@@ -19,7 +19,8 @@ function! s:get_visual_selection()
   let lines = getline(lnum1, lnum2)
   let lines[-1] = lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
   let lines[0] = lines[0][col1 - 1:]
-  return join(lines, "\n")
+  "return join(lines, "\n")
+  return lines
 endfunction
 
 function! s:get_complete_buffer()
@@ -328,6 +329,7 @@ function! fsharpbinding#python#FsiShow()
             setlocal noswapfile
             exec 'wincmd p'
         endif
+        call fsharpbinding#python#FsiRead(5)
     catch
         echohl WarningMsg "failed to display fsi output" 
     endtry
@@ -360,7 +362,7 @@ for b in vim.buffers:
 #echo first nonempty line
 for l in lines:
     if l != "":
-        vim.command('echo "%s"' % l)
+        vim.command("redraw | echo '%s'" % l.replace("'", "''"))
         break
 EOF
 endfunction
@@ -381,12 +383,15 @@ endfunction
 
 function! fsharpbinding#python#FsiSendLine()
     let text = getline('.')
-    call fsharpbinding#python#FsiEval(text)
+    "need to do this before FsiEval else we'll force a refresh
     exec 'normal j'
+    call fsharpbinding#python#FsiEval(text)
 endfunction
 
 function! fsharpbinding#python#FsiSendSel()
-    let text = s:get_visual_selection()
+    let lines = s:get_visual_selection()
+    exec 'normal' len(lines) . 'j'
+    let text = join(lines, "\n")
     call fsharpbinding#python#FsiEval(text)
 endfunction
 
