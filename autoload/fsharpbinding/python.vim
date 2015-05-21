@@ -329,6 +329,7 @@ function! fsharpbinding#python#FsiShow()
             setlocal noswapfile
             exec 'wincmd p'
         endif
+        call fsharpbinding#python#FsiRead(5)
     catch
         echohl WarningMsg "failed to display fsi output" 
     endtry
