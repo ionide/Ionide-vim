@@ -204,10 +204,11 @@ class FSAutoComplete:
         msg = self._helptext.send('helptext %s\n' % candidate)
         msg = str(msg[candidate])
 
-        if "'" in msg:
-            return msg
-        else:
-            return msg + " '" #HACK: - the ' appears to ensure that newlines are interpreted properly in the preview window
+        if "\'" in msg and "\"" in msg:
+            msg = msg.replace("\"", "") #HACK: dictionary parsing in vim gets weird if both ' and " get printed in the same string
+        elif "\n" in msg: 
+            msg = msg + "\n\n'" #HACK: - the ' is inserted to ensure that newlines are interpreted properly in the preview window
+        return msg
 
 class FSharpVimFixture(unittest.TestCase):
     def setUp(self):
