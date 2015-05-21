@@ -23,10 +23,9 @@ vim-fsharp requires mono and fsharp installed.
 #####Installing with [vim-plug][vim-plug]
 
 ~~~.vim
-Plug 'fsharp/fsharpbinding', {
+Plug 'fsharp/vim-fsharp', {
       \ 'for': 'fsharp',
-      \ 'rtp': 'vim',
-      \ 'do':  'make -C vim fsautocomplete',
+      \ 'do':  'make fsautocomplete',
       \}
 ~~~
 
@@ -34,17 +33,14 @@ Plug 'fsharp/fsharpbinding', {
 
 By VimL way:
 ~~~.vim
-NeoBundle 'fsharp/fsharpbinding', {
+NeoBundle 'fsharp/vim-fsharp', {
            \ 'description': 'F# support for Vim',
-           \ 'rtp': 'vim',
            \ 'lazy': 1,
            \ 'autoload': {'filetypes': 'fsharp'},
            \ 'build': {
-           \   'mac':   'make -C vim fsautocomplete',
-           \   'linux': 'make -C vim fsautocomplete',
-           \   'unix':  'make -C vim fsautocomplete',
+           \   'unix':  'make fsautocomplete',
            \ },
-           \ 'build_commands': ['make', 'mozroots', 'xbuild'],
+           \ 'build_commands': ['curl', 'make', 'mozroots', 'touch', 'unzip'],
            \}
 ~~~
 
@@ -52,15 +48,12 @@ By using TOML configuration:
 ~~~.toml
 [[plugins]]
 description = 'F# support for Vim'
-repository = 'fsharp/fsharpbinding'
-rtp = 'vim'
+repository = 'fsharp/vim-fsharp'
 lazy = 1
 filetypes = 'fsharp'
-build_commands = ['make', 'mozroots', 'xbuild']
+build_commands = ['curl', 'make', 'mozroots', 'touch', 'unzip']
   [plugins.build]
-  mac   = 'make -C vim fsautocomplete'
-  unix  = 'make -C vim fsautocomplete'
-  linux = 'make -C vim fsautocomplete'
+  unix = 'make fsautocomplete'
 ~~~
 
 ####Windows
