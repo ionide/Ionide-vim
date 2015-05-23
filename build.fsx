@@ -6,14 +6,19 @@ open System.IO
 open System.Net
 open System.Text.RegularExpressions
 
-let vimInstallDir = Environment.ExpandEnvironmentVariables( "%HOMEDRIVE%%HOMEPATH%\\vimfiles\\bundle\\fsharpbinding-vim")
+let homePath =
+    if Environment.OSVersion.Platform = PlatformID.Unix || Environment.OSVersion.Platform = PlatformID.MacOSX then
+        Environment.GetEnvironmentVariable("HOME")
+    else Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%")
+        
+let vimInstallDir = homePath @@ "vimfiles/bundle/fsharpbinding-vim"
 
-let vimBinDir =  @"ftplugin\bin"
-let ftpluginDir =  __SOURCE_DIRECTORY__ @@ "ftplugin"
-let autoloadDir =  __SOURCE_DIRECTORY__ @@ "autoload"
-let syntaxDir =  __SOURCE_DIRECTORY__ @@ "syntax"
-let ftdetectDir =  __SOURCE_DIRECTORY__ @@ "ftdetect"
-let syntaxCheckersDir =  __SOURCE_DIRECTORY__ @@ "syntax_checkers"
+let vimBinDir = __SOURCE_DIRECTORY__ @@ "ftplugin/bin"
+let ftpluginDir = __SOURCE_DIRECTORY__ @@ "ftplugin"
+let autoloadDir = __SOURCE_DIRECTORY__ @@ "autoload"
+let syntaxDir = __SOURCE_DIRECTORY__ @@ "syntax"
+let ftdetectDir = __SOURCE_DIRECTORY__ @@ "ftdetect"
+let syntaxCheckersDir = __SOURCE_DIRECTORY__ @@ "syntax_checkers"
 
 let acArchive = "fsautocomplete.zip"
 let acVersion = "0.15.0"
