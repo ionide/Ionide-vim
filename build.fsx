@@ -3,14 +3,8 @@
 open Fake
 open System
 open System.IO
+open System.Net
 open System.Text.RegularExpressions
-
-Target "RestorePackages" (fun _ -> 
-     "packages.config"
-     |> RestorePackage (fun p ->
-         { p with
-             ToolPath = "..\lib\nuget\NuGet.exe" })
- )
 
 let vimInstallDir = Environment.ExpandEnvironmentVariables( "%HOMEDRIVE%%HOMEPATH%\\vimfiles\\bundle\\fsharpbinding-vim")
 
@@ -21,11 +15,17 @@ let syntaxDir =  __SOURCE_DIRECTORY__ @@ "syntax"
 let ftdetectDir =  __SOURCE_DIRECTORY__ @@ "ftdetect"
 let syntaxCheckersDir =  __SOURCE_DIRECTORY__ @@ "syntax_checkers"
 
-Target "BuildVim" (fun _ ->
+let acArchive = "fsautocomplete.zip"
+let acVersion = "0.14.0"
+
+Target "FSharp.AutoComplete" (fun _ ->
   CreateDir vimBinDir
-  MSBuildRelease vimBinDir "Build" [__SOURCE_DIRECTORY__ @@ @"..\FSharp.AutoComplete\FSharp.AutoComplete.fsproj"]
-  |> Log "Build-Output: "
-)
+  use client = new WebClient()
+  tracefn "Downloading version %s of FSharp.AutoComplete" acVersion
+  client.DownloadFile(sprintf "https://github.com/fsharp/FSharp.AutoComplete/releases/download/%s/%s" acVersion acArchive, vimBinDir @@ acArchive)
+  tracefn "Download complete"
+  tracefn "Unzipping"
+  Unzip vimBinDir (vimBinDir @@ acArchive))
 
 Target "Install" (fun _ ->
     DeleteDir vimInstallDir
@@ -34,15 +34,14 @@ Target "Install" (fun _ ->
     CopyDir (vimInstallDir @@ "autoload") autoloadDir (fun _ -> true)
     CopyDir (vimInstallDir @@ "syntax") syntaxDir (fun _ -> true)
     CopyDir (vimInstallDir @@ "syntax_checkers") syntaxCheckersDir (fun _ -> true)
-    CopyDir (vimInstallDir @@ "ftdetect") ftdetectDir (fun _ -> true)
-    )
+    CopyDir (vimInstallDir @@ "ftdetect") ftdetectDir (fun _ -> true))
 
 Target "Clean" (fun _ ->
-  CleanDirs [ vimBinDir; vimInstallDir ])
+    CleanDirs [ vimBinDir; vimInstallDir ])
 
 Target "All" id
 
-"BuildVim"
+"FSharp.AutoComplete"
     ==> "Install"
     ==> "All"
 

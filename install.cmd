@@ -4,7 +4,7 @@ pushd %~dp0
 
 IF EXIST packages\FAKE\tools\Fake.exe GOTO FAKEINSTALLED
 
-"..\lib\nuget\NuGet.exe" "install" "FAKE" "-OutputDirectory" "packages" "-ExcludeVersion" "-Prerelease"
+"..\NuGet.exe" "install" "FAKE" "-OutputDirectory" "packages" "-ExcludeVersion" "-Prerelease"
 
 :FAKEINSTALLED
 
