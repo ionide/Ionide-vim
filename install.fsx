@@ -1,17 +1,17 @@
 // include Fake lib
-#r @"packages\FAKE\tools\FakeLib.dll"
+#r "packages/FAKE/tools/FakeLib.dll"
 open Fake
 open System
 open System.IO
 open System.Net
 open System.Text.RegularExpressions
 
-let homePath =
+let homeVimPath =
     if Environment.OSVersion.Platform = PlatformID.Unix || Environment.OSVersion.Platform = PlatformID.MacOSX then
-        Environment.GetEnvironmentVariable("HOME")
-    else Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%")
+        Environment.GetEnvironmentVariable("HOME") @@ ".vim"
+    else Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%") @@ "vimfiles"
         
-let vimInstallDir = homePath @@ "vimfiles/bundle/fsharpbinding-vim"
+let vimInstallDir = homeVimPath @@ "bundle/fsharpbinding-vim"
 
 let vimBinDir = __SOURCE_DIRECTORY__ @@ "ftplugin/bin"
 let ftpluginDir = __SOURCE_DIRECTORY__ @@ "ftplugin"

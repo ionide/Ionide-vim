@@ -1,4 +1,4 @@
-if [ -e ./packages/FAKE/tools/Fake.exe ]
+if ! [ -e ./packages/FAKE/tools/Fake.exe ]
 then
     mono paket.bootstrapper.exe
     exit_code=$?
@@ -13,4 +13,4 @@ then
     fi
 fi
 
-mono packages/FAKE/tools/FAKE.exe $@ --fsiargs -d:MONO build.fsx 
+mono packages/FAKE/tools/FAKE.exe $@ --fsiargs -d:MONO install.fsx 

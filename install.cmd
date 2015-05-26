@@ -14,5 +14,5 @@ if errorlevel 1 (
 
 :FAKEINSTALLED
 
-packages\FAKE\tools\FAKE.exe build.fsx %*
+packages\FAKE\tools\FAKE.exe install.fsx %*
 
