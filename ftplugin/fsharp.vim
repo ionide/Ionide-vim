@@ -16,7 +16,6 @@ let s:candidates = [ 'fsi',
             \ 'fsharpi',
             \ 'fsharpi.exe' ]
 
-let g:fsharp_onfly_error_check = 1
 
 if !exists('g:fsharp_interactive_bin')
     let g:fsharp_interactive_bin = ''
@@ -66,11 +65,12 @@ EOF
     nnoremap <buffer> <leader>d :call fsharpbinding#python#GotoDecl()<cr>
     nnoremap <buffer> <leader>s :call fsharpbinding#python#GoBackFromDecl()<cr>
 
-    com! -buffer LogFile call fsharpbinding#python#LoadLogFile()
-    com! -buffer -nargs=* -complete=file ParseProject call fsharpbinding#python#ParseProject(<f-args>)
-    com! -buffer -nargs=* -complete=file BuildProject call fsharpbinding#python#BuildProject(<f-args>)
-    com! -buffer -nargs=* -complete=file RunTests call fsharpbinding#python#RunTests(<f-args>)
-    com! -buffer -nargs=* -complete=file RunProject call fsharpbinding#python#RunProject(<f-args>)
+    com! -buffer FSharpLogFile call fsharpbinding#python#LoadLogFile()
+    com! -buffer FSharpToggleHelptext call fsharpbinding#python#ToggleHelptext()
+    com! -buffer -nargs=* -complete=file FSharpParseProject call fsharpbinding#python#ParseProject(<f-args>)
+    com! -buffer -nargs=* -complete=file FSharpBuildProject call fsharpbinding#python#BuildProject(<f-args>)
+    com! -buffer -nargs=* -complete=file FSharpRunTests call fsharpbinding#python#RunTests(<f-args>)
+    com! -buffer -nargs=* -complete=file FSharpRunProject call fsharpbinding#python#RunProject(<f-args>)
     
     "fsi
     com! -buffer FsiShow call fsharpbinding#python#FsiShow()

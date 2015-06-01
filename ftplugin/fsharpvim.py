@@ -151,17 +151,10 @@ class FSAutoComplete:
         if msg is None:
             return []
 
-        msg = map(str, msg)
-
         if base != '':
             msg = filter(lambda(line):
-                    line.lower().find(base.lower()) != -1, msg)
-
-        msg.sort(key=lambda x: x.startswith(base), reverse=True)
-        msg = map(lambda(line):
-                {'word': line,
-                 'info': self.helptext(line), 
-                 'menu': ""}, msg)
+                    line['Name'].lower().find(base.lower()) != -1, msg)
+        msg.sort(key=lambda x: x['Name'].startswith(base), reverse=True)
 
         return msg
 

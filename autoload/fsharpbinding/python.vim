@@ -70,6 +70,7 @@ function! fsharpbinding#python#BuildProject(...)
             execute '!xbuild ' . fnameescape(a:1)
         elseif exists('b:proj_file')
             execute '!xbuild ' . fnameescape(b:proj_file) "/verbosity:quiet /nologo"
+            let b:fsharp_buffer_changed = 0
         else
             echoe "no project file could be found"
         endif
@@ -91,7 +92,7 @@ function! fsharpbinding#python#RunProject(...)
             echom "target" target
             execute '!mono ' . fnameescape(target)
         else
-            echoe "no project file could be found"
+            echoe "no project file could be found" > 0
         endif
     catch
         echoe "failed to execute build. ex: " v:exception
@@ -166,6 +167,14 @@ function! fsharpbinding#python#CurrentErrors()
     return result
 endfunction
 
+function! fsharpbinding#python#ToggleHelptext()
+    if g:fsharp_completion_helptext
+        let g:fsharp_completion_helptext = 0
+    else
+        let g:fsharp_completion_helptext = 1
+    endif
+endfunction
+
 function! fsharpbinding#python#Complete(findstart, base)
     let line = getline('.')
     let idx = col('.') - 1 "1-indexed
@@ -195,8 +204,22 @@ line = b[row - 1]
 if col > len(line):
     col = len(line)
 fsautocomplete.parse(b.name, True, b)
-vim.command('return %s' % fsautocomplete.complete(b.name, row, col, vim.eval('a:base')))
+for line in fsautocomplete.complete(b.name, row, col, vim.eval('a:base')):
+    name = str(line['Name'])
+    glyph = str(line['Glyph'])
+    if int(vim.eval('g:fsharp_completion_helptext')) > 0:
+        ht = fsautocomplete.helptext(name)
+        x = {'word': name,
+             'info': ht, 
+             'menu': glyph}
+        vim.eval('complete_add(%s)' % x)
+    else:
+        x = {'word': name,
+             'menu': glyph}
+        vim.eval('complete_add(%s)' % x)
+
 EOF
+        return []
     endif
     let b:fsharp_buffer_changed = 0
 endfunction
