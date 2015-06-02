@@ -331,6 +331,11 @@ EOF
     echo "fsi reset"
 endfunction
 
+function! fsharpbinding#python#FsiInput()
+    let text = input('> ')
+    call fsharpbinding#python#FsiEval(text)
+endfunction
+
 function! fsharpbinding#python#FsiSend(text)
     python << EOF
 path = vim.current.buffer.name
