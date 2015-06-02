@@ -44,7 +44,7 @@ endfunction
 
 function! fsharpbinding#python#LoadLogFile()
 python << EOF
-print fsautocomplete.logfiledir
+print G.fsac.logfiledir
 EOF
 endfunction
 
@@ -53,11 +53,11 @@ function! fsharpbinding#python#ParseProject(...)
     execute 'wa'
     if a:0 > 0
     python << EOF
-fsautocomplete.project(vim.eval("a:1"))
+G.fsac.project(vim.eval("a:1"))
 EOF
     elseif exists('b:proj_file')
     python << EOF
-fsautocomplete.project(vim.eval("b:proj_file"))
+G.fsac.project(vim.eval("b:proj_file"))
 EOF
     endif
 endfunction
@@ -86,7 +86,7 @@ function! fsharpbinding#python#RunProject(...)
         if a:0 > 0
             execute '!mono ' . fnameescape(a:1)
         elseif exists('b:proj_file')
-            let cmd = 'Statics.projects["' . b:proj_file . '"]["Output"]'
+            let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
             echom "runproj pre s:pyeval " cmd
             let target = s:pyeval(cmd)
             echom "target" target
@@ -106,7 +106,7 @@ function! fsharpbinding#python#RunTests(...)
         if a:0 > 0 && exists('g:fsharp_test_runner')
             execute '!mono ' . g:fsharp_test_runner fnameescape(a:1)
         elseif exists('b:proj_file') && exists('g:fsharp_test_runner')
-            let cmd = 'Statics.projects["' . b:proj_file . '"]["Output"]'
+            let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
             let target = s:pyeval(cmd)
             echom "target" target
             execute '!mono ' . g:fsharp_test_runner fnameescape(target)
@@ -121,9 +121,9 @@ endfunction
 function! fsharpbinding#python#TypeCheck()
     python << EOF
 b = vim.current.buffer
-fsautocomplete.parse(b.name, True, b)
+G.fsac.parse(b.name, True, b)
 row, col = vim.current.window.cursor
-res = fsautocomplete.tooltip(b.name, row, col)
+res = G.fsac.tooltip(b.name, row, col)
 lines = res.splitlines()
 first = ""
 if len(lines):
@@ -139,17 +139,17 @@ endfunction
 " probable loclist format
 " {'lnum': 2, 'bufnr': 1, 'col': 1, 'valid': 1, 'vcol': 1, 'nr': -1, 'type': 'W', 'pattern': '', 'text': 'Expected an assignment or function call and instead saw an expression.'}
 
-" fsautocomplete format
+" G.fsac format
 " {"StartLine":4,"StartLineAlternate":5,"EndLine":4,"EndLineAlternate":5,"StartColumn":0,"EndColumn":4,"Severity":"Error","Message":"The value or constructor 'asdf' is not defined","Subcategory":"typecheck","FileName":"/Users/karlnilsson/code/kjnilsson/fsharp-vim/test.fsx"}
 function! fsharpbinding#python#CurrentErrors()
     let result = []
     let buf = bufnr('%')
     try
         if version > 703
-            let errs = s:pyeval('fsautocomplete.errors_current()')
+            let errs = s:pyeval('G.fsac.errors_current()')
         else
             " Send a sync parse request if Vim 7.3, otherwise misses response for large files
-            let errs = s:pyeval("fsautocomplete.errors(vim.current.buffer.name, True, vim.current.buffer)")
+            let errs = s:pyeval("G.fsac.errors(vim.current.buffer.name, True, vim.current.buffer)")
         endif
         for e in errs
             call add(result,
@@ -186,7 +186,7 @@ function! fsharpbinding#python#Complete(findstart, base)
 
     while idx > 0
         let c = line[idx]
-        if c == ' ' || c == '.'
+        if c == ' ' || c == '.' || c == '('
             let idx += 1
             break
         endif
@@ -203,12 +203,12 @@ row, col = vim.current.window.cursor
 line = b[row - 1]
 if col > len(line):
     col = len(line)
-fsautocomplete.parse(b.name, True, b)
-for line in fsautocomplete.complete(b.name, row, col, vim.eval('a:base')):
+G.fsac.parse(b.name, True, b)
+for line in G.fsac.complete(b.name, row, col, vim.eval('a:base')):
     name = str(line['Name'])
     glyph = str(line['Glyph'])
     if int(vim.eval('g:fsharp_completion_helptext')) > 0:
-        ht = fsautocomplete.helptext(name)
+        ht = G.fsac.helptext(name)
         x = {'word': name,
              'info': ht, 
              'menu': glyph}
@@ -230,7 +230,7 @@ function! fsharpbinding#python#GoBackFromDecl()
 b = vim.current.buffer
 w = vim.current.window
 try:
-    f, cur = Statics.locations.pop()
+    f, cur = G.locations.pop()
     # declared within same file
     if b.name == f:
         w.cursor = cur
@@ -246,10 +246,10 @@ function! fsharpbinding#python#GotoDecl()
     python << EOF
 b = vim.current.buffer
 w = vim.current.window
-fsautocomplete.parse(b.name, True, b)
+G.fsac.parse(b.name, True, b)
 row, col = vim.current.window.cursor
-res = fsautocomplete.finddecl(b.name, row, col)
-Statics.locations.append((b.name, w.cursor))
+res = G.fsac.finddecl(b.name, row, col)
+G.locations.append((b.name, w.cursor))
 if res == None:
     vim.command('echo "declaration not found"')
 else:
@@ -265,7 +265,7 @@ endfunction
 function! fsharpbinding#python#OnBufWritePre()
     "ensure a parse has been requested before BufWritePost is called
     python << EOF
-fsautocomplete.parse(vim.current.buffer.name, True, vim.current.buffer)
+G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 EOF
     let b:fsharp_buffer_changed = 0
 endfunction
@@ -274,7 +274,7 @@ function! fsharpbinding#python#OnInsertLeave()
     if exists ("b:fsharp_buffer_changed") != 0 
         if b:fsharp_buffer_changed == 1
     python << EOF
-fsautocomplete.parse(vim.current.buffer.name, True, vim.current.buffer)
+G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 EOF
         endif
     endif
@@ -293,7 +293,7 @@ function! fsharpbinding#python#OnTextChanged()
     let b:fsharp_buffer_changed = 1
     "TODO: make an parse_async that writes to the server on a background thread
     python << EOF
-fsautocomplete.parse(vim.current.buffer.name, True, vim.current.buffer)
+G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 EOF
 endfunction
 
@@ -305,12 +305,12 @@ function! fsharpbinding#python#OnBufEnter()
     let b:fsharp_buffer_changed = 1
     set updatetime=500
 python << EOF
-fsautocomplete.parse(vim.current.buffer.name, True, vim.current.buffer)
+G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 
 file_dir = vim.eval("expand('%:p:h')")
-fsi.cd(file_dir)
+G.fsi.cd(file_dir)
 if vim.eval("exists('b:proj_file')") == 1:
-    fsautocomplete.project(vim.eval("b:proj_file"))
+    G.fsac.project(vim.eval("b:proj_file"))
 EOF
     "set makeprg
     if !filereadable(expand("%:p:h")."/Makefile")
@@ -323,10 +323,9 @@ endfunction
 
 function! fsharpbinding#python#FsiReset(fsi_path)
     python << EOF
-fsi.shutdown()
-Statics.fsi = FSharpInteractive(vim.eval('a:fsi_path'))
-fsi = Statics.fsi
-fsi.cd(vim.eval("expand('%:p:h')"))
+G.fsi.shutdown()
+G.fsi = FSharpInteractive(vim.eval('a:fsi_path'))
+G.fsi.cd(vim.eval("expand('%:p:h')"))
 EOF
     exec 'bd fsi-out'
     echo "fsi reset"
@@ -336,8 +335,8 @@ function! fsharpbinding#python#FsiSend(text)
     python << EOF
 path = vim.current.buffer.name
 (row, col) = vim.current.window.cursor
-fsi.set_loc(path, row)
-fsi.send(vim.eval('a:text'))
+G.fsi.set_loc(path, row)
+G.fsi.send(vim.eval('a:text'))
 EOF
 endfunction
 
@@ -352,7 +351,6 @@ function! fsharpbinding#python#FsiShow()
             setlocal noswapfile
             exec 'wincmd p'
         endif
-        call fsharpbinding#python#FsiRead(5)
     catch
         echohl WarningMsg "failed to display fsi output" 
     endtry
@@ -360,7 +358,7 @@ endfunction
 
 function! fsharpbinding#python#FsiPurge()
 python << EOF
-lines = fsi.purge()
+lines = G.fsi.purge()
 for b in vim.buffers:
     if 'fsi-out' in b.name:
         b.append(lines)
@@ -368,9 +366,18 @@ for b in vim.buffers:
 EOF
 endfunction
 
+function! fsharpbinding#python#FsiClear()
+python << EOF
+lines = G.fsi.purge()
+for b in vim.buffers:
+    if 'fsi-out' in b.name:
+        del b[:]
+        break
+EOF
+endfunction
 function! fsharpbinding#python#FsiRead(time_out)
 python << EOF
-lines = fsi.read_until_prompt(float(vim.eval('a:time_out')))
+lines = G.fsi.read_until_prompt(float(vim.eval('a:time_out')))
 for b in vim.buffers:
     if 'fsi-out' in b.name:
         b.append(lines)
