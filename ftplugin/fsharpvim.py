@@ -7,7 +7,7 @@ import json
 import threading
 import hidewin
 
-class Statics:
+class G:
     fsac = None
     fsi = None
     locations = []
@@ -113,7 +113,7 @@ class FSAutoComplete:
                 self._errors.update(parsed['Data'])
             elif parsed['Kind'] == "project":
                 data = parsed['Data']
-                Statics.projects[data['Project']] = data
+                G.projects[data['Project']] = data
                 self._project.update(data)
             elif parsed['Kind'] == "finddecl":
                 self._finddecl.update(parsed['Data'])

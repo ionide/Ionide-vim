@@ -22,6 +22,7 @@ if !exists('g:fsharp_interactive_bin')
     for c in s:candidates
         if executable(c)
             let g:fsharp_interactive_bin = c
+            break
         endif
     endfor
 endif
@@ -35,18 +36,15 @@ fsharp_dir = vim.eval("expand('<sfile>:p:h')")
 file_dir = vim.eval("expand('%:p:h')")
 sys.path.append(fsharp_dir)
 
-from fsharpvim import FSAutoComplete,Statics
+from fsharpvim import FSAutoComplete,G
 from fsi import FSharpInteractive 
 import pyvim
 
-if Statics.fsac == None:
-    debug = vim.eval("get(g:, 'fsharpbinding_debug', 0)") != '0'
-    Statics.fsac = FSAutoComplete(fsharp_dir, debug)
-if Statics.fsi == None:
-    debug = vim.eval("get(g:, 'fsharpbinding_debug', 0)") != '0'
-    Statics.fsi = FSharpInteractive(vim.eval('g:fsharp_interactive_bin'), debug)
-fsautocomplete = Statics.fsac
-fsi = Statics.fsi
+debug = vim.eval("get(g:, 'fsharpbinding_debug', 0)") != '0'
+if G.fsac == None:
+    G.fsac = FSAutoComplete(fsharp_dir, debug)
+if G.fsi == None:
+    G.fsi = FSharpInteractive(vim.eval('g:fsharp_interactive_bin'), debug)
 
 #find project file if any - assumes fsproj file will be in the same directory as the fs or fsi file
 b = vim.current.buffer
@@ -57,8 +55,8 @@ if '.fs' == ext or '.fsi' == ext:
     if len(projs):
         proj_file = os.path.join(dir, projs[0])
         vim.command("let b:proj_file = '%s'" % proj_file)
-        fsautocomplete.project(proj_file)
-fsautocomplete.parse(b.name, True, b)
+        G.fsac.project(proj_file)
+G.fsac.parse(b.name, True, b)
 EOF
 
     nnoremap <buffer> <leader>t :call fsharpbinding#python#TypeCheck()<cr>
@@ -74,6 +72,7 @@ EOF
     
     "fsi
     com! -buffer FsiShow call fsharpbinding#python#FsiShow()
+    com! -buffer FsiClear call fsharpbinding#python#FsiClear()
     com! -buffer FsiRead call fsharpbinding#python#FsiRead(0.5) "short timeout as there may not be anything to read
     com! -buffer FsiReset call fsharpbinding#python#FsiReset(g:fsharp_interactive_bin)
     com! -buffer -nargs=1 FsiEval call fsharpbinding#python#FsiEval(<q-args>)
