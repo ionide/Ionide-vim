@@ -140,11 +140,12 @@ This setting needs to point to a suitable test runner (such as nunit-console.exe
 let g:fsharp_test_runner = "/path/to/test/runner"
 ~~~
 
+This enables the helptext to be displayed during auto completion. Turn off if completion is too slow.
+
 ~~~.vim
 let g:fsharp_completion_helptext = 1
 ~~~
 
-This enables the helptext to be displayed during auto completion. Turn off if completion is too slow.
 
 [syntastic]: https://github.com/scrooloose/syntastic
 [airline]: https://github.com/bling/vim-airline
