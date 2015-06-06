@@ -8,6 +8,20 @@ if exists('b:did_ftplugin')
 endif
 let b:did_ftplugin = 1
 
+"set some defaults
+if !exists('g:loaded_syntastic_fsharp_syntax_checker')
+    let g:loaded_syntastic_fsharp_syntax_checker = 1
+endif
+if !exists('g:fsharp_only_check_errors_on_write')
+    let g:fsharp_only_check_errors_on_write = 0
+endif
+if !exists('g:fsharp_xbuild_path')
+    let g:fsharp_xbuild_path = "xbuild"
+endif
+if !exists('g:fsharp_completion_helptext')
+    let g:fsharp_completion_helptext = 1 
+endif
+
 let s:cpo_save = &cpo
 set cpo&vim
 
@@ -15,7 +29,6 @@ let s:candidates = [ 'fsi',
             \ 'fsi.exe',
             \ 'fsharpi',
             \ 'fsharpi.exe' ]
-
 
 if !exists('g:fsharp_interactive_bin')
     let g:fsharp_interactive_bin = ''
