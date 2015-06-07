@@ -9,9 +9,6 @@ endif
 let b:did_ftplugin = 1
 
 "set some defaults
-if !exists('g:loaded_syntastic_fsharp_syntax_checker')
-    let g:loaded_syntastic_fsharp_syntax_checker = 1
-endif
 if !exists('g:fsharp_only_check_errors_on_write')
     let g:fsharp_only_check_errors_on_write = 0
 endif
