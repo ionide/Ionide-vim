@@ -4,6 +4,7 @@ endif
 
 let s:save_cpo = &cpo
 set cpo&vim
+let g:loaded_syntastic_fsharp_syntax_checker = 1
 
 function! SyntaxCheckers_fsharp_syntax_IsAvailable() dict
     return has('python')
