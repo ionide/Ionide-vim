@@ -135,6 +135,7 @@ syn match    fsharpCharErr      "'\\\d\d'\|'\\\d'"
 syn match    fsharpCharErr      "'\\[^\'ntbr]'"
 syn region   fsharpString       start=+"+ skip=+\\\\\|\\"+ end=+"+ contains=fsharpFormat
 syn region   fsharpString       start=+"""+ skip=+\\\\\|\\"+ end=+"""+ contains=fsharpFormat
+syn region   fsharpString       start=+@"+ skip=+""+ end=+"+ contains=fsharpFormat
 
 syn match    fsharpFunDef       "->"
 syn match    fsharpRefAssign    ":="
