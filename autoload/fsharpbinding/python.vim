@@ -205,7 +205,7 @@ line = b[row - 1]
 if col > len(line):
     col = len(line)
 G.fsac.parse(b.name, True, b)
-for line in G.fsac.complete(b.name, row, col, vim.eval('a:base')):
+for line in G.fsac.complete(b.name, row, col + 1, vim.eval('a:base')):
     name = str(line['Name'])
     glyph = str(line['Glyph'])
     if int(vim.eval('g:fsharp_completion_helptext')) > 0:
