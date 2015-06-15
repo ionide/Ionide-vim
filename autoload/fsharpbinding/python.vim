@@ -70,7 +70,8 @@ function! fsharpbinding#python#BuildProject(...)
             execute '!xbuild ' . fnameescape(a:1)
         elseif exists('b:proj_file')
             execute '!xbuild ' . fnameescape(b:proj_file) "/verbosity:quiet /nologo"
-            let b:fsharp_buffer_changed = 0
+            call fsharpbinding#python#ParseProject()
+            let b:fsharp_buffer_changed = 1
         else
             echoe "no project file could be found"
         endif
