@@ -124,7 +124,7 @@ function! fsharpbinding#python#TypeCheck()
 b = vim.current.buffer
 G.fsac.parse(b.name, True, b)
 row, col = vim.current.window.cursor
-res = G.fsac.tooltip(b.name, row, col)
+res = G.fsac.tooltip(b.name, row, col + 1)
 lines = res.splitlines()
 first = ""
 if len(lines):
@@ -249,7 +249,7 @@ b = vim.current.buffer
 w = vim.current.window
 G.fsac.parse(b.name, True, b)
 row, col = vim.current.window.cursor
-res = G.fsac.finddecl(b.name, row, col)
+res = G.fsac.finddecl(b.name, row, col + 1)
 G.locations.append((b.name, w.cursor))
 if res == None:
     vim.command('echo "declaration not found"')
