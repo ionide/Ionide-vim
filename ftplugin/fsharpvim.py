@@ -195,6 +195,7 @@ class FSAutoComplete:
 
     def helptext(self, candidate):
         msg = self._helptext.send('helptext %s\n' % candidate)
+        print msg
         msg = str(msg[candidate])
 
         if "\'" in msg and "\"" in msg:
