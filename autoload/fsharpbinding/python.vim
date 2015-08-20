@@ -141,7 +141,7 @@ endfunction
 " {'lnum': 2, 'bufnr': 1, 'col': 1, 'valid': 1, 'vcol': 1, 'nr': -1, 'type': 'W', 'pattern': '', 'text': 'Expected an assignment or function call and instead saw an expression.'}
 
 " G.fsac format
-" {"StartLine":4,"StartLineAlternate":5,"EndLine":4,"EndLineAlternate":5,"StartColumn":0,"EndColumn":4,"Severity":"Error","Message":"The value or constructor 'asdf' is not defined","Subcategory":"typecheck","FileName":"/Users/karlnilsson/code/kjnilsson/fsharp-vim/test.fsx"}
+" {"StartLine":4,"StartLine":5,"EndLine":4,"EndLine":5,"StartColumn":0,"EndColumn":4,"Severity":"Error","Message":"The value or constructor 'asdf' is not defined","Subcategory":"typecheck","FileName":"/Users/karlnilsson/code/kjnilsson/fsharp-vim/test.fsx"}
 function! fsharpbinding#python#CurrentErrors()
     let result = []
     let buf = bufnr('%')
@@ -154,11 +154,11 @@ function! fsharpbinding#python#CurrentErrors()
         endif
         for e in errs
             call add(result,
-                \{'lnum': e['StartLineAlternate'],
-                \ 'col': e['StartColumn'],
+                \{'lnum': e['StartLine'],
+                \ 'col': e['StartColumn'] - 1,
                 \ 'type': e['Severity'][0],
                 \ 'text': e['Message'],
-                \ 'hl': '\%' . e['StartLineAlternate'] . 'l\%>' . e['StartColumn'] .  'c\%<' . (e['EndColumn'] + 1) . 'c',
+                \ 'hl': '\%' . e['StartLine'] . 'l\%>' . (e['StartColumn'] - 1) .  'c\%<' . e['EndColumn'] . 'c',
                 \ 'bufnr': buf,
                 \ 'valid': 1 })
         endfor

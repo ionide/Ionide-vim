@@ -195,8 +195,7 @@ class FSAutoComplete:
 
     def helptext(self, candidate):
         msg = self._helptext.send('helptext %s\n' % candidate)
-        print msg
-        msg = str(msg[candidate])
+        msg = str(msg['Text'])
 
         if "\'" in msg and "\"" in msg:
             msg = msg.replace("\"", "") #HACK: dictionary parsing in vim gets weird if both ' and " get printed in the same string
