@@ -152,3 +152,11 @@ let g:fsharp_completion_helptext = 1
 [pathogen]: https://github.com/tpope/vim-pathogen
 [vim-plug]: https://github.com/junegunn/vim-plug
 [NeoBundle]: https://github.com/Shougo/neobundle.vim
+
+Maintainers
+-----------
+
+Tha maintainers of this repository appointed by the F# Core Engineering Group are:
+
+ - [Robin Neatherway](https://github.com/rneatherway), [Steffen Forkmann](http://github.com/forki), [Karl Nilsson](http://github.com/kjnilsson), [Dave Thomas](http://github.com/7sharp9) and [Guillermo López-Anglada](http://github.com/guillermooo)
+ - The primary maintainer for this repository is [Karl Nilsson](http://github.com/kjnilsson)
