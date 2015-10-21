@@ -1,7 +1,4 @@
 " Vim autoload functions
-" Language:     F#
-" Last Change:  Fri 16 Oct 2015
-" Maintainer:   Gregor Uhlenheuer <kongo2002@googlemail.com>
 
 if exists('g:loaded_autoload_fsharpbinding_python')
     finish
@@ -25,6 +22,15 @@ endfunction
 
 function! s:get_complete_buffer()
     return join(getline(1, '$'), "\n")
+endfunction
+
+function! s:platform_exec(cmd)
+    echom "platform_exe" a:cmd
+    if has('win32')
+        execute '!' . a:cmd
+    else
+        execute '!mono' a:cmd
+    endif
 endfunction
 
 " Vim73-compatible version of pyeval
@@ -80,18 +86,16 @@ function! fsharpbinding#python#BuildProject(...)
     endtry
 endfunction
 
-
 function! fsharpbinding#python#RunProject(...)
     try
         execute 'wa'
         if a:0 > 0
-            execute '!mono ' . fnameescape(a:1)
+            s:platform_exec(fnameescape(a:1))
         elseif exists('b:proj_file')
             let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
             echom "runproj pre s:pyeval " cmd
             let target = s:pyeval(cmd)
-            echom "target" target
-            execute '!mono ' . fnameescape(target)
+            s:platform_exec(fnameescape(target))
         else
             echoe "no project file could be found" > 0
         endif
@@ -105,17 +109,16 @@ function! fsharpbinding#python#RunTests(...)
         execute 'wa'
         call fsharpbinding#python#BuildProject()
         if a:0 > 0 && exists('g:fsharp_test_runner')
-            execute '!mono ' . g:fsharp_test_runner fnameescape(a:1)
+            call s:platform_exec(shellescape(g:fsharp_test_runner) . ' ' . fnameescape(a:1))
         elseif exists('b:proj_file') && exists('g:fsharp_test_runner')
             let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
             let target = s:pyeval(cmd)
-            echom "target" target
-            execute '!mono ' . g:fsharp_test_runner fnameescape(target)
+            call s:platform_exec(shellescape(g:fsharp_test_runner) . ' ' . fnameescape(target))
         else
             echoe "no project file or test runner could be found"
         endif
     catch
-        echoe "failed to execute build. ex: " v:exception
+        echoe "failed to execute tests. ex: " v:exception
     endtry
 endfunction
 
