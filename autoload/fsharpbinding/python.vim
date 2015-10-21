@@ -1,6 +1,6 @@
 " Vim autoload functions
 " Language:     F#
-" Last Change:  Mon 20 Oct 2014 08:21:43 PM CEST
+" Last Change:  Fri 16 Oct 2015
 " Maintainer:   Gregor Uhlenheuer <kongo2002@googlemail.com>
 
 if exists('g:loaded_autoload_fsharpbinding_python')
@@ -67,9 +67,9 @@ function! fsharpbinding#python#BuildProject(...)
     try
         execute 'wa'
         if a:0 > 0
-            execute '!xbuild ' . fnameescape(a:1)
+            execute '!' . shellescape(g:fsharp_xbuild_path) . ' ' . fnameescape(a:1)
         elseif exists('b:proj_file')
-            execute '!xbuild ' . fnameescape(b:proj_file) "/verbosity:quiet /nologo"
+            execute '!' . shellescape(g:fsharp_xbuild_path) . ' ' . fnameescape(b:proj_file) "/verbosity:quiet /nologo"
             call fsharpbinding#python#ParseProject()
             let b:fsharp_buffer_changed = 1
         else
@@ -211,7 +211,7 @@ for line in G.fsac.complete(b.name, row, col + 1, vim.eval('a:base')):
     if int(vim.eval('g:fsharp_completion_helptext')) > 0:
         ht = G.fsac.helptext(name)
         x = {'word': name,
-             'info': ht, 
+             'info': ht,
              'menu': glyph}
         vim.eval('complete_add(%s)' % x)
     else:
@@ -272,7 +272,7 @@ EOF
 endfunction
 
 function! fsharpbinding#python#OnInsertLeave()
-    if exists ("b:fsharp_buffer_changed") != 0 
+    if exists ("b:fsharp_buffer_changed") != 0
         if b:fsharp_buffer_changed == 1
     python << EOF
 G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
@@ -282,7 +282,7 @@ EOF
 endfunction
 
 function! fsharpbinding#python#OnCursorHold()
-    if exists ("g:fsharp_only_check_errors_on_write") != 0 
+    if exists ("g:fsharp_only_check_errors_on_write") != 0
         if g:fsharp_only_check_errors_on_write != 1 && b:fsharp_buffer_changed == 1
             exec "SyntasticCheck"
         endif
@@ -316,7 +316,7 @@ EOF
     "set makeprg
     if !filereadable(expand("%:p:h")."/Makefile")
         if exists('b:proj_file')
-            let &l:makeprg=g:fsharp_xbuild_path . ' ' . b:proj_file . ' /verbosity:quiet /nologo /p:Configuration=Debug'
+            let &l:makeprg=shellescape(g:fsharp_xbuild_path) . ' ' . b:proj_file . ' /verbosity:quiet /nologo /p:Configuration=Debug'
             setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
         endif
     endif
@@ -358,7 +358,7 @@ function! fsharpbinding#python#FsiShow()
             exec 'wincmd p'
         endif
     catch
-        echohl WarningMsg "failed to display fsi output" 
+        echohl WarningMsg "failed to display fsi output"
     endtry
 endfunction
 
@@ -413,7 +413,7 @@ function! fsharpbinding#python#FsiEval(text)
         endif
         call fsharpbinding#python#FsiRead(5)
     catch
-        echohl WarningMsg "fsi eval failure" 
+        echohl WarningMsg "fsi eval failure"
     endtry
 endfunction
 
