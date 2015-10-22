@@ -90,12 +90,12 @@ function! fsharpbinding#python#RunProject(...)
     try
         execute 'wa'
         if a:0 > 0
-            s:platform_exec(fnameescape(a:1))
+            call s:platform_exec(fnameescape(a:1))
         elseif exists('b:proj_file')
             let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
             echom "runproj pre s:pyeval " cmd
             let target = s:pyeval(cmd)
-            s:platform_exec(fnameescape(target))
+            call s:platform_exec(fnameescape(target))
         else
             echoe "no project file could be found" > 0
         endif
