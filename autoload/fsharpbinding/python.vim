@@ -24,14 +24,15 @@ function! s:get_complete_buffer()
     return join(getline(1, '$'), "\n")
 endfunction
 
-function! s:platform_exec(cmd)
-    echom "platform_exe" a:cmd
-    if has('win32')
+if has('win32') || has('win32unix')
+    function! s:platform_exec(cmd)
         execute '!' . a:cmd
-    else
+    endfunction
+else
+    function! s:platform_exec(cmd)
         execute '!mono' a:cmd
-    endif
-endfunction
+    endfunction
+endif
 
 " Vim73-compatible version of pyeval
 " taken from: http://stackoverflow.com/questions/13219111/how-to-embed-python-expression-into-s-command-in-vim
@@ -92,8 +93,8 @@ function! fsharpbinding#python#RunProject(...)
         if a:0 > 0
             call s:platform_exec(fnameescape(a:1))
         elseif exists('b:proj_file')
-            let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
-            echom "runproj pre s:pyeval " cmd
+            let cmd = 'G.projects[vim.eval("b:proj_file")]["Output"]'
+            "echom "runproj pre s:pyeval " cmd
             let target = s:pyeval(cmd)
             call s:platform_exec(fnameescape(target))
         else
@@ -111,7 +112,7 @@ function! fsharpbinding#python#RunTests(...)
         if a:0 > 0 && exists('g:fsharp_test_runner')
             call s:platform_exec(shellescape(g:fsharp_test_runner) . ' ' . fnameescape(a:1))
         elseif exists('b:proj_file') && exists('g:fsharp_test_runner')
-            let cmd = 'G.projects["' . b:proj_file . '"]["Output"]'
+            let cmd = 'G.projects[vim.eval("b:proj_file")]["Output"]'
             let target = s:pyeval(cmd)
             call s:platform_exec(shellescape(g:fsharp_test_runner) . ' ' . fnameescape(target))
         else
