@@ -62,8 +62,6 @@ build_commands = ['curl', 'make', 'mozroots', 'touch', 'unzip']
 
 2. Run _install.cmd_
 
-3. Currently you will most likely need to set g:fsharp_xbuild_path and g:fsharp_interactive_bin to appropriate values. 
-
 ####Syntastic
 
 vim-fsharp utilizes the [syntastic][syntastic] plugin in order to
@@ -128,7 +126,7 @@ let g:fsharpbinding_debug = 1
 This will create two log files `log.txt` and `log2.txt` in your temporary folder
 (i.e. `/tmp/`).
 
-You can set the msbuild/xbuild path. On windows it is very likely you need to do this unless msbuild is in your path.
+You can set the msbuild/xbuild path.
 
 ~~~.vim
 let g:fsharp_xbuild_path = "/path/to/xbuild/or/msbuild"
