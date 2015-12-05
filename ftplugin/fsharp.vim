@@ -36,6 +36,7 @@ import pyvim
 debug = vim.eval("get(g:, 'fsharpbinding_debug', 0)") != '0'
 if G.fsac is None:
    G.fsac = FSAutoComplete(fsharp_dir, debug)
+   G.fsac.get_paths()
 vim_var_exists = lambda var_name: vim.eval("exists('%s')" % var_name) != '0'
 # retrieve path to a compiler tool (fsi, msbuild/xbuild) with fsautocomplete unless set by the user
 def get_path(var_name, path_obj):
