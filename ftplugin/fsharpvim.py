@@ -195,14 +195,25 @@ class FSAutoComplete:
 
     def tooltip(self, fn, line, column):
         msg = self._tooltip.send('tooltip "%s" %d %d 500\n' % (fn, line, column))
-        if msg != None:
-            return str(msg)
-        else:
+        if msg == None:
             return ""
+        output = ""
+        for ols in msg:
+            for ol in ols:
+                output = output + str(ol['Signature']) + "\n"
+        return output
 
     def helptext(self, candidate):
         msg = self._helptext.send('helptext %s\n' % candidate)
-        msg = str(msg['Text'])
+        if msg == None:
+            return ""
+
+        output = ""
+        for ols in msg['Overloads']:
+            for ol in ols:
+                output = output + str(ol['Signature']) + "\n"
+
+        msg = output 
 
         if "\'" in msg and "\"" in msg:
             msg = msg.replace("\"", "") #HACK: dictionary parsing in vim gets weird if both ' and " get printed in the same string
