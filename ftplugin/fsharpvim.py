@@ -132,8 +132,7 @@ class FSAutoComplete:
         self.send("project \"%s\"\n" % path.abspath(fn))
 
     def parse(self, fn, full, lines):
-        fulltext = "full" if full else ""
-        self.send("parse \"%s\" %s\n" % (fn, fulltext))
+        self.send("parse \"%s\"\n" % (fn))
         for line in lines:
             self.send(line + "\n")
         self.send("<<EOF>>\n")
@@ -151,7 +150,7 @@ class FSAutoComplete:
     def complete(self, fn, line, column, base):
         self.__log('complete: base = %s\n' % base)
 
-        msg = self.completion.send('completion "%s" %d %d\n' % (fn, line, column))
+        msg = self.completion.send('completion "%s" %d %d filter=%s\n' % (fn, line, column, base))
 
         self.__log('msg received %s\n' % msg)
 
