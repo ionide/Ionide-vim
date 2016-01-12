@@ -6,6 +6,7 @@ import unittest
 import json
 import threading
 import hidewin
+import vim
 
 class G:
     fsac = None
@@ -192,6 +193,9 @@ class FSAutoComplete:
         else:
             return msg
 
+    def _vim_encode(self, s):
+        return s.encode(vim.eval("&encoding"))
+
     def tooltip(self, fn, line, column):
         msg = self._tooltip.send('tooltip "%s" %d %d 500\n' % (fn, line, column))
         if msg == None:
@@ -199,8 +203,9 @@ class FSAutoComplete:
         output = ""
         for ols in msg:
             for ol in ols:
-                output = output + str(ol['Signature']) + "\n"
+                output = output + self._vim_encode(ol['Signature']) + "\n"
         return output
+
 
     def helptext(self, candidate):
         msg = self._helptext.send('helptext %s\n' % candidate)
@@ -210,7 +215,7 @@ class FSAutoComplete:
         output = ""
         for ols in msg['Overloads']:
             for ol in ols:
-                output = output + str(ol['Signature']) + "\n"
+                output = output + self._vim_encode(ol['Signature']) + "\n"
 
         msg = output 
 
