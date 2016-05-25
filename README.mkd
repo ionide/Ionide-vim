@@ -144,6 +144,25 @@ This enables the helptext to be displayed during auto completion. Turn off if co
 let g:fsharp_completion_helptext = 1
 ~~~
 
+### Troubleshooting
+
+> I get syntax highlighting but not error checking and commands like :FsiEval are not found
+
+Type
+
+~~~.vim
+:SyntasticInfo
+~~~
+
+The "available" and "currently enabled" checkers should be listed as "syntax".  If these entries are blank, then
+the syntax checker has not been loaded properly.  One cause can be that your vim is compiled without Python support; type
+
+~~~
+:echo has('python')
+~~~
+
+to check this.  Some vims are compiled against Python3 (they return 1 to "echo has('python3')" but not "echo has('python')").
+For instance, on Ubuntu 16.04, you need vim-nox-py2, not vim-nox.
 
 [syntastic]: https://github.com/scrooloose/syntastic
 [airline]: https://github.com/bling/vim-airline
