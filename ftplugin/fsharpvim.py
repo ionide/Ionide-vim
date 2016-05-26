@@ -67,7 +67,11 @@ class FSAutoComplete:
         try:
             self.p = Popen(command, **opts)
         except WindowsError:
-            self.p = Popen(command[1:], **opts)
+            try:
+                self.p = Popen(command[1:], **opts)
+            except WindowsError as error:
+                msg = "Windows Error encountered while trying to execute %s: %s" % (command[1:], error)
+                raise WindowsError(msg)
 
         self.debug = debug
         self.switch_to_json()
