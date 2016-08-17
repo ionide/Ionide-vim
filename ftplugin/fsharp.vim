@@ -63,11 +63,36 @@ if '.fs' == ext or '.fsi' == ext:
         G.fsac.project(proj_file)
 G.fsac.parse(b.name, True, b)
 EOF
+    if !exists('g:fsharp_map_keys')
+        let g:fsharp_map_keys = 1
+    endif
 
-    nnoremap <buffer> <leader>t :call fsharpbinding#python#TypeCheck()<cr>
-    nnoremap <buffer> <leader>d :call fsharpbinding#python#GotoDecl()<cr>
-    nnoremap <buffer> <leader>s :call fsharpbinding#python#GoBackFromDecl()<cr>
-    nnoremap <buffer> <leader>e :call fsharpbinding#python#FsiInput()<cr>
+    if !exists('g:fsharp_map_prefix')
+        let g:fsharp_map_prefix = '<leader>'
+    endif
+
+    if !exists('g:fsharp_map_typecheck')
+        let g:fsharp_map_typecheck = 't'
+    endif
+
+    if !exists('g:fsharp_map_gotodecl')
+        let g:fsharp_map_gotodecl = 'd'
+    endif
+
+    if !exists('g:fsharp_map_gobackfromdecl')
+        let g:fsharp_map_gobackfromdecl = 's'
+    endif
+
+    if !exists('g:fsharp_map_fsiinput')
+        let g:fsharp_map_fsiinput = 'e'
+    endif
+
+    if g:fsharp_map_keys
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_typecheck  ":call fsharpbinding#python#TypeCheck()<CR>"
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_gotodecl  ":call fsharpbinding#python#GotoDecl()<CR>"
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_gobackfromdecl  ":call fsharpbinding#python#GoBackFromDecl()<CR>"
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsiinput  ":call fsharpbinding#python#FsiInput()<CR>"
+    endif
 
     com! -buffer FSharpLogFile call fsharpbinding#python#LoadLogFile()
     com! -buffer FSharpToggleHelptext call fsharpbinding#python#ToggleHelptext()
@@ -84,10 +109,21 @@ EOF
     com! -buffer -nargs=1 FsiEval call fsharpbinding#python#FsiEval(<q-args>)
     com! -buffer FsiEvalBuffer call fsharpbinding#python#FsiSendAll()
 
-    nnoremap  :<C-u>call fsharpbinding#python#FsiSendLine()<cr>
-    vnoremap  :<C-u>call fsharpbinding#python#FsiSendSel()<cr>
-    nnoremap <leader>i :<C-u>call fsharpbinding#python#FsiSendLine()<cr>
-    vnoremap <leader>i :<C-u>call fsharpbinding#python#FsiSendSel()<cr>
+    if !exists('g:fsharp_map_fsisendline')
+        let g:fsharp_map_fsisendline = 'i'
+    endif
+
+    if !exists('g:fsharp_map_fsisendsel')
+        let g:fsharp_map_fsisendsel = 'i'
+    endif
+
+    if g:fsharp_map_keys
+        nnoremap  :<C-u>call fsharpbinding#python#FsiSendLine()<cr>
+        vnoremap  :<C-u>call fsharpbinding#python#FsiSendSel()<cr>
+
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsisendline  ":call fsharpbinding#python#FsiSendLine()<CR>"
+        execute "vnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsisendsel  ":call fsharpbinding#python#FsiSendSel()<CR>"
+    endif
 
     augroup fsharpbindings_au
         au!

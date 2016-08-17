@@ -144,6 +144,50 @@ This enables the helptext to be displayed during auto completion. Turn off if co
 let g:fsharp_completion_helptext = 1
 ~~~
 
+If you find the default bindings unsuitable then it is possible to turn them off.
+
+~~~.vim
+let g:fsharp_map_keys = 0
+~~~
+
+It is also possible to configure them to provide a more customised experience.
+
+Override the default prefix of `<leader>` to the keys `cp`
+
+~~~.vim
+let g:fsharp_map_prefix = 'cp'
+~~~
+
+Override the default mapping to send the current like to fsharp interactive
+
+~~~.vim
+let g:fsharp_map_fsisendline = 'p'
+~~~
+
+Override the default mapping to send the current selection to fsharp interactive
+
+~~~.vim
+let g:fsharp_map_fsisendsel = 'p'
+~~~
+
+Override the default mapping to go to declaration in the current window
+
+~~~.vim
+let g:fsharp_map_gotodecl = 'g'
+~~~
+
+Override the default mapping to go back to where go to declaration was triggered
+
+~~~.vim
+let g:fsharp_map_gobackfromdecl = 'b'
+~~~
+
+Override the default mapping to evaluate an fsharp expression in the fsi
+
+~~~.vim
+let g:fsharp_map_fsiinput = 'i'
+~~~
+
 ### Troubleshooting
 
 > I get syntax highlighting but not error checking and commands like :FsiEval are not found
