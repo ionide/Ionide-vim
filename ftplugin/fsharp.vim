@@ -121,8 +121,8 @@ EOF
         nnoremap  :<C-u>call fsharpbinding#python#FsiSendLine()<cr>
         vnoremap  :<C-u>call fsharpbinding#python#FsiSendSel()<cr>
 
-        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsisendline  ":call fsharpbinding#python#FsiSendLine()<CR>"
-        execute "vnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsisendsel  ":call fsharpbinding#python#FsiSendSel()<CR>"
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsisendline  ":<C-u>call fsharpbinding#python#FsiSendLine()<CR>"
+        execute "vnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsisendsel  ":<C-u>call fsharpbinding#python#FsiSendSel()<CR>"
     endif
 
     augroup fsharpbindings_au
