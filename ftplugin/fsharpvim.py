@@ -66,12 +66,12 @@ class FSAutoComplete:
         hidewin.addopt(opts)
         try:
             self.p = Popen(command, **opts)
-        except WindowsError:
+        except OSError:
             try:
                 self.p = Popen(command[1:], **opts)
-            except WindowsError as error:
-                msg = "Windows Error encountered while trying to execute %s: %s" % (command[1:], error)
-                raise WindowsError(msg)
+            except OSError as error:
+                msg = "Error encountered while trying to execute %s: %s" % (command[1:], error)
+                raise OSError(msg)
 
         self.debug = debug
         self.switch_to_json()
