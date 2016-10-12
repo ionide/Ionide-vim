@@ -152,10 +152,10 @@ class FSAutoComplete:
     def get_paths(self):
         return self._getpaths.send("compilerlocation\n")
 
-    def complete(self, fn, line, column, base):
+    def complete(self, fn, line_str, line, column, base):
         self.__log('complete: base = %s\n' % base)
 
-        msg = self.completion.send('completion "%s" %d %d filter=%s\n' % (fn, line, column, base))
+        msg = self.completion.send('completion "%s" "%s" %d %d filter=%s\n' % (fn, line_str, line, column, base))
 
         self.__log('msg received %s\n' % msg)
 

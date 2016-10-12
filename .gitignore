@@ -1,6 +1,7 @@
 *.swp
 *.swo
 *.pyc
+tags
 paket.exe
 ftplugin/bin/
 packages/

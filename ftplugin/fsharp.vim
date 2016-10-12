@@ -56,7 +56,7 @@ b = vim.current.buffer
 x,ext = os.path.splitext(b.name)
 if '.fs' == ext or '.fsi' == ext:
     dir = os.path.dirname(os.path.realpath(b.name))
-    projs = filter(lambda f: '.fsproj' == os.path.splitext(f)[1], os.listdir(dir))
+    projs = filter(lambda f: f.lower() == 'project.json' or f.lower().endswith('.fsproj'), os.listdir(dir)
     if len(projs):
         proj_file = os.path.join(dir, projs[0])
         vim.command("let b:proj_file = '%s'" % proj_file)
