@@ -18,12 +18,6 @@ call g:SyntasticRegistry.CreateAndRegisterChecker({
     \ 'filetype': 'fsharp',
     \ 'name': 'syntax'})
 
-if exists('g:syntastic_extra_filetypes')
-    call add(g:syntastic_extra_filetypes, '<filetype>')
-else
-    let g:syntastic_extra_filetypes = ['<filetype>']
-endif
-
 let &cpo = s:save_cpo
 unlet s:save_cpo
 
