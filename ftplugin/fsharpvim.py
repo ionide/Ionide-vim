@@ -91,6 +91,7 @@ class FSAutoComplete:
     def __log(self, msg):
         if self.debug:
             self.logfile.write(msg)
+            self.logfile.flush()
 
     def send(self, txt):
         if self.debug:
@@ -108,6 +109,7 @@ class FSAutoComplete:
 
             if self.debug:
                 self.logfile2.write("::work read: %s" % data)
+                self.logfile2.flush()
 
             parsed = json.loads(data)
             if parsed['Kind'] == "completion":
@@ -152,10 +154,10 @@ class FSAutoComplete:
     def get_paths(self):
         return self._getpaths.send("compilerlocation\n")
 
-    def complete(self, fn, line_str, line, column, base):
+    def complete(self, fn, line, column, base):
         self.__log('complete: base = %s\n' % base)
 
-        msg = self.completion.send('completion "%s" "%s" %d %d filter=%s\n' % (fn, line_str, line, column, base))
+        msg = self.completion.send('completion "%s" \"%s\" %d %d filter=%s\n' % (fn, self._current_line(), line, column, base))
 
         self.__log('msg received %s\n' % msg)
 
@@ -170,7 +172,7 @@ class FSAutoComplete:
         return msg
 
     def finddecl(self, fn, line, column):
-        msg = self._finddecl.send('finddecl "%s" %d %d\n' % (fn, line, column))
+        msg = self._finddecl.send('finddecl "%s" \"%s\" %d %d\n' % (fn, self._current_line(), line, column))
         if msg != None:
             return str(msg['File']), (int(str(msg['Line'])), int(str(msg['Column'])))
         else:
@@ -190,6 +192,9 @@ class FSAutoComplete:
 
         return msg
 
+    def _current_line(self):
+        return vim.current.line.replace("\"", "\\\"")
+
     def errors_current(self):
         msg = self._errors.read()
         if msg == None:
@@ -201,7 +206,7 @@ class FSAutoComplete:
         return s.encode(vim.eval("&encoding"))
 
     def tooltip(self, fn, line, column):
-        msg = self._tooltip.send('tooltip "%s" %d %d 500\n' % (fn, line, column))
+        msg = self._tooltip.send('tooltip "%s" \"%s\" %d %d 500\n' % (fn, self._current_line(), line, column))
         if msg == None:
             return ""
         output = ""

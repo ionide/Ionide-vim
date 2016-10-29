@@ -5,3 +5,4 @@ tags
 paket.exe
 ftplugin/bin/
 packages/
+FsAutoComplete/*
