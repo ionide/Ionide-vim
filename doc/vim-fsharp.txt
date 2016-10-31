@@ -29,6 +29,7 @@ Required:~
 
 Optional:~
     - Syntastic plugin (for syntax and type checking)
+    NOTE: Must be enabled (see |'g:syntastic_fsharp_checkers'|)
 
 ===============================================================================
 USAGE                                                            *fsharp-usage*
@@ -41,6 +42,10 @@ Suggestion: Install a completer such as NeoComplete or SuperTab
 ===============================================================================
 OPTIONS                                                        *fsharp-options*
 
+                                                *'g:syntastic_fsharp_checkers'*
+Use this option to enable syntastic integration >
+    let g:syntastic_fsharp_checkers=['syntax']
+<
                                         *'g:fsharp_only_check_errors_on_write'*
 Use this option to disable "on the fly" syntax checking >
     let g:fsharp_only_check_errors_on_write = 1
@@ -192,7 +197,7 @@ FSharp Interactive:~
         output will be written to the fsi-out buffer.
 
 ===============================================================================
-CREDITS                                                         *fsharp-credits*
+CREDITS                                                        *fsharp-credits*
 
 Syntax and indent files by kongo2002 <github.com/kongo2002>:
  http://github.com/kongo2002/fsharp-vim
