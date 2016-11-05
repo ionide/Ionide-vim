@@ -1,4 +1,3 @@
-
 let (|Item|_|) = Map.tryFind
 
 let m = Map ["key1", 1; "key2", 2]
@@ -10,8 +9,10 @@ let withAp m k =
 
 let without m k =
     match Map.tryFind k m with
-    | Some v -> Some v
-    | None -> None
+    | Some v ->
+       Some v
+    | None ->
+        None
 
 
 
