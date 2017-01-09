@@ -214,6 +214,10 @@ For instance, on Ubuntu 16.04, you need vim-nox-py2, not vim-nox.
 [vim-plug]: https://github.com/junegunn/vim-plug
 [NeoBundle]: https://github.com/Shougo/neobundle.vim
 
+
+NB: if you in the past installed `fsharpbinding-vim` you need to remove this from the `bundles` directory. They don't play nicely together and `fsharpbinding-vim` is no longer developed.
+
+
 Maintainers
 -----------
 
