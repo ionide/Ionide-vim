@@ -7,6 +7,7 @@ import Queue
 import uuid
 import hidewin
 
+
 class FSharpInteractive:
     def __init__(self, fsi_path, is_debug = False):
         self._debug = is_debug
@@ -16,7 +17,7 @@ class FSharpInteractive:
         command = [fsi_path, '--fsi-server:%s' % id, '--nologo']
         opts = { 'stdin': PIPE, 'stdout': PIPE, 'stderr': PIPE, 'shell': False, 'universal_newlines': True }
         hidewin.addopt(opts)
-        self.p = Popen(command, **opts) 
+        self.p = Popen(command, **opts)
 
         if is_debug:
             logfiledir = tempfile.gettempdir() + "/fsi-log.txt"
@@ -39,13 +40,13 @@ class FSharpInteractive:
             self.logfile.flush()
 
     def shutdown(self):
-        print "shutting down fsi"
+        print("shutting down fsi")
         self._should_work = False
         self.p.kill()
 
     def set_loc(self, path, line_num):
         self.p.stdin.write("#" + str(line_num) + " @\"" + path + "\"\n")
-            
+
     def send(self, txt):
         self.p.stdin.write(txt + "\n")
         self.p.stdin.write(";;\n")
@@ -73,7 +74,7 @@ class FSharpInteractive:
     def read_until_prompt(self, time_out):
         output = []
         try:
-            l = self.lines.get(True, time_out) 
+            l = self.lines.get(True, time_out)
             if 'SERVER-PROMPT>' in l:
                 return output
             output.append(str(l).rstrip())
@@ -97,7 +98,7 @@ class FSharpInteractive:
                 self.lines.put(l, True)
                 self._log(l)
             except Exception as ex:
-                print ex
+                print(ex)
 
     def _err_work(self):
         while(self._should_work):

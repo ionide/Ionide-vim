@@ -50,7 +50,7 @@ endfunction
 
 function! fsharpbinding#python#LoadLogFile()
 python << EOF
-print G.fsac.logfiledir
+print(G.fsac.logfiledir)
 EOF
 endfunction
 
@@ -242,7 +242,7 @@ try:
     else:
         pyvim.jump(f, cur)
 except:
-    print "no more locations"
+    print("no more locations")
 EOF
 endfunction
 
