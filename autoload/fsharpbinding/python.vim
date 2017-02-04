@@ -48,13 +48,11 @@ vim.command('return ' + result)
 EOF
 endfunction
 
-
 function! fsharpbinding#python#LoadLogFile()
 python << EOF
 print G.fsac.logfiledir
 EOF
 endfunction
-
 
 function! fsharpbinding#python#ParseProject(...)
     execute 'wa'
@@ -68,7 +66,6 @@ G.fsac.project(vim.eval("b:proj_file"))
 EOF
     endif
 endfunction
-
 
 function! fsharpbinding#python#BuildProject(...)
     try
@@ -167,7 +164,7 @@ function! fsharpbinding#python#CurrentErrors()
                 \ 'valid': 1 })
         endfor
     catch
-        echohl WarningMsg "failed to parse file"
+        echoe "failed to parse file. ex: " v:exception
     endtry
     return result
 endfunction
@@ -233,7 +230,6 @@ EOF
     let b:fsharp_buffer_changed = 0
 endfunction
 
-
 function! fsharpbinding#python#GoBackFromDecl()
     python << EOF
 b = vim.current.buffer
@@ -249,7 +245,6 @@ except:
     print "no more locations"
 EOF
 endfunction
-
 
 function! fsharpbinding#python#GotoDecl()
     python << EOF
@@ -367,7 +362,7 @@ function! fsharpbinding#python#FsiShow()
             exec 'wincmd p'
         endif
     catch
-        echohl WarningMsg "failed to display fsi output"
+        echoe "failed to display fsi output. ex" v:exception
     endtry
 endfunction
 
@@ -422,7 +417,7 @@ function! fsharpbinding#python#FsiEval(text)
         endif
         call fsharpbinding#python#FsiRead(5)
     catch
-        echohl WarningMsg "fsi eval failure"
+        echoe "fsi eval failure. ex" v:exception
     endtry
 endfunction
 
