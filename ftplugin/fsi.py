@@ -3,9 +3,13 @@ from os import path
 import string
 import threading
 import tempfile
-import Queue
 import uuid
 import hidewin
+
+try:
+    from queue import Queue
+except:
+    from Queue import Queue
 
 
 class FSharpInteractive:
@@ -24,7 +28,7 @@ class FSharpInteractive:
             self.logfile = open(logfiledir, "w")
 
         self._should_work = True
-        self.lines = Queue.Queue()
+        self.lines = Queue()
         self.worker = threading.Thread(target=self._work, args=[])
         self.worker.daemon = True
         self.worker.start()

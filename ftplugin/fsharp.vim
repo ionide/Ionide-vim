@@ -1,12 +1,18 @@
 " Vim filetype plugin
 " Language:     F#
-" Last Change:  Fri 16 Oct 2015
+" Last Change:  Sat 04 Feb 2017
 " Maintainer:   Gregor Uhlenheuer <kongo2002@googlemail.com>
 
 if exists('b:did_ftplugin')
     finish
 endif
 let b:did_ftplugin = 1
+
+if has('python3')
+    let s:py_env = 'python3 << EOF'
+else
+    let s:py_env = 'python << EOF'
+endif
 
 "set some defaults
 if !exists('g:fsharp_only_check_errors_on_write')
@@ -20,8 +26,8 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " check for python support
-if has('python')
-    python <<EOF
+if has('python3') || has('python')
+    exe s:py_env
 import vim
 import os
 import re
@@ -56,7 +62,7 @@ b = vim.current.buffer
 x,ext = os.path.splitext(b.name)
 if '.fs' == ext or '.fsi' == ext:
     dir = os.path.dirname(os.path.realpath(b.name))
-    projs = filter(lambda f: f.lower() == 'project.json' or f.lower().endswith('.fsproj'), os.listdir(dir))
+    projs = list(filter(lambda f: f.lower() == 'project.json' or f.lower().endswith('.fsproj'), os.listdir(dir)))
     if len(projs):
         proj_file = os.path.join(dir, projs[0])
         vim.command("let b:proj_file = '%s'" % proj_file)
