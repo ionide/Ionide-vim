@@ -156,7 +156,7 @@ function! fsharpbinding#python#CurrentErrors()
             " Send a sync parse request if Vim 7.3, otherwise misses response for large files
             let errs = s:pyeval("G.fsac.errors(vim.current.buffer.name, True, vim.current.buffer)")
         endif
-        for e in errs
+        for e in errs['Errors']
             call add(result,
                 \{'lnum': e['StartLine'],
                 \ 'col': e['StartColumn'] - 1,
