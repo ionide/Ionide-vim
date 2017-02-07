@@ -136,7 +136,7 @@ class FSAutoComplete:
         self.send("outputmode json\n")
 
     def project(self, fn):
-        self.send("project \"%s\"\n" % path.abspath(fn))
+        self.send("project \"%s\" verbose\n" % path.abspath(fn))
 
     def parse(self, fn, full, lines):
         self.send("parse \"%s\"\n" % (fn))
