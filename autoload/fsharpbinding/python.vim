@@ -8,6 +8,12 @@ let g:loaded_autoload_fsharpbinding_python = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
+if has('python3')
+    let s:py_env = 'python3 << EOF'
+else
+    let s:py_env = 'python << EOF'
+endif
+
 " taken from: http://stackoverflow.com/questions/1533565/how-to-get-visually-selected-text-in-vimscript
 function! s:get_visual_selection()
   " Why is this not a built-in Vim script function?!
@@ -38,9 +44,13 @@ endif
 " taken from: http://stackoverflow.com/questions/13219111/how-to-embed-python-expression-into-s-command-in-vim
 function s:pyeval(expr)
     if version > 703
-        return pyeval(a:expr)
+        if has('python3')
+            return py3eval(a:expr)
+        elseif has('python')
+            return pyeval(a:expr)
+        endif
     endif
-python << EOF
+exe s:py_env
 import json
 arg = vim.eval('a:expr')
 result = json.dumps(eval(arg))
@@ -48,27 +58,24 @@ vim.command('return ' + result)
 EOF
 endfunction
 
-
 function! fsharpbinding#python#LoadLogFile()
-python << EOF
-print G.fsac.logfiledir
+exe s:py_env
+print(G.fsac.logfiledir)
 EOF
 endfunction
-
 
 function! fsharpbinding#python#ParseProject(...)
     execute 'wa'
     if a:0 > 0
-    python << EOF
+    exe s:py_env
 G.fsac.project(vim.eval("a:1"))
 EOF
     elseif exists('b:proj_file')
-    python << EOF
+    exe s:py_env
 G.fsac.project(vim.eval("b:proj_file"))
 EOF
     endif
 endfunction
-
 
 function! fsharpbinding#python#BuildProject(...)
     try
@@ -124,7 +131,7 @@ function! fsharpbinding#python#RunTests(...)
 endfunction
 
 function! fsharpbinding#python#TypeCheck()
-    python << EOF
+    exe s:py_env
 b = vim.current.buffer
 G.fsac.parse(b.name, True, b)
 row, col = vim.current.window.cursor
@@ -167,7 +174,7 @@ function! fsharpbinding#python#CurrentErrors()
                 \ 'valid': 1 })
         endfor
     catch
-        echohl WarningMsg "failed to parse file"
+        echoe "failed to parse file. ex: " v:exception
     endtry
     return result
 endfunction
@@ -202,7 +209,7 @@ function! fsharpbinding#python#Complete(findstart, base)
         return idx
     else
 
-    python << EOF
+    exe s:py_env
 b = vim.current.buffer
 row, col = vim.current.window.cursor
 line = b[row - 1]
@@ -233,9 +240,8 @@ EOF
     let b:fsharp_buffer_changed = 0
 endfunction
 
-
 function! fsharpbinding#python#GoBackFromDecl()
-    python << EOF
+    exe s:py_env
 b = vim.current.buffer
 w = vim.current.window
 try:
@@ -246,13 +252,12 @@ try:
     else:
         pyvim.jump(f, cur)
 except:
-    print "no more locations"
+    print("no more locations")
 EOF
 endfunction
 
-
 function! fsharpbinding#python#GotoDecl()
-    python << EOF
+    exe s:py_env
 b = vim.current.buffer
 w = vim.current.window
 G.fsac.parse(b.name, True, b)
@@ -273,7 +278,7 @@ endfunction
 
 function! fsharpbinding#python#OnBufWritePre()
     "ensure a parse has been requested before BufWritePost is called
-    python << EOF
+    exe s:py_env
 G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 EOF
     let b:fsharp_buffer_changed = 0
@@ -282,7 +287,7 @@ endfunction
 function! fsharpbinding#python#OnInsertLeave()
     if exists ("b:fsharp_buffer_changed") != 0
         if b:fsharp_buffer_changed == 1
-    python << EOF
+    exe s:py_env
 G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 EOF
         endif
@@ -302,7 +307,7 @@ endfunction
 function! fsharpbinding#python#OnTextChanged()
     let b:fsharp_buffer_changed = 1
     "TODO: make an parse_async that writes to the server on a background thread
-    python << EOF
+    exe s:py_env
 G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 EOF
 endfunction
@@ -314,7 +319,7 @@ endfunction
 function! fsharpbinding#python#OnBufEnter()
     let b:fsharp_buffer_changed = 1
     set updatetime=500
-python << EOF
+exe s:py_env
 G.fsac.parse(vim.current.buffer.name, True, vim.current.buffer)
 
 file_dir = vim.eval("expand('%:p:h')")
@@ -332,7 +337,7 @@ EOF
 endfunction
 
 function! fsharpbinding#python#FsiReset(fsi_path)
-    python << EOF
+    exe s:py_env
 G.fsi.shutdown()
 G.fsi = FSharpInteractive(vim.eval('a:fsi_path'))
 G.fsi.cd(vim.eval("expand('%:p:h')"))
@@ -347,7 +352,7 @@ function! fsharpbinding#python#FsiInput()
 endfunction
 
 function! fsharpbinding#python#FsiSend(text)
-    python << EOF
+    exe s:py_env
 path = vim.current.buffer.name
 (row, col) = vim.current.window.cursor
 G.fsi.set_loc(path, row)
@@ -367,12 +372,12 @@ function! fsharpbinding#python#FsiShow()
             exec 'wincmd p'
         endif
     catch
-        echohl WarningMsg "failed to display fsi output"
+        echoe "failed to display fsi output. ex" v:exception
     endtry
 endfunction
 
 function! fsharpbinding#python#FsiPurge()
-python << EOF
+exe s:py_env
 lines = G.fsi.purge()
 for b in vim.buffers:
     if 'fsi-out' in b.name:
@@ -382,7 +387,7 @@ EOF
 endfunction
 
 function! fsharpbinding#python#FsiClear()
-python << EOF
+exe s:py_env
 lines = G.fsi.purge()
 for b in vim.buffers:
     if 'fsi-out' in b.name:
@@ -391,7 +396,7 @@ for b in vim.buffers:
 EOF
 endfunction
 function! fsharpbinding#python#FsiRead(time_out)
-python << EOF
+exe s:py_env
 lines = G.fsi.read_until_prompt(float(vim.eval('a:time_out')))
 for b in vim.buffers:
     if 'fsi-out' in b.name:
@@ -422,7 +427,7 @@ function! fsharpbinding#python#FsiEval(text)
         endif
         call fsharpbinding#python#FsiRead(5)
     catch
-        echohl WarningMsg "fsi eval failure"
+        echoe "fsi eval failure. ex" v:exception
     endtry
 endfunction
 

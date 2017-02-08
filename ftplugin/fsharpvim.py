@@ -1,5 +1,6 @@
 from subprocess import Popen, PIPE
 from os import path
+import sys
 import string
 import tempfile
 import unittest
@@ -8,12 +9,14 @@ import threading
 import hidewin
 import vim
 
+
 class G:
     fsac = None
     fsi = None
     paths = {}
     locations = []
     projects = {}
+
 
 class Interaction:
     def __init__(self, proc, timeOut, logfile = None):
@@ -26,6 +29,7 @@ class Interaction:
 
     def _write(self, txt):
         self.proc.stdin.write(txt)
+        self.proc.stdin.flush()
 
         if self.debug:
             self.logfile.write("> " + txt)
@@ -52,6 +56,7 @@ class Interaction:
     def update(self, data):
         self.data = data
         self.event.set()
+
 
 class FSAutoComplete:
     def __init__(self, dir, debug = False):
@@ -165,8 +170,8 @@ class FSAutoComplete:
             return []
 
         if base != '':
-            msg = filter(lambda(line):
-                    line['Name'].lower().find(base.lower()) != -1, msg)
+            msg = list(filter(lambda line: line['Name'].lower().find(base.lower()) != -1,
+                              msg))
         msg.sort(key=lambda x: x['Name'].startswith(base), reverse=True)
 
         return msg
@@ -203,6 +208,8 @@ class FSAutoComplete:
             return msg
 
     def _vim_encode(self, s):
+        if (sys.version_info > (3, 0)):
+            return s
         return s.encode(vim.eval("&encoding"))
 
     def tooltip(self, fn, line, column):
@@ -215,7 +222,6 @@ class FSAutoComplete:
                 output = output + self._vim_encode(ol['Signature']) + "\n"
         return output
 
-
     def helptext(self, candidate):
         msg = self._helptext.send('helptext %s\n' % candidate)
         if msg == None:
@@ -226,7 +232,7 @@ class FSAutoComplete:
             for ol in ols:
                 output = output + self._vim_encode(ol['Signature']) + "\n"
 
-        msg = output 
+        msg = output
 
         if "\'" in msg and "\"" in msg:
             msg = msg.replace("\"", "") #HACK: dictionary parsing in vim gets weird if both ' and " get printed in the same string
@@ -234,12 +240,13 @@ class FSAutoComplete:
             msg = msg + "\n\n'" #HACK: - the ' is inserted to ensure that newlines are interpreted properly in the preview window
         return msg
 
+
 class FSharpVimFixture(unittest.TestCase):
     def setUp(self):
         self.fsac = FSAutoComplete('.')
         self.testscript = 'test/TestScript.fsx'
         with open(self.testscript, 'r') as content_file:
-            content = map(lambda(line): line.strip('\n'), list(content_file))
+            content = map(lambda line: line.strip('\n'), list(content_file))
 
         self.fsac.parse(self.testscript, True, content)
 
@@ -248,7 +255,6 @@ class FSharpVimFixture(unittest.TestCase):
 
     def test_completion(self):
         completions = self.fsac.complete(self.testscript, 8, 16, '')
-
 
 if __name__ == '__main__':
     unittest.main()
