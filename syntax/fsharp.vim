@@ -33,7 +33,7 @@ syn keyword  fsharpScript contained line error warning light nowarn
 " comments
 syn match    fsharpComment "//.*$" contains=fsharpTodo,@Spell
 syn region   fsharpDocComment start="///" end="$" contains=fsharpTodo,fsharpXml,@Spell keepend oneline
-syn region   fsharpXml matchgroup=fsharpXmlDoc start="<[^>]\+>" end="</[^>]\+>" contained
+syn region   fsharpXml matchgroup=fsharpXmlDoc start="<[^>]\+>" end="</[^>]\+>" contained contains=fsharpXml
 
 " Double-backtick identifiers
 syn region   fsharpDoubleBacktick start="``" end="``"  keepend oneline
