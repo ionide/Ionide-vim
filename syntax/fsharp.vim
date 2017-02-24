@@ -40,7 +40,7 @@ syn region   fsharpDoubleBacktick start="``" end="``" keepend oneline
 
 
 " symbol names
-syn match fsharpSymbol "\%(let\|use\|mutable\|rec\|and\)\@<=!\=\s\+\zs\w\+\ze\s*[^=:]*[=:]"
+syn match fsharpSymbol "\%(let\|use\|mutable\|rec\|and\|private\)\@<=!\=\s\+\zs\w\+\ze\s*[^=:]*[=:]"
 syn match fsharpSymbol "\%(member\)\@<=\s\+\w\+\.\zs\w\+"
 
 
