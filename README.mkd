@@ -1,4 +1,4 @@
-##F# support for Vim (vim-fsharp)
+## F# support for Vim (vim-fsharp)
 
 Syntax and indent files have been copied from [fsharp-vim](http://github.com/kongo2002/fsharp-vim) with kind permissions from [kongo2002](https://github.com/kongo2002).
 
@@ -6,13 +6,13 @@ Syntax and indent files have been copied from [fsharp-vim](http://github.com/kon
 
 This was adapted from http://github.com/timrobinson/fsharp-vim. The current aim is to provide a good experience for fsx scripting. On opening an fs or fsi file any project file found in the same directory will be parsed. Multiple projects are supported.
 
-###Installing
+### Installing
 
 vim-fsharp requires mono and fsharp installed.
 
-####OSX and linux
+#### OSX and linux
 
-#####Installing with pathogen
+##### Installing with pathogen
 
 1. Install [pathogen][pathogen] and [syntastic][syntastic]
 
@@ -20,7 +20,7 @@ vim-fsharp requires mono and fsharp installed.
 
 2. Run *make* inside the vim directory. This downloads the auto completion server.
 
-#####Installing with [vim-plug][vim-plug]
+##### Installing with [vim-plug][vim-plug]
 
 ~~~.vim
 Plug 'fsharp/vim-fsharp', {
@@ -29,7 +29,7 @@ Plug 'fsharp/vim-fsharp', {
       \}
 ~~~
 
-#####Installing with [NeoBundle][NeoBundle]
+##### Installing with [NeoBundle][NeoBundle]
 
 By VimL way:
 ~~~.vim
@@ -56,13 +56,13 @@ build_commands = ['curl', 'make', 'mozroots', 'touch', 'unzip']
   unix = 'make fsautocomplete'
 ~~~
 
-####Windows
+#### Windows
 
 1. Install [pathogen][pathogen] and [syntastic][syntastic]
 
 2. Run _install.cmd_
 
-####Syntastic
+#### Syntastic
 
 vim-fsharp utilizes the [syntastic][syntastic] plugin in order to
 supply interactive syntax and type checking. You may want to install that plugin
@@ -73,15 +73,15 @@ optional integration in your status bar (i.e. [vim-airline][airline]).
 
 All you have to do is to install [syntastic][syntastic] in your vim runtime path.
 
-###Usage
+### Usage
 
 Opening either `*.fs`, `*.fsi` or `*.fsx` files should trigger syntax highlighting and other depending runtime files as well.
 
 Omnicomplete triggers the fsharp autocomplete process. (suggestion: install [supertab](https://github.com/ervandew/supertab))
 
-###Commands
+### Commands
 
-#####General
+##### General
 * `:make` Calls xbuild on the fsproj for the current file (if any).
 * `:FSharpParseProject` Reparses all the project files and dependencies (this is done automatically when opening a .fs or .fsi file).
 * `:FSharpBuildProject` Calls xbuild on the fsproj for the current file (if any). Can also take a path to the proj file to build.
@@ -92,7 +92,7 @@ Omnicomplete triggers the fsharp autocomplete process. (suggestion: install [sup
 * `leader<d>` _go to declaration_ in current window.
 * `leader<s>` Takes you back from where _go to declaration_ was triggered. Experimental.
 
-#####FSharp Interactive
+##### FSharp Interactive
 * `:FsiEval` Evaluates an fsharp expression in the fsi
 * `leader<e>` Same as FsiEval but from a vim command line
 * `:FsiEvalBuffer` Evaluates the entire buffer in the fsi
@@ -103,7 +103,7 @@ Omnicomplete triggers the fsharp autocomplete process. (suggestion: install [sup
 * `Alt-Enter` Send either the current selection or the current line to the fsharp interactive and echoes the output the first line of the output. All output will be written to the _fsi-out_ buffer.
 * `leader<i>` Same as Alt-Enter
 
-###On-the-fly syntax checking
+### On-the-fly syntax checking
 
 > Interactive syntax/type checking requires vim 7.4 or higher and [syntastic][syntastic]
 
@@ -114,7 +114,7 @@ In case you would prefer not to have you errors checked continuously add the fol
 let g:fsharp_only_check_errors_on_write = 1
 ~~~
 
-###Settings
+### Settings
 
 You can enable *debug-mode* in order to inspect the fsautocomplete behavior by
 setting the global vim variable `g:fsharpbinding_debug` to a non-zero value:
