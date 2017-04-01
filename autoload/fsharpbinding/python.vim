@@ -163,16 +163,19 @@ function! fsharpbinding#python#CurrentErrors()
             " Send a sync parse request if Vim 7.3, otherwise misses response for large files
             let errs = s:pyeval("G.fsac.errors(vim.current.buffer.name, True, vim.current.buffer)")
         endif
-        for e in errs['Errors']
-            call add(result,
-                \{'lnum': e['StartLine'],
-                \ 'col': e['StartColumn'] - 1,
-                \ 'type': e['Severity'][0],
-                \ 'text': e['Message'],
-                \ 'hl': '\%' . e['StartLine'] . 'l\%>' . (e['StartColumn'] - 1) .  'c\%<' . e['EndColumn'] . 'c',
-                \ 'bufnr': buf,
-                \ 'valid': 1 })
-        endfor
+
+        if !empty(errs)
+            for e in errs['Errors']
+                call add(result,
+                    \{'lnum': e['StartLine'],
+                    \ 'col': e['StartColumn'] - 1,
+                    \ 'type': e['Severity'][0],
+                    \ 'text': e['Message'],
+                    \ 'hl': '\%' . e['StartLine'] . 'l\%>' . (e['StartColumn'] - 1) .  'c\%<' . e['EndColumn'] . 'c',
+                    \ 'bufnr': buf,
+                    \ 'valid': 1 })
+            endfor
+        endif
     catch
         echoe "failed to parse file. ex: " v:exception
     endtry
