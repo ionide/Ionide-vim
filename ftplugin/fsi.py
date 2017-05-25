@@ -50,10 +50,12 @@ class FSharpInteractive:
 
     def set_loc(self, path, line_num):
         self.p.stdin.write("#" + str(line_num) + " @\"" + path + "\"\n")
+        self.p.stdin.flush()
 
     def send(self, txt):
         self.p.stdin.write(txt + "\n")
         self.p.stdin.write(";;\n")
+        self.p.stdin.flush()
         self._log(">" + txt + ";;")
 
     def cd(self, path):
@@ -61,6 +63,7 @@ class FSharpInteractive:
             return
         self.p.stdin.write("System.IO.Directory.SetCurrentDirectory(@\"" + path + "\");;\n")
         self.p.stdin.write("#silentCd @\"" + path + "\";;\n")
+        self.p.stdin.flush()
         self.purge()
         self._current_path = path
 
