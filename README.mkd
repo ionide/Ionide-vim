@@ -208,6 +208,8 @@ the syntax checker has not been loaded properly.  One cause can be that your vim
 
 to check this.
 
+If both of this commands return 0 and you're on Debian 8, you may need to install the package 'vim-python-jedi' instead of 'vim' to have Python support. 
+
 [syntastic]: https://github.com/scrooloose/syntastic
 [airline]: https://github.com/bling/vim-airline
 [pathogen]: https://github.com/tpope/vim-pathogen

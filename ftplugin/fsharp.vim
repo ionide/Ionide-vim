@@ -26,7 +26,10 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 " check for python support
-if has('python3') || has('python')
+if !(has('python3') || has('python'))
+    echoerr "Python environment not found"
+    finish
+else
     exe s:py_env
 import vim
 import os
