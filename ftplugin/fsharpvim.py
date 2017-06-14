@@ -116,6 +116,11 @@ class FSAutoComplete:
                 self.logfile2.write("::work read: %s" % data)
                 self.logfile2.flush()
 
+            # Temporary fix for unwanted stdout messages from Mono V5.0.1.1
+            # To be removed for the next Mono release
+            if data[0] != '{':
+                continue
+
             parsed = json.loads(data)
             if parsed['Kind'] == "completion":
                 self.completion.update(parsed['Data'])
