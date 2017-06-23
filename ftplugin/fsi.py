@@ -21,7 +21,11 @@ class FSharpInteractive:
         command = [fsi_path, '--fsi-server:%s' % id, '--nologo']
         opts = { 'stdin': PIPE, 'stdout': PIPE, 'stderr': PIPE, 'shell': False, 'universal_newlines': True }
         hidewin.addopt(opts)
-        self.p = Popen(command, **opts)
+
+        try:
+            self.p = Popen(command, **opts)
+        except Exception as e:
+            raise Exception ('Error executing fsi.  g:fsharp_interactive_bin="' + fsi_path + '" ' + str(e))
 
         if is_debug:
             logfiledir = tempfile.gettempdir() + "/fsi-log.txt"

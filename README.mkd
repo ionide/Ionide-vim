@@ -126,6 +126,12 @@ let g:fsharpbinding_debug = 1
 This will create two log files `log.txt` and `log2.txt` in your temporary folder
 (i.e. `/tmp/`).
 
+Override the default F# interactive binary
+
+~~~.vim
+let g:fsharp_interactive_bin = '/path/to/fsi'
+~~~
+
 You can set the msbuild/xbuild path.
 
 ~~~.vim
