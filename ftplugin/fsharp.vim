@@ -1,6 +1,6 @@
 " Vim filetype plugin
 " Language:     F#
-" Last Change:  Sat 04 Feb 2017
+" Last Change:  Sun 25 Jun 2017
 " Maintainer:   Gregor Uhlenheuer <kongo2002@googlemail.com>
 
 if exists('b:did_ftplugin')
@@ -20,6 +20,10 @@ if !exists('g:fsharp_only_check_errors_on_write')
 endif
 if !exists('g:fsharp_completion_helptext')
     let g:fsharp_completion_helptext = 1
+endif
+" Enable checker by default
+if !exists('g:syntastic_fsharp_checkers')
+    let g:syntastic_fsharp_checkers = ['syntax']
 endif
 
 let s:cpo_save = &cpo

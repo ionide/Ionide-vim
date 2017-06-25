@@ -114,6 +114,12 @@ In case you would prefer not to have you errors checked continuously add the fol
 let g:fsharp_only_check_errors_on_write = 1
 ~~~
 
+In case you prefer to disable the syntax checker, add the following to your vimrc:
+
+~~~.vim
+let g:syntastic_fsharp_checkers = ['']
+~~~
+
 ### Settings
 
 You can enable *debug-mode* in order to inspect the fsautocomplete behavior by
