@@ -200,6 +200,13 @@ Override the default mapping to evaluate an fsharp expression in the fsi
 let g:fsharp_map_fsiinput = 'i'
 ~~~
 
+Automatically open the result of an FsiEval (fsi-out buffer) in a vsplit window
+
+~~~.vim
+let g:fsharp_fsi_show_auto_open = 1
+~~~
+
+
 ### Troubleshooting
 
 > I get syntax highlighting but not error checking and commands like :FsiEval are not found

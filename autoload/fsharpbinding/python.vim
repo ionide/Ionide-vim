@@ -427,6 +427,13 @@ function! fsharpbinding#python#FsiEval(text)
         call fsharpbinding#python#FsiSend(a:text)
         if bufnr('fsi-out') == -1
             exec 'badd fsi-out'
+
+            " auto-open the fsi-out buffer
+            if exists('g:fsharp_fsi_show_auto_open')
+                if g:fsharp_fsi_show_auto_open == 1
+                    call fsharpbinding#python#FsiShow()
+                endif
+            endif
         endif
         call fsharpbinding#python#FsiRead(5)
     catch
