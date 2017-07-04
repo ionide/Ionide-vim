@@ -345,7 +345,7 @@ G.fsi.shutdown()
 G.fsi = FSharpInteractive(vim.eval('a:fsi_path'))
 G.fsi.cd(vim.eval("expand('%:p:h')"))
 EOF
-    exec 'bd fsi-out'
+    exec 'bw fsi-out'
     echo "fsi reset"
 endfunction
 
