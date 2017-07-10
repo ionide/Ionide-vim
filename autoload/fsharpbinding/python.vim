@@ -240,7 +240,8 @@ for line in G.fsac.complete(b.name, row, col + 1, vim.eval('a:base')):
         name = "``%s``" % name
     glyph = str(line['Glyph'])
     if int(vim.eval('g:fsharp_completion_helptext')) > 0:
-        ht = G.fsac.helptext(name)
+        include_comments = vim.eval('g:fsharp_helptext_comments') != '0'
+        ht = G.fsac.helptext(name, include_comments)
         x = {'word': name,
              'abbr': abbr,
              'info': ht,

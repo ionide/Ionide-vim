@@ -157,6 +157,12 @@ This enables the helptext to be displayed during auto completion. Turn off if co
 let g:fsharp_completion_helptext = 1
 ~~~
 
+Show comments, in addition to type signature, when using Omni completion (default=0).
+
+~~~.vim
+let g:fsharp_helptext_comments = 1
+~~~
+
 If you find the default bindings unsuitable then it is possible to turn them off.
 
 ~~~.vim

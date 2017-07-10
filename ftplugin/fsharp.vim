@@ -21,6 +21,9 @@ endif
 if !exists('g:fsharp_completion_helptext')
     let g:fsharp_completion_helptext = 1
 endif
+if !exists('g:fsharp_helptext_comments')
+    let g:fsharp_helptext_comments= 0
+endif
 " Enable checker by default
 if !exists('g:syntastic_fsharp_checkers')
     let g:syntastic_fsharp_checkers = ['syntax']
