@@ -213,18 +213,37 @@ class FSAutoComplete:
             return msg
 
     def _vim_encode(self, s):
+        """Encode string so vim can properly display it"""
         if (sys.version_info > (3, 0)):
             return s
         return s.encode(vim.eval("&encoding"))
 
-    def tooltip(self, fn, line, column):
+    def _format_comment(self, comment):
+        """Clean comment so it displays nicely"""
+        return self._vim_encode(comment.replace("\"", "\\\"").replace("\n ", "\n").strip())
+
+    def tooltip(self, fn, line, column, include_comments):
+        """Get the tooltip information for an expression"""
         msg = self._tooltip.send('tooltip "%s" \"%s\" %d %d 500\n' % (fn, self._current_line(), line, column))
         if msg == None:
             return ""
-        output = ""
+
+        output_signature = ""
         for ols in msg:
             for ol in ols:
-                output = output + self._vim_encode(ol['Signature']) + "\n"
+                output_signature = output_signature + self._vim_encode(ol['Signature']) + "\n"
+
+        output_comments = ""
+        if include_comments:
+            for ols in msg:
+                for ol in ols:
+                    output_comments = output_comments + self._format_comment(ol['Comment']) + "\n"
+                
+        if include_comments and output_comments.strip() != "":
+            output = 'HasComments%s\n%s' % (output_signature, output_comments)
+        else:
+            output = output_signature
+
         return output
 
     def helptext(self, candidate):

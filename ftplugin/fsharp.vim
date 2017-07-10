@@ -88,6 +88,10 @@ EOF
         let g:fsharp_map_typecheck = 't'
     endif
 
+    if !exists('g:fsharp_map_typehelp')
+        let g:fsharp_map_typehelp = 'h'
+    endif
+
     if !exists('g:fsharp_map_gotodecl')
         let g:fsharp_map_gotodecl = 'd'
     endif
@@ -102,6 +106,7 @@ EOF
 
     if g:fsharp_map_keys
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_typecheck  ":call fsharpbinding#python#TypeCheck()<CR>"
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_typehelp  ":call fsharpbinding#python#TypeHelp()<CR>"
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_gotodecl  ":call fsharpbinding#python#GotoDecl()<CR>"
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_gobackfromdecl  ":call fsharpbinding#python#GoBackFromDecl()<CR>"
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsiinput  ":call fsharpbinding#python#FsiInput()<CR>"
