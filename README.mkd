@@ -89,6 +89,7 @@ Omnicomplete triggers the fsharp autocomplete process. (suggestion: install [sup
 * `:FSharpRunTests` If `g:fsharp_test_runner` is set it will build the current project and run any tests. (Currently only tested with nunit-console.exe)
 * `:FSharpToggleHelptext` toggles g:fsharp_completion_helptext. (See below for details)
 * `leader<t>` Echoes the type of the expression currently pointed to by the cursor.
+* `leader<h>` Echoes the help info (type and comments) of the expression currently pointed to by the cursor.
 * `leader<d>` _go to declaration_ in current window.
 * `leader<s>` Takes you back from where _go to declaration_ was triggered. Experimental.
 
@@ -154,6 +155,12 @@ This enables the helptext to be displayed during auto completion. Turn off if co
 
 ~~~.vim
 let g:fsharp_completion_helptext = 1
+~~~
+
+Show comments, in addition to type signature, when using Omni completion (default=0).
+
+~~~.vim
+let g:fsharp_helptext_comments = 1
 ~~~
 
 If you find the default bindings unsuitable then it is possible to turn them off.
