@@ -118,7 +118,7 @@ class FSAutoComplete:
 
             # Temporary fix for unwanted stdout messages from Mono V5.0.1.1
             # To be removed for the next Mono release
-            if data[0] != '{':
+            if (len(data) == 0 or data[0] != '{'):
                 continue
 
             parsed = json.loads(data)
@@ -273,6 +273,14 @@ class FSAutoComplete:
         elif "\n" in msg:
             msg = msg + "\n\n'" #HACK: - the ' is inserted to ensure that newlines are interpreted properly in the preview window
         return msg
+
+    def shutdown(self):
+        """Shutdown fsautocomplete process"""
+        try:
+            self.send("quit\n")
+            self.p.kill()
+        except:
+            pass
 
 class FSharpVimFixture(unittest.TestCase):
     def setUp(self):

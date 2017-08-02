@@ -334,6 +334,14 @@ function! fsharpbinding#python#OnTextChangedI()
     let b:fsharp_buffer_changed = 1
 endfunction
 
+" Ensure that python processes close on exit
+function! fsharpbinding#python#OnVimLeave()
+exe s:py_env
+G.fsac.shutdown()
+G.fsi.shutdown()
+EOF
+endfunction
+
 function! fsharpbinding#python#OnBufEnter()
     let b:fsharp_buffer_changed = 1
     set updatetime=500

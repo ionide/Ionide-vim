@@ -162,6 +162,9 @@ EOF
         au InsertLeave  *.fs,*.fsi,*fsx  if pumvisible() == 0|silent! pclose|endif
     augroup END
 
+    " Python process cleanup
+    autocmd VimLeavePre * call fsharpbinding#python#OnVimLeave()
+
     " omnicomplete
     setlocal omnifunc=fsharpbinding#python#Complete
 endif
