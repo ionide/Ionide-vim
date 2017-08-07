@@ -48,9 +48,13 @@ class FSharpInteractive:
             self.logfile.flush()
 
     def shutdown(self):
+        """Shutdown fsi process"""
         print("shutting down fsi")
         self._should_work = False
-        self.p.kill()
+        try:
+            self.p.kill()
+        except:
+            pass
 
     def set_loc(self, path, line_num):
         self.p.stdin.write("#" + str(line_num) + " @\"" + path + "\"\n")
