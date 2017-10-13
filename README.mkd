@@ -89,6 +89,7 @@ Omnicomplete triggers the fsharp autocomplete process. (suggestion: install [sup
 * `:FSharpRunTests` If `g:fsharp_test_runner` is set it will build the current project and run any tests. (Currently only tested with nunit-console.exe)
 * `:FSharpToggleHelptext` toggles g:fsharp_completion_helptext. (See below for details)
 * `leader<t>` Echoes the type of the expression currently pointed to by the cursor.
+* `leader<h>` Echoes the help info (type and comments) of the expression currently pointed to by the cursor.
 * `leader<d>` _go to declaration_ in current window.
 * `leader<s>` Takes you back from where _go to declaration_ was triggered. Experimental.
 
@@ -114,6 +115,12 @@ In case you would prefer not to have you errors checked continuously add the fol
 let g:fsharp_only_check_errors_on_write = 1
 ~~~
 
+In case you prefer to disable the syntax checker, add the following to your vimrc:
+
+~~~.vim
+let g:syntastic_fsharp_checkers = ['']
+~~~
+
 ### Settings
 
 You can enable *debug-mode* in order to inspect the fsautocomplete behavior by
@@ -125,6 +132,12 @@ let g:fsharpbinding_debug = 1
 
 This will create two log files `log.txt` and `log2.txt` in your temporary folder
 (i.e. `/tmp/`).
+
+Override the default F# interactive binary
+
+~~~.vim
+let g:fsharp_interactive_bin = '/path/to/fsi'
+~~~
 
 You can set the msbuild/xbuild path.
 
@@ -142,6 +155,12 @@ This enables the helptext to be displayed during auto completion. Turn off if co
 
 ~~~.vim
 let g:fsharp_completion_helptext = 1
+~~~
+
+Show comments, in addition to type signature, when using Omni completion (default=0).
+
+~~~.vim
+let g:fsharp_helptext_comments = 1
 ~~~
 
 If you find the default bindings unsuitable then it is possible to turn them off.
@@ -187,6 +206,13 @@ Override the default mapping to evaluate an fsharp expression in the fsi
 ~~~.vim
 let g:fsharp_map_fsiinput = 'i'
 ~~~
+
+Automatically open the result of an FsiEval (fsi-out buffer) in a vsplit window
+
+~~~.vim
+let g:fsharp_fsi_show_auto_open = 1
+~~~
+
 
 ### Troubleshooting
 

@@ -21,7 +21,11 @@ class FSharpInteractive:
         command = [fsi_path, '--fsi-server:%s' % id, '--nologo']
         opts = { 'stdin': PIPE, 'stdout': PIPE, 'stderr': PIPE, 'shell': False, 'universal_newlines': True }
         hidewin.addopt(opts)
-        self.p = Popen(command, **opts)
+
+        try:
+            self.p = Popen(command, **opts)
+        except Exception as e:
+            raise Exception ('Error executing fsi.  g:fsharp_interactive_bin="' + fsi_path + '" ' + str(e))
 
         if is_debug:
             logfiledir = tempfile.gettempdir() + "/fsi-log.txt"
@@ -44,9 +48,13 @@ class FSharpInteractive:
             self.logfile.flush()
 
     def shutdown(self):
+        """Shutdown fsi process"""
         print("shutting down fsi")
         self._should_work = False
-        self.p.kill()
+        try:
+            self.p.kill()
+        except:
+            pass
 
     def set_loc(self, path, line_num):
         self.p.stdin.write("#" + str(line_num) + " @\"" + path + "\"\n")

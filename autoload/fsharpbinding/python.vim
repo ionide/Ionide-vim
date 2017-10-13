@@ -130,22 +130,36 @@ function! fsharpbinding#python#RunTests(...)
     endtry
 endfunction
 
-function! fsharpbinding#python#TypeCheck()
+" Get type information for the expression at the cursor
+" includeComments [0|1]
+function! fsharpbinding#python#TypeInfo(includeComments)
     exe s:py_env
 b = vim.current.buffer
 G.fsac.parse(b.name, True, b)
 row, col = vim.current.window.cursor
-res = G.fsac.tooltip(b.name, row, col + 1)
+res = G.fsac.tooltip(b.name, row, col + 1, vim.eval('a:includeComments') != '0')
 lines = res.splitlines()
 first = ""
 if len(lines):
     first = lines[0]
 if first.startswith('Multiple') or first.startswith('type'):
     vim.command('echo "%s"' % res)
+elif first.startswith('HasComments'):
+    vim.command('echo "%s"' % res.replace("HasComments", "", 1))
 else:
     vim.command('echo "%s"' % first)
 EOF
     let b:fsharp_buffer_changed = 0
+endfunction
+
+" Get a type definition for an expression
+function! fsharpbinding#python#TypeCheck()
+    call fsharpbinding#python#TypeInfo(0)
+endfunction
+
+" Get a type definition and available comment block for an expression
+function! fsharpbinding#python#TypeHelp()
+    call fsharpbinding#python#TypeInfo(1)
 endfunction
 
 " probable loclist format
@@ -226,7 +240,8 @@ for line in G.fsac.complete(b.name, row, col + 1, vim.eval('a:base')):
         name = "``%s``" % name
     glyph = str(line['Glyph'])
     if int(vim.eval('g:fsharp_completion_helptext')) > 0:
-        ht = G.fsac.helptext(name)
+        include_comments = vim.eval('g:fsharp_helptext_comments') != '0'
+        ht = G.fsac.helptext(name, include_comments)
         x = {'word': name,
              'abbr': abbr,
              'info': ht,
@@ -319,6 +334,14 @@ function! fsharpbinding#python#OnTextChangedI()
     let b:fsharp_buffer_changed = 1
 endfunction
 
+" Ensure that python processes close on exit
+function! fsharpbinding#python#OnVimLeave()
+exe s:py_env
+G.fsac.shutdown()
+G.fsi.shutdown()
+EOF
+endfunction
+
 function! fsharpbinding#python#OnBufEnter()
     let b:fsharp_buffer_changed = 1
     set updatetime=500
@@ -345,7 +368,7 @@ G.fsi.shutdown()
 G.fsi = FSharpInteractive(vim.eval('a:fsi_path'))
 G.fsi.cd(vim.eval("expand('%:p:h')"))
 EOF
-    exec 'bd fsi-out'
+    exec 'bw fsi-out'
     echo "fsi reset"
 endfunction
 
@@ -427,6 +450,13 @@ function! fsharpbinding#python#FsiEval(text)
         call fsharpbinding#python#FsiSend(a:text)
         if bufnr('fsi-out') == -1
             exec 'badd fsi-out'
+
+            " auto-open the fsi-out buffer
+            if exists('g:fsharp_fsi_show_auto_open')
+                if g:fsharp_fsi_show_auto_open == 1
+                    call fsharpbinding#python#FsiShow()
+                endif
+            endif
         endif
         call fsharpbinding#python#FsiRead(5)
     catch

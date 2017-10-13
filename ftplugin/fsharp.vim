@@ -1,6 +1,6 @@
 " Vim filetype plugin
 " Language:     F#
-" Last Change:  Sat 04 Feb 2017
+" Last Change:  Sun 25 Jun 2017
 " Maintainer:   Gregor Uhlenheuer <kongo2002@googlemail.com>
 
 if exists('b:did_ftplugin')
@@ -20,6 +20,13 @@ if !exists('g:fsharp_only_check_errors_on_write')
 endif
 if !exists('g:fsharp_completion_helptext')
     let g:fsharp_completion_helptext = 1
+endif
+if !exists('g:fsharp_helptext_comments')
+    let g:fsharp_helptext_comments= 0
+endif
+" Enable checker by default
+if !exists('g:syntastic_fsharp_checkers')
+    let g:syntastic_fsharp_checkers = ['syntax']
 endif
 
 let s:cpo_save = &cpo
@@ -84,6 +91,10 @@ EOF
         let g:fsharp_map_typecheck = 't'
     endif
 
+    if !exists('g:fsharp_map_typehelp')
+        let g:fsharp_map_typehelp = 'h'
+    endif
+
     if !exists('g:fsharp_map_gotodecl')
         let g:fsharp_map_gotodecl = 'd'
     endif
@@ -98,6 +109,7 @@ EOF
 
     if g:fsharp_map_keys
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_typecheck  ":call fsharpbinding#python#TypeCheck()<CR>"
+        execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_typehelp  ":call fsharpbinding#python#TypeHelp()<CR>"
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_gotodecl  ":call fsharpbinding#python#GotoDecl()<CR>"
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_gobackfromdecl  ":call fsharpbinding#python#GoBackFromDecl()<CR>"
         execute "nnoremap <buffer>" g:fsharp_map_prefix.g:fsharp_map_fsiinput  ":call fsharpbinding#python#FsiInput()<CR>"
@@ -149,6 +161,9 @@ EOF
         au BufEnter     *.fs,*.fsi,*fsx call fsharpbinding#python#OnBufEnter()
         au InsertLeave  *.fs,*.fsi,*fsx  if pumvisible() == 0|silent! pclose|endif
     augroup END
+
+    " Python process cleanup
+    autocmd VimLeavePre * call fsharpbinding#python#OnVimLeave()
 
     " omnicomplete
     setlocal omnifunc=fsharpbinding#python#Complete
