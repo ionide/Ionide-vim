@@ -1,16 +1,17 @@
 # Directories
 
-bin_d  = $(abspath ftplugin/bin)
+bin_d  = $(abspath fsac)
 
 # Installation paths.
 #dest_root = $(HOME)/.vim/bundle/vim-fsharp/
 #dest_bin  = $(dest_root)/ftplugin/bin/
 
 ac_exe     = $(bin_d)/fsautocomplete.exe
-ac_archive = fsautocomplete.zip
-ac_version = 0.34.0
+ac_archive = fsautocomplete.netcore.zip
+ac_version = master
 ac_url     = https://github.com/fsharp/FSharp.AutoComplete/releases/download/$(ac_version)/$(ac_archive)
-
+ac_url     = https://ci.appveyor.com/api/projects/fsautocomplete/fsautocomplete/artifacts/bin/pkgs/$(ac_archive)?branch=$(ac_version)
+	
 git_url    = https://github.com/fsharp/FsAutoComplete.git
 
 # ----------------------------------------------------------------------------

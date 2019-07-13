@@ -3,6 +3,9 @@
 *.pyc
 tags
 paket.exe
+.paket
 ftplugin/bin/
 packages/
 FsAutoComplete/*
+fsac/
+fsac.zip
