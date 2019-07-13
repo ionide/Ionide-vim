@@ -22,9 +22,7 @@ I have only tested vim-plug and _install.sh_(_install.cmd_ should also work).
 
 ##### Installing with pathogen
 
-1. Install [pathogen][pathogen] and [syntastic][syntastic]
-
-2. Clone vim-fsharp-languageclient into your bundle directory.
+1. Clone vim-fsharp-languageclient into your bundle directory.
 
 2. Run *make* inside the vim directory. This downloads the auto completion server.
 
