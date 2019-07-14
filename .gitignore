@@ -6,6 +6,6 @@ paket.exe
 .paket
 ftplugin/bin/
 packages/
-FsAutoComplete/*
+.ionide
 fsac/
 fsac.zip

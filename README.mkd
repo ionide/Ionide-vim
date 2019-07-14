@@ -1,72 +1,87 @@
-## F# support for Vim through LSP (vim-fsharp-languageclient)
+# Ionide-Vim
 
-This is a modified version of [fsharp/vim-fsharp](https://github.com/fsharp/vim-fsharp) which uses LSP-mode of [FsAutoComplete](https://github.com/fsharp/FsAutoComplete) as a backend, and is powered by [autozimu/LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim).
+**F# support for Vim/Neovim**
 
-The original description is as follows:
+_Part of the [Ionide](http://ionide.io) plugin suite._
 
-> Syntax and indent files have been copied from [fsharp-vim](http://github.com/kongo2002/fsharp-vim) with kind permissions from [kongo2002](https://github.com/kongo2002).
-> 
-> > Requires vim 7.3 or higher compiled with python 2 or 3 support.
-> 
-> This was adapted from http://github.com/timrobinson/fsharp-vim. The current aim is to provide a good experience for fsx scripting. On opening an fs or fsi file any project file found in the same directory will be parsed. Multiple projects are supported.
+## About Ionide-Vim
 
-Note that this plugin does not require python support. Also, [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) requires neovim or vim 8.0+.
+* A fork of [fsharp/vim-fsharp](https://github.com/fsharp/vim-fsharp).
 
-### Installing
+* Uses LSP-mode of [FsAutoComplete](https://github.com/fsharp/FsAutoComplete) as a backend.
 
-vim-fsharp-languageclient requires .NET Core Runtime installed. Also it depends on [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim), so make sure it's installed beforehand.
+* Powered by [autozimu/LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim).
 
-I have only tested vim-plug and _install.sh_(_install.cmd_ should also work).
+## Development Status
 
-#### OSX and linux
+Consider this to be beta since it's lacking features compared to Ionide-VSCode and not as battle-tested as that.
 
-##### Installing with pathogen
+That being said, we maintainers use this plugin daily so it will someday become feature-rich and stable for sure.
 
-1. Clone vim-fsharp-languageclient into your bundle directory.
+Feel free to [request features and/or file bug reports](https://github.com/ionide/Ionide-vim/issues)!
 
-2. Run *make* inside the vim directory. This downloads the auto completion server.
+## Requirements
 
-##### Installing with [vim-plug][vim-plug]
+* Neovim or Vim 8.0+
+  - Python support is not required as of now. This may or may not change in the future.
+
+* [.NET Core SDK](https://dotnet.microsoft.com/download)
+  - Required to run FsAutoComplete.
+  - Very useful for command-line development.
+
+* [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)
+  - Required to communicate with FsAutoComplete.
+
+* [fzf](https://github.com/junegunn/fzf) (optional)
+  - Optional dependency of LanguageClient-neovim.
+  - Multi-entry selection UI.
+
+## Features
+
+- Syntax highlighting
+- Auto completions
+- Error highlighting
+- Tooltips
+- Method parameter hints
+- Go to Definition
+- Find all references
+- Highlighting usages
+- Rename
+- Show symbols in file
+- Find symbol in workspace
+- Show signature in status line
+
+## Getting Started
+
+### 1. Install [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)
+
+Refer to [their INSTALL.md](https://github.com/autozimu/LanguageClient-neovim/blob/next/INSTALL.md).
+
+### 2. Install Ionide-vim
+
+#### Installing with your plugin manager
+
+##### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ~~~.vim
-Plug 'cannorin/vim-fsharp-languageclient', {
-      \ 'for': 'fsharp',
+Plug 'ionide/Ionide-vim', {
       \ 'do':  'make fsautocomplete',
       \}
 ~~~
 
-##### Installing with [NeoBundle][NeoBundle]
+##### [dein.vim](https://github.com/Shougo/dein.vim)
 
-By VimL way:
 ~~~.vim
-NeoBundle 'cannorin/vim-fsharp-languageclient', {
-           \ 'description': 'F# support for Vim',
-           \ 'lazy': 1,
-           \ 'autoload': {'filetypes': 'fsharp'},
-           \ 'build': {
-           \   'unix':  'make fsautocomplete',
-           \ },
-           \ 'build_commands': ['curl', 'make', 'mozroots', 'touch', 'unzip'],
-           \}
+call dein#add('ionide/Ionide-vim', {
+    \ 'build': 'make fsautocomplete',
+    \ })
 ~~~
 
-By using TOML configuration:
-~~~.toml
-[[plugins]]
-description = 'F# support for Vim'
-repository = 'cannorin/vim-fsharp-languageclient'
-lazy = 1
-filetypes = 'fsharp'
-build_commands = ['curl', 'make', 'mozroots', 'touch', 'unzip']
-  [plugins.build]
-  unix = 'make fsautocomplete'
-~~~
+#$## Installing on Windows
 
-#### Windows
+Run `install.cmd`.
 
-1. Run _install.cmd_
-
-### Setting up the language client
+### 3. Setting up the language client
 
 Once you installed, add the following to somewhere in your `.vimrc`:
 
@@ -78,7 +93,7 @@ let g:LanguageClient_serverCommands = {
 
 This will configure FSAC to be used from LanguageClient-neovim.
 
-### Usage
+## Usage
 
 Opening either `*.fs`, `*.fsi` or `*.fsx` files should trigger syntax highlighting and other depending runtime files as well.
 
@@ -88,33 +103,41 @@ Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neov
 
 To be added as requested for F#-specific features.
 
-##### General
-*  `:FSharpLoadWorkspaceAuto` Guess a workspace (`sln` or `fsproj`) and then load it. Equivalent to `FSharp.workspaceMode = sln` in Ionide. Automatically called when you open F# files.
-* `:FSharpParseProject <files>+` Load specified projects (`fsproj` or `sln`).
-* `:FSharpReloadWorkspace` Reload all the projects currently loaded. Automatically called when you edit and save `.fsproj` files.
+* `:FSharpLoadWorkspaceAuto`
+  - Guess a workspace (`sln` or `fsproj`) and then load it.
+  - Equivalent to `FSharp.workspaceMode = sln` in Ionide-VSCode.
+  - Automatically called when you open F# files. Can be disabled in settings.
+* `:FSharpParseProject <files>+`
+  - Load specified projects (`sln` or `fsproj`).
+* `:FSharpReloadWorkspace`
+  - Reload all the projects currently loaded.
+  - Automatically called when you save `.fsproj` files. Can be disabled in settings.
 
 ### Settings
 
 Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) for features provided via Language Server Protocol.
 
-
 To be added as requested for F#-specific features.
 
-Show the type signature at the cursor position (default: 1).
+#### Show type signature at cursor position (default: 1).
 
 ~~~.vim
 let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 ~~~
 
-Enable/disable automatic calling of `:FSharpLoadWorkspaceAuto`. (default: 1)
+#### Enable/disable automatic calling of `:FSharpLoadWorkspaceAuto`. (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_workspace_init = 1 " 0 to disable.
 ~~~
 
-Enable/disable automatic calling of `:FSharpReloadWorkspace`. (default: 1)
+#### Enable/disable automatic calling of `:FSharpReloadWorkspace`. (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 ~~~
+
+## Maintainers
+
+* The primary maintainer for this repository is [@cannorin](http://github.com/cannorin).
 
