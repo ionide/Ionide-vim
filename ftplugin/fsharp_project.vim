@@ -10,7 +10,7 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 augroup FSharpLC
-  autocmd! BufWritePost <buffer> call fsharp#reloadProjects()
+  autocmd! BufWritePost *.fsproj call fsharp#reloadProjects()
 augroup END
 
 let &cpo = s:cpo_save

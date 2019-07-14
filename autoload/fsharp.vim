@@ -8,6 +8,15 @@ let g:loaded_autoload_fsharp = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
+function! s:prompt(msg)
+    let height = &cmdheight
+    if height < 2
+        set cmdheight=2
+    endif
+    echom a:msg
+    let &cmdheight = height
+endfunction
+
 function! s:PlainNotification(content)
     return { 'Content': a:content }
 endfunction
@@ -170,7 +179,7 @@ endfunction
 function! fsharp#reloadProjects()
     if len(s:workspace) > 0
         call s:workspaceLoad(s:workspace)
-        echom "[FSAC] Workspace reloaded."
+        call s:prompt("[FSAC] Workspace reloaded.")
     else
         echom "[FSAC] Workspace is empty"
     endif

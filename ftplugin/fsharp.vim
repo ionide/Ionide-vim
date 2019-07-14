@@ -46,7 +46,7 @@ if g:fsharp#automatic_workspace_init
 endif
 
 augroup FSharpLC
-    autocmd! CursorMoved <buffer> call fsharp#OnCursorMove()
+    autocmd! CursorMoved *.fs call fsharp#OnCursorMove()
 augroup END
 
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
