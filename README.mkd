@@ -77,7 +77,7 @@ call dein#add('ionide/Ionide-vim', {
     \ })
 ~~~
 
-#$## Installing on Windows
+#### Installing on Windows
 
 Run `install.cmd`.
 
