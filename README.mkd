@@ -103,14 +103,16 @@ Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neov
 
 To be added as requested for F#-specific features.
 
-* `:FSharpLoadWorkspaceAuto`
+#### `:FSharpLoadWorkspaceAuto`
   - Search a workspace (`sln` or `fsproj`) and then load it.
   - Equivalent to `FSharp.workspaceMode = sln` in Ionide-VSCode.
   - Automatically called when you open F# files. Can be disabled in settings.
   - The deep level of directory hierarchy to search can also be configured in settings.
-* `:FSharpParseProject <files>+`
+
+#### `:FSharpParseProject <files>+`
   - Load specified projects (`sln` or `fsproj`).
-* `:FSharpReloadWorkspace`
+
+#### `:FSharpReloadWorkspace`
   - Reload all the projects currently loaded.
   - Automatically called when you save `.fsproj` files. Can be disabled in settings.
 
