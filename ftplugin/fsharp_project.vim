@@ -1,4 +1,3 @@
-
 " Vim filetype plugin
 
 if exists('b:did_fsharp_project_ftplugin')
@@ -9,8 +8,8 @@ let b:did_fsharp_project_ftplugin = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
-augroup FSharpLC
-  autocmd! BufWritePost *.fsproj call fsharp#reloadProjects()
+augroup FSharpLC_fsproj
+  autocmd! BufWritePost *.fsproj call fsharp#OnFSProjSave()
 augroup END
 
 let &cpo = s:cpo_save

@@ -119,22 +119,29 @@ Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neov
 
 To be added as requested for F#-specific features.
 
-#### Show type signature at cursor position (default: 1).
-
-~~~.vim
-let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
-~~~
-
 #### Enable/disable automatic calling of `:FSharpLoadWorkspaceAuto`. (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_workspace_init = 1 " 0 to disable.
 ~~~
 
+#### Set the deep level of directory hierarchy when searching for sln/fsprojs (default: 2)
+
+~~~.vim
+let g:fsharp#workspace_mode_peek_deep_level = 2
+
+~~~
+
 #### Enable/disable automatic calling of `:FSharpReloadWorkspace`. (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
+~~~
+
+#### Show type signature at cursor position (default: 1).
+
+~~~.vim
+let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 ~~~
 
 ## Maintainers

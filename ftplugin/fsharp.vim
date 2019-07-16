@@ -17,6 +17,9 @@ endif
 if !exists('g:fsharp#automatic_workspace_init')
     let g:fsharp#automatic_workspace_init = 1
 endif
+if !exists('g:fsharp#workspace_mode_peek_deep_level')
+    let g:fsharp#workspace_mode_peek_deep_level = 2
+endif
 if !exists('g:fsharp#automatic_reload_workspace')
     let g:fsharp#automatic_reload_workspace = 1
 endif
@@ -45,7 +48,7 @@ if g:fsharp#automatic_workspace_init
     augroup END
 endif
 
-augroup FSharpLC
+augroup FSharpLC_fs
     autocmd! CursorMoved *.fs call fsharp#OnCursorMove()
 augroup END
 

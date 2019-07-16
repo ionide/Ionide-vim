@@ -124,7 +124,7 @@ function! s:documentationSymbol(xmlSig, assembly)
 endfunction
 
 function! s:findWorkspace(dir)
-    let result = s:workspacePeek(a:dir, 2, [])
+    let result = s:workspacePeek(a:dir, g:fsharp#workspace_mode_peek_deep_level, [])
     let content = json_decode(result.result.content)
     if len(content.Data.Found) < 1
         return []
@@ -186,7 +186,7 @@ function! fsharp#reloadProjects()
 endfunction
 
 function! fsharp#OnFSProjSave()
-    if g:fsharp#automatic_reload_workspace
+    if &ft == "fsharp_project" && g:fsharp#automatic_reload_workspace
         call fsharp#reloadProjects()
     endif
 endfunction
@@ -206,6 +206,12 @@ function! fsharp#OnCursorMove()
         call fsharp#showSignature()
     endif
 endfunction
+
+function! fsharp#showF1Help()
+    let result = s:f1Help(expand('%:p'), line('.') - 1, col('.') - 1)
+    echo result
+endfunction
+
 
 let s:script_root_dir = expand('<sfile>:p:h') . "/../"
 let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
