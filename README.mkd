@@ -154,7 +154,7 @@ If you are using neovim 0.4.0 or later, floating windows will be used for toolti
 
 ~~~.vim
 if has('nvim') && exists('*nvim_open_win')
-  augroup ShowTooltip
+  augroup FSharpShowTooltip
     autocmd!
     autocmd CursorHold *.fs call fsharp#showTooltip()
   augroup END
