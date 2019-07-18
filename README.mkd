@@ -42,7 +42,6 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 - Auto completions
 - Error highlighting
 - Tooltips
-- Method parameter hints
 - Go to Definition
 - Find all references
 - Highlighting usages
