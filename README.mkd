@@ -161,6 +161,8 @@ if has('nvim') && exists('*nvim_open_win')
 endif
 ~~~
 
+Note that you can set the delay time to show the tooltip by [`set updatetime=<ms>`](http://vimdoc.sourceforge.net/htmldoc/options.html#'updatetime'). The default delay is 4 seconds, which you may find too slow.
+
 ## Maintainers
 
 * The primary maintainer for this repository is [@cannorin](http://github.com/cannorin).
