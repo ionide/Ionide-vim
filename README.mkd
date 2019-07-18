@@ -147,6 +147,21 @@ let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 ~~~
 
+### Advanced Tips
+
+#### Show tooltips on CursorHold
+
+If you are using neovim 0.4.0 or later, floating windows will be used for tooltips and you might find it convenient to make them appear if the cursor does not move for several seconds.
+
+~~~.vim
+if has('nvim') && exists('*nvim_open_win')
+  augroup ShowTooltip
+    autocmd!
+    autocmd CursorHold *.fs call fsharp#showTooltip()
+  augroup END
+endif
+~~~
+
 ## Maintainers
 
 * The primary maintainer for this repository is [@cannorin](http://github.com/cannorin).

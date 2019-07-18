@@ -218,6 +218,20 @@ function! fsharp#showF1Help()
     echo result
 endfunction
 
+function! fsharp#showTooltip()
+    function! s:callback_showTooltip(result)
+        let result = a:result
+        if exists('result.result.content')
+            let content = json_decode(result.result.content)
+            if exists('content.Data')
+                call LanguageClient#textDocument_hover()
+            endif
+        endif
+    endfunction
+    " show hover only if signature exists for the current position
+    call s:signature(expand('%:p'), line('.') - 1, col('.') - 1, function("s:callback_showTooltip"))
+endfunction
+
 let s:script_root_dir = expand('<sfile>:p:h') . "/../"
 let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
 let g:fsharp#languageserver_command =
