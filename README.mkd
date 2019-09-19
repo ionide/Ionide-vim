@@ -115,6 +115,9 @@ To be added as requested for F#-specific features.
   - Reload all the projects currently loaded.
   - Automatically called when you save `.fsproj` files. Can be disabled in settings.
 
+#### `:FSharpUpdateFSAC`
+  - Download the latest build of FsAutoComplete to be used with Ionide-vim.
+
 ### Settings
 
 Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) for features provided via Language Server Protocol.

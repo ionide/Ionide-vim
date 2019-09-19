@@ -241,7 +241,7 @@ let g:fsharp#languageserver_command =
     \ ]
 
 function! s:download(branch)
-    echom "[FSAC] Downloading FSAC."
+    echom "[FSAC] Downloading FSAC. This may take a while..."
     let zip = s:script_root_dir . "fsac.zip"
     call system(
         \ 'curl -fLo ' . zip .  ' --create-dirs ' .

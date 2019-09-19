@@ -9,7 +9,7 @@ let script_dir = expand('<sfile>:p:h')
 let fsac = script_dir . "/../fsac/fsautocomplete.dll"
 
 if empty(glob(fsac))
-    echoerr "FSAC not found. :FSharpDownloadFSAC to download."
+    echoerr "FSAC not found. :FSharpUpdateFSAC to download."
     finish
 endif
 
@@ -54,6 +54,7 @@ augroup END
 
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
 com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
+com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
 
 let &cpo = s:cpo_save
