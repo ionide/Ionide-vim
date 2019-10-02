@@ -118,35 +118,51 @@ To be added as requested for F#-specific features.
 #### `:FSharpUpdateFSAC`
   - Download the latest build of FsAutoComplete to be used with Ionide-vim.
 
+### Working with F# Interactive
+
+TODO
+
 ### Settings
 
 Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) for features provided via Language Server Protocol.
 
 To be added as requested for F#-specific features.
 
-#### Enable/disable automatic calling of `:FSharpLoadWorkspaceAuto` on opening F# files (default: 1)
+#### Workspace Settings
+
+##### Enable/disable automatic calling of `:FSharpLoadWorkspaceAuto` on opening F# files (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_workspace_init = 1 " 0 to disable.
 ~~~
 
-#### Set the deep level of directory hierarchy when searching for sln/fsprojs (default: 2)
+##### Set the deep level of directory hierarchy when searching for sln/fsprojs (default: 2)
 
 ~~~.vim
 let g:fsharp#workspace_mode_peek_deep_level = 2
 
 ~~~
 
-#### Enable/disable automatic calling of `:FSharpReloadWorkspace` on saving `fsproj` (default: 1)
+##### Enable/disable automatic calling of `:FSharpReloadWorkspace` on saving `fsproj` (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 ~~~
 
-#### Show type signature at cursor position (default: 1)
+#### Editor Settings
+
+##### Show type signature at cursor position (default: 1)
 
 ~~~.vim
 let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
+~~~
+
+#### F# Interactive Settings
+
+##### Change the F# Interactive command to be used within Ionide-vim (default: `dotnet fsi`)
+
+~~~.vim
+let g:fsharp#fsharp_interactive_command = "dotnet fsi"
 ~~~
 
 ### Advanced Tips
@@ -159,7 +175,7 @@ If you are using neovim 0.4.0 or later, floating windows will be used for toolti
 if has('nvim') && exists('*nvim_open_win')
   augroup FSharpShowTooltip
     autocmd!
-    autocmd CursorHold *.fs call fsharp#showTooltip()
+    autocmd CursorHold *.fs,*.fsi,*.fsx call fsharp#showTooltip()
   augroup END
 endif
 ~~~

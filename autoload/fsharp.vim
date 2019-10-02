@@ -130,12 +130,12 @@ function! s:findWorkspace(dir, cont)
             if workspace.Type == 'none'
                 let workspace = found
             elseif found.Type == 'solution'
-                if workspace.Type == 'project' then
+                if workspace.Type == 'project'
                     let workspace = found
                 else
                     let curLen = len(workspace.Data.Items)
                     let newLen = len(found.Data.Items)
-                    if newLen > curLen then
+                    if newLen > curLen
                         let workspace = found
                     endif
                 endif
@@ -263,6 +263,109 @@ function! fsharp#updateFSAC(...)
     endif
     call s:download(branch)
 endfunction
+
+let s:fsi_buffer = 0
+let s:fsi_job    = 0
+let s:fsi_height = 8
+
+function! s:fsiHandleError(chanId, data, name)
+
+endfunction
+
+function! fsharp#openFsi()
+    if bufwinid(s:fsi_buffer) <= 0
+        " Neovim
+        if has('nvim') && exists('*termopen')
+            let current_win = win_getid()
+            " TODO: allow user to configure split style
+            botright new
+            execute 'resize' s:fsi_height
+            " if window is closed but FSI is still alive then reuse it
+            if s:fsi_buffer != 0 && bufexists(str2nr(s:fsi_buffer))
+                exec 'b' s:fsi_buffer
+                normal G
+                call win_gotoid(current_win)
+            else
+                let s:fsi_job = termopen(g:fsharp#fsharp_interactive_command)
+                if s:fsi_job > 0
+                    let s:fsi_buffer = bufnr("%")
+                    setlocal bufhidden=hide
+                    normal G
+                    call win_gotoid(current_win)
+                else
+                    close
+                    echom "[FSAC] Failed to open FSI."
+                    return -1
+                endif
+            endif
+            return s:fsi_buffer
+        " Vim 8+
+        elseif exists('*term_start')
+            " TODO: Vim 8
+            let s:fsi_buffer = term_start(g:fsharp#fsharp_interactive_command, {})
+            return s:fsi_buffer
+        else
+            echom "[FSAC] Your Vim does not support terminal".
+            return 0
+        endif
+    endif
+    return s:fsi_buffer
+endfunction
+
+function! fsharp#toggleFsi()
+    let fsiWindowId = bufwinid(s:fsi_buffer)
+    if fsiWindowId > 0
+        let current_win = win_getid()
+        call win_gotoid(fsiWindowId)
+        let s:fsi_height = winheight('%')
+        close
+        call win_gotoid(current_win)
+    else
+        if fsharp#openFsi() > 0
+            call win_gotoid(bufwinid(s:fsi_buffer))
+        endif
+    endif
+endfunction
+
+function! fsharp#sendFsi(text)
+    if fsharp#openFsi() > 0
+        " Neovim
+        if has('nvim')
+            call chansend(s:fsi_job, a:text . ";;". "\n")
+        " Vim 8
+        else
+            " TODO: Vim 8
+        endif
+    endif
+endfunction
+
+" https://stackoverflow.com/a/6271254
+function! s:get_visual_selection()
+    let [line_start, column_start] = getpos("'<")[1:2]
+    let [line_end, column_end] = getpos("'>")[1:2]
+    let lines = getline(line_start, line_end)
+    if len(lines) == 0
+        return ''
+    endif
+    let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+    let lines[0] = lines[0][column_start - 1:]
+    return lines
+endfunction
+
+function! fsharp#sendSelectionToFsi() range
+    let lines = s:get_visual_selection()
+    exec 'normal' len(lines) . 'j'
+    let text = join(lines, "\n")
+    return fsharp#sendFsi(text)
+endfunction
+
+function! fsharp#sendLineToFsi()
+    let text = getline('.')
+    exec 'normal j'
+    return fsharp#sendFsi(text)
+endfunction
+
+" TODO: send whole buffer
 
 let &cpo = s:cpo_save
 unlet s:cpo_save

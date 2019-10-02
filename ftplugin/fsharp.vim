@@ -26,6 +26,9 @@ endif
 if !exists('g:fsharp#show_signature_on_cursor_move')
     let g:fsharp#show_signature_on_cursor_move = 1
 endif
+if !exists('g:fsharp#fsharp_interactive_command')
+    let g:fsharp#fsharp_interactive_command = "dotnet fsi"
+endif
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -49,13 +52,22 @@ if g:fsharp#automatic_workspace_init
 endif
 
 augroup FSharpLC_fs
-    autocmd! CursorMoved *.fs call fsharp#OnCursorMove()
+    autocmd!
+    autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
 augroup END
 
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
 com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
 com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
+
+" TODO: :FsiEval :FsiEvalBuffer :FsiReset :FsiShow
+
+" TODO: allow user to customize key binding for these commands
+vnoremap <silent> <M-cr> :call fsharp#sendSelectionToFsi()<cr><esc>
+nnoremap <silent> <M-cr> :call fsharp#sendLineToFsi()<cr>
+nnoremap <silent> <M-/>  :call fsharp#sendLineToFsi()<cr>
+nnoremap <silent> <M-@>  :call fsharp#toggleFsi()<cr>
 
 let &cpo = s:cpo_save
 
