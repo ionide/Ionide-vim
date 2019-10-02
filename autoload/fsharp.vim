@@ -189,7 +189,7 @@ function! fsharp#reloadProjects()
 endfunction
 
 function! fsharp#OnFSProjSave()
-    if &ft == "fsharp_project" && g:fsharp#automatic_reload_workspace
+    if &ft == "fsharp_project" && exists('g:fsharp#automatic_reload_workspace') && g:fsharp#automatic_reload_workspace
         call fsharp#reloadProjects()
     endif
 endfunction
