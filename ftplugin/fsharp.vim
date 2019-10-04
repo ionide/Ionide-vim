@@ -5,14 +5,6 @@ if exists('b:did_fsharp_ftplugin')
 endif
 let b:did_fsharp_ftplugin = 1
 
-let script_dir = expand('<sfile>:p:h')
-let fsac = script_dir . "/../fsac/fsautocomplete.dll"
-
-if empty(glob(fsac))
-    echoerr "FSAC not found. :FSharpUpdateFSAC to download."
-    finish
-endif
-
 " set some defaults
 if !exists('g:fsharp#automatic_workspace_init')
     let g:fsharp#automatic_workspace_init = 1
@@ -41,6 +33,17 @@ setl comments=s0:*\ -,m0:*\ \ ,ex0:*),s1:(*,mb:*,ex:*),:\/\/\/,:\/\/
 " make ftplugin undo-able
 let b:undo_ftplugin = 'setl fo< cms< com< fdm<'
 
+com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
+
+" check if FSAC exists
+let script_dir = expand('<sfile>:p:h')
+let fsac = script_dir . "/../fsac/fsautocomplete.dll"
+if empty(glob(fsac))
+    echoerr "FSAC not found. :FSharpUpdateFSAC to download."
+    let &cpo = s:cpo_save
+    finish
+endif
+
 if g:fsharp#automatic_workspace_init
     augroup LanguageClient_config
         autocmd!
@@ -54,7 +57,6 @@ augroup END
 
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
 com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
-com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
 
 let &cpo = s:cpo_save
