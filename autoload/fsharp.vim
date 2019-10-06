@@ -296,7 +296,7 @@ function! fsharp#openFsi(returnFocus)
                 if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
             " open FSI: Neovim
             elseif has('nvim')
-                let s:fsi_job = termopen(g:fsharp#fsharp_interactive_command)
+                let s:fsi_job = termopen(g:fsharp#fsi_command)
                 if s:fsi_job > 0
                     let s:fsi_buffer = bufnr("%")
                 else
@@ -311,7 +311,7 @@ function! fsharp#openFsi(returnFocus)
                 \ "curwin": 1,
                 \ "term_finish": "close"
                 \ }
-                let s:fsi_buffer = term_start(g:fsharp#fsharp_interactive_command, options)
+                let s:fsi_buffer = term_start(g:fsharp#fsi_command, options)
                 if s:fsi_buffer != 0
                     if exists('*term_setkill') | call term_setkill(s:fsi_buffer, "term") | endif
                     let s:fsi_job = term_getjob(s:fsi_buffer)

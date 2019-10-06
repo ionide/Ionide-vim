@@ -2,6 +2,8 @@
 
 **F# support for Vim/Neovim**
 
+![ionide-vim](https://i.imgur.com/3RLcJw6.gif)
+
 _Part of the [Ionide](http://ionide.io) plugin suite._
 
 ## About Ionide-Vim
@@ -40,7 +42,7 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 
 - Syntax highlighting
 - Auto completions
-- Error highlighting
+- Error highlighting and error list
 - Tooltips
 - Go to Definition
 - Find all references
@@ -49,6 +51,7 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 - Show symbols in file
 - Find symbol in workspace
 - Show signature in status line
+- Integration with F# Interactive **(new!)**
 
 ## Getting Started
 
@@ -120,7 +123,30 @@ To be added as requested for F#-specific features.
 
 ### Working with F# Interactive
 
-TODO
+Ionide-vim has an integration with F# Interactive.
+
+FSI is displayed using the builtin `:terminal` feature introduced in Vim 8 / Neovim.
+
+#### `:FsiShow`
+  - Shows F# Interactive windows.
+
+#### `:FsiEval <expr>`
+  - Evaluates given expression in FSI.
+
+#### `:FsiEvalBuffer`
+  - Sends the content of current file to FSI.
+
+#### `:FsiReset`
+  - Resets the current FSI session.
+
+#### `Alt-Enter`
+  - When in normal mode, sends the current line to FSI.
+  - When in visual mode, sends the selection to FSI.
+
+#### `Alt-@`
+  - Toggles FSI window. FSI windows shown in different tabpages share the same FSI session.
+
+You can customize the location of FSI, key mappings, etc. See [the documentation below](#f-interactive-settings).
 
 ### Settings
 
@@ -162,7 +188,27 @@ let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 ##### Change the F# Interactive command to be used within Ionide-vim (default: `dotnet fsi`)
 
 ~~~.vim
-let g:fsharp#fsharp_interactive_command = "dotnet fsi"
+let g:fsharp#fsi_command = "dotnet fsi"
+~~~
+
+##### Change the key mappings (default: `vscode`)
+
+* `vscode`:     Default. Same as in Ionide-VSCode (`Alt-Enter` to send, `Alt-@` to toggle terminal).
+  - `<M-CR>` in Neovim / `<ESC><CR>` in Vim: Send line/selection to FSI.
+  - `<M-@>`  in Neovim / `<ESC>@`    in Vim: Toggle FSI window.
+* `vim-fsharp`: Same as in [fsharp/vim-fsharp](https://github.com/fsharp/vim-fsharp#fsharp-interactive). Note that `<leader>` is mapped to backslash by default. See `:help mapleader`.
+  - `<leader>i` : Send line/selecion to FSI.
+  - `<leader>e` : Toggle FSI window.
+* `custom`:     You must set both `g:fsharp#fsi_keymap_send` and  `g:fsharp#fsi_keymap_toggle` by yourself.
+  - `g:fsharp#fsi_keymap_send`   : Send line/selection to FSI.
+  - `g:fsharp#fsi_keymap_toggle` : Toggle FSI window.
+* `none`:       Disables mapping.
+
+~~~.vim
+" custom mapping example
+let g:fsharp#fsi_keymap = "custom"
+let g:fsharp#fsi_keymap_send   = "<C-e>"
+let g:fsharp#fsi_keymap_toggle = "<C-@>"
 ~~~
 
 ### Advanced Tips

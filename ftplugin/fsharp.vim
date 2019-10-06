@@ -26,8 +26,11 @@ endif
 if !exists('g:fsharp#show_signature_on_cursor_move')
     let g:fsharp#show_signature_on_cursor_move = 1
 endif
-if !exists('g:fsharp#fsharp_interactive_command')
-    let g:fsharp#fsharp_interactive_command = "dotnet fsi"
+if !exists('g:fsharp#fsi_command')
+    let g:fsharp#fsi_command = "dotnet fsi"
+endif
+if !exists('g:fsharp#fsi_keymap')
+    let g:fsharp#fsi_keymap = "vscode"
 endif
 
 let s:cpo_save = &cpo
@@ -61,25 +64,37 @@ com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
 com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
 
-" TODO: :FsiEval :FsiEvalBuffer :FsiReset :FsiShow
 com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
 com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()
 com! -buffer FsiReset call fsharp#resetFsi()
 com! -buffer FsiShow call fsharp#openFsi()
 
-" TODO: allow user to customize key binding for these commands
-if has('nvim')
-    vnoremap <silent> <M-cr> :call fsharp#sendSelectionToFsi()<cr><esc>
-    nnoremap <silent> <M-cr> :call fsharp#sendLineToFsi()<cr>
-    nnoremap <silent> <M-/>  :call fsharp#sendLineToFsi()<cr>
-    nnoremap <silent> <M-@>  :call fsharp#toggleFsi()<cr>
-    tnoremap <silent> <M-@>  <C-\><C-n>:call fsharp#toggleFsi()<cr>
-else
-    vnoremap <silent> <leader><cr> :call fsharp#sendSelectionToFsi()<cr><esc>
-    nnoremap <silent> <leader><cr> :call fsharp#sendLineToFsi()<cr>
-    nnoremap <silent> <leader></>  :call fsharp#sendLineToFsi()<cr>
-    nnoremap <silent> <C-@>  :call fsharp#toggleFsi()<cr>
-    tnoremap <silent> <C-@>  <C-\><C-n>:call fsharp#toggleFsi()<cr>
+if g:fsharp#fsi_keymap == "vscode"
+    if has('nvim')
+        let g:fsharp#fsi_keymap_send   = "<M-cr>"
+        let g:fsharp#fsi_keymap_toggle = "<M-@>"
+    else
+        let g:fsharp#fsi_keymap_send   = "<esc><cr>"
+        let g:fsharp#fsi_keymap_toggle = "<esc>@"
+    endif
+elseif g:fsharp#fsi_keymap == "vim-fsharp"
+    let g:fsharp#fsi_keymap_send   = "<leader>i"
+    let g:fsharp#fsi_keymap_toggle = "<leader>e"
+elseif g:fsharp#fsi_keymap == "custom"
+    let g:fsharp#fsi_keymap = "none"
+    if !exists('g:fsharp#fsi_keymap_send')
+        echoerr "g:fsharp#fsi_keymap_send is not set"
+    elseif !exists('g:fsharp#fsi_keymap_toggle')
+        echoerr "g:fsharp#fsi_keymap_toggle is not set"
+    else
+        let g:fsharp#fsi_keymap = "custom"
+    endif
+endif
+if g:fsharp#fsi_keymap != "none"
+    execute "vnoremap <silent>" g:fsharp#fsi_keymap_send ":call fsharp#sendSelectionToFsi()<cr><esc>"
+    execute "nnoremap <silent>" g:fsharp#fsi_keymap_send ":call fsharp#sendLineToFsi()<cr>"
+    execute "nnoremap <silent>" g:fsharp#fsi_keymap_toggle ":call fsharp#toggleFsi()<cr>"
+    execute "tnoremap <silent>" g:fsharp#fsi_keymap_toggle "<C-\\><C-n>:call fsharp#toggleFsi()<cr>"
 endif
 
 let &cpo = s:cpo_save
