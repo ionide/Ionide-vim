@@ -266,7 +266,8 @@ endfunction
 
 let s:fsi_buffer = 0
 let s:fsi_job    = 0
-let s:fsi_height = 8
+let s:fsi_width  = 0
+let s:fsi_height = 0
 
 function! s:win_gotoid_safe(winid)
     function! s:vimReturnFocus(window)
@@ -285,9 +286,9 @@ function! fsharp#openFsi(returnFocus)
         " Neovim
         if exists('*termopen') || exists('*term_start')
             let current_win = win_getid()
-            " TODO: allow user to configure split style
-            botright new
-            execute 'resize' s:fsi_height
+            execute g:fsharp#fsi_window_command
+            if s:fsi_width  > 0 | execute 'vertical resize' s:fsi_width | endif
+            if s:fsi_height > 0 | execute 'resize' s:fsi_height | endif
             " if window is closed but FSI is still alive then reuse it
             if s:fsi_buffer != 0 && bufexists(str2nr(s:fsi_buffer))
                 exec 'b' s:fsi_buffer
@@ -338,6 +339,7 @@ function! fsharp#toggleFsi()
     if fsiWindowId > 0
         let current_win = win_getid()
         call win_gotoid(fsiWindowId)
+        let s:fsi_width = winwidth('%')
         let s:fsi_height = winheight('%')
         close
         call win_gotoid(current_win)

@@ -191,15 +191,25 @@ let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 let g:fsharp#fsi_command = "dotnet fsi"
 ~~~
 
+##### Change how FSI window is opened (default: `botright 10new`)
+
+It must create a new empty window and then focus to it.
+
+See [`:help opening-window`](http://vimdoc.sourceforge.net/htmldoc/windows.html#opening-window) for details.
+
+~~~.vim
+let g:fsharp#fsi_window_command = "botright vnew"
+~~~
+
 ##### Change the key mappings (default: `vscode`)
 
 * `vscode`:     Default. Same as in Ionide-VSCode (`Alt-Enter` to send, `Alt-@` to toggle terminal).
   - `<M-CR>` in Neovim / `<ESC><CR>` in Vim: Send line/selection to FSI.
   - `<M-@>`  in Neovim / `<ESC>@`    in Vim: Toggle FSI window.
-* `vim-fsharp`: Same as in [fsharp/vim-fsharp](https://github.com/fsharp/vim-fsharp#fsharp-interactive). Note that `<leader>` is mapped to backslash by default. See `:help mapleader`.
+* `vim-fsharp`: Same as in [fsharp/vim-fsharp](https://github.com/fsharp/vim-fsharp#fsharp-interactive). Note that `<leader>` is mapped to backslash by default. See [`:help mapleader`](http://vimdoc.sourceforge.net/htmldoc/map.html#mapleader).
   - `<leader>i` : Send line/selecion to FSI.
   - `<leader>e` : Toggle FSI window.
-* `custom`:     You must set both `g:fsharp#fsi_keymap_send` and  `g:fsharp#fsi_keymap_toggle` by yourself.
+* `custom`:     You must set both `g:fsharp#fsi_keymap_send` and `g:fsharp#fsi_keymap_toggle` by yourself.
   - `g:fsharp#fsi_keymap_send`   : Send line/selection to FSI.
   - `g:fsharp#fsi_keymap_toggle` : Toggle FSI window.
 * `none`:       Disables mapping.

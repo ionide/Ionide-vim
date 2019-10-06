@@ -32,6 +32,9 @@ endif
 if !exists('g:fsharp#fsi_keymap')
     let g:fsharp#fsi_keymap = "vscode"
 endif
+if !exists('g:fsharp#fsi_window_command')
+    let g:fsharp#fsi_window_command = "botright 10new"
+endif
 
 let s:cpo_save = &cpo
 set cpo&vim
