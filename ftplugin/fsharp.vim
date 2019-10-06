@@ -62,12 +62,25 @@ com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
 
 " TODO: :FsiEval :FsiEvalBuffer :FsiReset :FsiShow
+com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
+com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()
+com! -buffer FsiReset call fsharp#resetFsi()
+com! -buffer FsiShow call fsharp#openFsi()
 
 " TODO: allow user to customize key binding for these commands
-vnoremap <silent> <M-cr> :call fsharp#sendSelectionToFsi()<cr><esc>
-nnoremap <silent> <M-cr> :call fsharp#sendLineToFsi()<cr>
-nnoremap <silent> <M-/>  :call fsharp#sendLineToFsi()<cr>
-nnoremap <silent> <M-@>  :call fsharp#toggleFsi()<cr>
+if has('nvim')
+    vnoremap <silent> <M-cr> :call fsharp#sendSelectionToFsi()<cr><esc>
+    nnoremap <silent> <M-cr> :call fsharp#sendLineToFsi()<cr>
+    nnoremap <silent> <M-/>  :call fsharp#sendLineToFsi()<cr>
+    nnoremap <silent> <M-@>  :call fsharp#toggleFsi()<cr>
+    tnoremap <silent> <M-@>  <C-\><C-n>:call fsharp#toggleFsi()<cr>
+else
+    vnoremap <silent> <leader><cr> :call fsharp#sendSelectionToFsi()<cr><esc>
+    nnoremap <silent> <leader><cr> :call fsharp#sendLineToFsi()<cr>
+    nnoremap <silent> <leader></>  :call fsharp#sendLineToFsi()<cr>
+    nnoremap <silent> <C-@>  :call fsharp#toggleFsi()<cr>
+    tnoremap <silent> <C-@>  <C-\><C-n>:call fsharp#toggleFsi()<cr>
+endif
 
 let &cpo = s:cpo_save
 

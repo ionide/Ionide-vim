@@ -268,14 +268,22 @@ let s:fsi_buffer = 0
 let s:fsi_job    = 0
 let s:fsi_height = 8
 
-function! s:fsiHandleError(chanId, data, name)
-
+function! s:win_gotoid_safe(winid)
+    function! s:vimReturnFocus(window)
+        call win_gotoid(a:window)
+        redraw!
+    endfunction
+    if has('nvim')
+        call win_gotoid(a:winid)
+    else
+        call timer_start(1, { -> s:vimReturnFocus(a:winid) })
+    endif
 endfunction
 
-function! fsharp#openFsi()
+function! fsharp#openFsi(returnFocus)
     if bufwinid(s:fsi_buffer) <= 0
         " Neovim
-        if has('nvim') && exists('*termopen')
+        if exists('*termopen') || exists('*term_start')
             let current_win = win_getid()
             " TODO: allow user to configure split style
             botright new
@@ -284,25 +292,38 @@ function! fsharp#openFsi()
             if s:fsi_buffer != 0 && bufexists(str2nr(s:fsi_buffer))
                 exec 'b' s:fsi_buffer
                 normal G
-                call win_gotoid(current_win)
-            else
+                if !has('nvim') && mode() == 'n' | execute "normal A" | endif
+                if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
+            " open FSI: Neovim
+            elseif has('nvim')
                 let s:fsi_job = termopen(g:fsharp#fsharp_interactive_command)
                 if s:fsi_job > 0
                     let s:fsi_buffer = bufnr("%")
-                    setlocal bufhidden=hide
-                    normal G
-                    call win_gotoid(current_win)
+                else
+                    close
+                    echom "[FSAC] Failed to open FSI."
+                    return -1
+                endif
+            " open FSI: Vim
+            else
+                let options = {
+                \ "term_name": "F# Interactive",
+                \ "curwin": 1,
+                \ "term_finish": "close"
+                \ }
+                let s:fsi_buffer = term_start(g:fsharp#fsharp_interactive_command, options)
+                if s:fsi_buffer != 0
+                    if exists('*term_setkill') | call term_setkill(s:fsi_buffer, "term") | endif
+                    let s:fsi_job = term_getjob(s:fsi_buffer)
                 else
                     close
                     echom "[FSAC] Failed to open FSI."
                     return -1
                 endif
             endif
-            return s:fsi_buffer
-        " Vim 8+
-        elseif exists('*term_start')
-            " TODO: Vim 8
-            let s:fsi_buffer = term_start(g:fsharp#fsharp_interactive_command, {})
+            setlocal bufhidden=hide
+            normal G
+            if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
             return s:fsi_buffer
         else
             echom "[FSAC] Your Vim does not support terminal".
@@ -321,20 +342,38 @@ function! fsharp#toggleFsi()
         close
         call win_gotoid(current_win)
     else
-        if fsharp#openFsi() > 0
-            call win_gotoid(bufwinid(s:fsi_buffer))
-        endif
+        call fsharp#openFsi(0)
     endif
 endfunction
 
+function! fsharp#quitFsi()
+    if s:fsi_buffer != 0 && bufexists(str2nr(s:fsi_buffer))
+        if has('nvim')
+            let winid = bufwinid(s:fsi_buffer)
+            if winid > 0 | execute "close " . winid | endif
+            call jobstop(s:fsi_job)
+        else
+            call job_stop(s:fsi_job, "term")
+        endif
+        let s:fsi_buffer = 0
+        let s:fsi_job = 0
+    endif
+endfunction
+
+function! fsharp#resetFsi()
+    call fsharp#quitFsi()
+    return fsharp#openFsi(1)
+endfunction
+
 function! fsharp#sendFsi(text)
-    if fsharp#openFsi() > 0
+    if fsharp#openFsi(1) > 0
         " Neovim
         if has('nvim')
             call chansend(s:fsi_job, a:text . ";;". "\n")
         " Vim 8
         else
-            " TODO: Vim 8
+            call term_sendkeys(s:fsi_buffer, a:text . ";;" . "\<cr>")
+            call term_wait(s:fsi_buffer)
         endif
     endif
 endfunction
@@ -352,6 +391,10 @@ function! s:get_visual_selection()
     return lines
 endfunction
 
+function! s:get_complete_buffer()
+    return join(getline(1, '$'), "\n")
+endfunction
+
 function! fsharp#sendSelectionToFsi() range
     let lines = s:get_visual_selection()
     exec 'normal' len(lines) . 'j'
@@ -362,6 +405,11 @@ endfunction
 function! fsharp#sendLineToFsi()
     let text = getline('.')
     exec 'normal j'
+    return fsharp#sendFsi(text)
+endfunction
+
+function! fsharp#sendAllToFsi()
+    let text = s:get_complete_buffer()
     return fsharp#sendFsi(text)
 endfunction
 
