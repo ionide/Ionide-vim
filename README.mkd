@@ -144,11 +144,11 @@ FSI is displayed using the builtin `:terminal` feature introduced in Vim 8 / Neo
 #### `Alt-Enter`
   - When in normal mode, sends the current line to FSI.
   - When in visual mode, sends the selection to FSI.
-	- Sending code to FSI opens FSI window but the cursor does not focus to it. Unlike Neovim, Vim doesn't support asynchronous buffer updating so you have to input something (e.g. moving cursor) to see the result. You can change this behavior in settings.
+  - Sending code to FSI opens FSI window but the cursor does not focus to it. Unlike Neovim, Vim doesn't support asynchronous buffer updating so you have to input something (e.g. moving cursor) to see the result. You can change this behavior in settings.
 
 #### `Alt-@`
   - Toggles FSI window. FSI windows shown in different tabpages share the same FSI session.
-	- When opened, the cursor automatically focuses to the FSI window (unlike in `Alt-Enter` by default).
+  - When opened, the cursor automatically focuses to the FSI window (unlike in `Alt-Enter` by default).
 
 You can customize the location of FSI, key mappings, etc. See [the documentation below](#f-interactive-settings).
 
