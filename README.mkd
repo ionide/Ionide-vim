@@ -76,21 +76,13 @@ call dein#add('ionide/Ionide-vim', {
     \ })
 ~~~
 
+#### Installing manually
+
+Clone Ionide-vim to some runtimepath and run `make fsautocomplete`.
+
 #### Installing on Windows
 
 Run `install.cmd`.
-
-### 3. Setting up the language client
-
-Once you installed, add the following to somewhere in your `.vimrc`:
-
-```vim
-let g:LanguageClient_serverCommands = {
-  \ 'fsharp': g:fsharp#languageserver_command
-  \ }
-```
-
-This will configure FSAC to be used from LanguageClient-neovim.
 
 ## Usage
 
