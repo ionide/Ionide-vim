@@ -415,8 +415,6 @@ function! fsharp#sendAllToFsi()
     return fsharp#sendFsi(text)
 endfunction
 
-" TODO: send whole buffer
-
 let &cpo = s:cpo_save
 unlet s:cpo_save
 
