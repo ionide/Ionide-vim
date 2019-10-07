@@ -95,6 +95,8 @@ let g:LanguageClient_serverCommands = {
 
 This will configure FSAC to be used from LanguageClient-neovim.
 
+Note: if you append it before actually installing Ionide-vim, it will fail with `E121: Undefined variable: g:fsharp#languageserver_command`.
+
 ## Usage
 
 Opening either `*.fs`, `*.fsi` or `*.fsx` files should trigger syntax highlighting and other depending runtime files as well.
@@ -106,20 +108,20 @@ Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neov
 To be added as requested for F#-specific features.
 
 #### `:FSharpLoadWorkspaceAuto`
-  - Search a workspace (`sln` or `fsproj`) and then load it.
+  - Searches a workspace (`sln` or `fsproj`) and then load it.
   - Equivalent to `FSharp.workspaceMode = sln` in Ionide-VSCode.
   - Automatically called when you open F# files. Can be disabled in settings.
   - The deep level of directory hierarchy to search can also be configured in settings.
 
 #### `:FSharpParseProject <files>+`
-  - Load specified projects (`sln` or `fsproj`).
+  - Loads specified projects (`sln` or `fsproj`).
 
 #### `:FSharpReloadWorkspace`
-  - Reload all the projects currently loaded.
+  - Reloads all the projects currently loaded.
   - Automatically called when you save `.fsproj` files. Can be disabled in settings.
 
 #### `:FSharpUpdateFSAC`
-  - Download the latest build of FsAutoComplete to be used with Ionide-vim.
+  - Downloads the latest build of FsAutoComplete to be used with Ionide-vim.
 
 ### Working with F# Interactive
 
