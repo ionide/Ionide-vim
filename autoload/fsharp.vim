@@ -368,7 +368,7 @@ function! fsharp#resetFsi()
 endfunction
 
 function! fsharp#sendFsi(text)
-    if fsharp#openFsi(1) > 0
+    if fsharp#openFsi(!g:fsharp#fsi_focus_on_send) > 0
         " Neovim
         if has('nvim')
             call chansend(s:fsi_job, a:text . ";;". "\n")

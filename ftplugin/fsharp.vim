@@ -35,6 +35,9 @@ endif
 if !exists('g:fsharp#fsi_window_command')
     let g:fsharp#fsi_window_command = "botright 10new"
 endif
+if !exists('g:fsharp#fsi_focus_on_send')
+    let g:fsharp#fsi_focus_on_send = 0
+endif
 
 let s:cpo_save = &cpo
 set cpo&vim
