@@ -56,6 +56,15 @@ if empty(glob(fsac))
     finish
 endif
 
+" add LanguageClient configuration
+
+if !exists('g:LanguageClient_serverCommands')
+    let g:LanguageClient_serverCommands = {}
+endif
+if !has_key(g:LanguageClient_serverCommands, 'fsharp')
+    let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
+endif
+
 if g:fsharp#automatic_workspace_init
     augroup LanguageClient_config
         autocmd!
