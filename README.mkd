@@ -87,8 +87,6 @@ Clone Ionide-vim to some runtimepath and run `make fsautocomplete`.
 
 Run `install.cmd`.
 
-Note: if you append it before actually installing Ionide-vim, it will fail with `E121: Undefined variable: g:fsharp#languageserver_command`.
-
 ## Usage
 
 Opening either `*.fs`, `*.fsi` or `*.fsx` files should trigger syntax highlighting and other depending runtime files as well.
