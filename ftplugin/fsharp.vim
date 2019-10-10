@@ -6,12 +6,10 @@ endif
 let b:did_fsharp_ftplugin = 1
 
 " set some defaults
-if !exists('g:fsharp#automatic_workspace_init')
-    let g:fsharp#automatic_workspace_init = 1
-endif
-if !exists('g:fsharp#workspace_mode_peek_deep_level')
-    let g:fsharp#workspace_mode_peek_deep_level = 2
-endif
+
+" FSAC server configuration
+call fsharp#getServerConfig()
+
 if !exists('g:fsharp#automatic_reload_workspace')
     let g:fsharp#automatic_reload_workspace = 1
 endif
@@ -87,6 +85,7 @@ augroup END
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
 com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
+com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
 
 com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
 com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()

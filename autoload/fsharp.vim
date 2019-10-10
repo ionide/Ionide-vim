@@ -125,27 +125,29 @@ endfunction
 "     'WorkspaceModePeekDeepLevel',
 let s:config_keys_camel =
     \ [
-    \     'ExcludeProjectDirectories',
-    \     'KeywordsAutocomplete',
-    \     'ExternalAutocomplete',
-    \     'Linter',
-    \     'UnionCaseStubGeneration',
-    \     'UnionCaseStubGenerationBody',
-    \     'RecordStubGeneration',
-    \     'RecordStubGenerationBody',
-    \     'InterfaceStubGeneration',
-    \     'InterfaceStubGenerationObjectIdentifier',
-    \     'InterfaceStubGenerationMethodBody',
-    \     'UnusedOpensAnalyzer',
-    \     'UnusedDeclarationsAnalyzer',
-    \     'SimplifyNameAnalyzer',
-    \     'ResolveNamespaces',
-    \     'EnableReferenceCodeLens',
-    \     'EnableAnalyzers',
-    \     'AnalyzersPath',
-    \     'DisableInMemoryProjectReferences',
-    \     'LineLens',
-    \     'UseSdkScripts'
+    \     {'key': 'AutomaticWorkspaceInit', 'default': 1},
+    \     {'key': 'WorkspaceModePeekDeepLevel', 'default': 2},
+    \     {'key': 'ExcludeProjectDirectories', 'default': []},
+    \     {'key': 'KeywordsAutocomplete', 'default': 1},
+    \     {'key': 'ExternalAutocomplete', 'default': 0},
+    \     {'key': 'Linter', 'default': 1},
+    \     {'key': 'UnionCaseStubGeneration', 'default': 1},
+    \     {'key': 'UnionCaseStubGenerationBody'},
+    \     {'key': 'RecordStubGeneration', 'default': 1},
+    \     {'key': 'RecordStubGenerationBody'},
+    \     {'key': 'InterfaceStubGeneration'},
+    \     {'key': 'InterfaceStubGenerationObjectIdentifier', 'default': 'this'},
+    \     {'key': 'InterfaceStubGenerationMethodBody'},
+    \     {'key': 'UnusedOpensAnalyzer', 'default': 1},
+    \     {'key': 'UnusedDeclarationsAnalyzer', 'default': 1},
+    \     {'key': 'SimplifyNameAnalyzer', 'default': 0},
+    \     {'key': 'ResolveNamespaces', 'default': 1},
+    \     {'key': 'EnableReferenceCodeLens', 'default': 1},
+    \     {'key': 'EnableAnalyzers', 'default': 1},
+    \     {'key': 'AnalyzersPath'},
+    \     {'key': 'DisableInMemoryProjectReferences', 'default': 0},
+    \     {'key': 'LineLens'},
+    \     {'key': 'UseSdkScripts', 'default': 0},
     \ ]
 let s:config_keys = []
 
@@ -153,26 +155,32 @@ function! s:buildConfigKeys()
     if len(s:config_keys) == 0
         for key_camel in s:config_keys_camel
             let key = {}
-            let key.snake = substitute(key_camel, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
-            let key.camel = key_camel
+            let key.snake = substitute(key_camel.key, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
+            let key.camel = key_camel.key
+            if has_key(key_camel, 'default')
+                let key.default = key_camel.default
+            endif
             call add(s:config_keys, key)
         endfor
     endif
 endfunction
 
-function! s:getFSharpConfig()
+function! g:fsharp#getServerConfig()
     let fsharp = {}
     call s:buildConfigKeys() 
     for key in s:config_keys
         if exists('g:fsharp#' . key.snake)
             let fsharp[key.camel] = g:fsharp#{key.snake}
+        elseif has_key(key, 'default')
+            let g:fsharp#{key.snake} = key.default
+            let fsharp[key.camel] = key.default
         endif
     endfor
     return fsharp
 endfunction
 
 function! g:fsharp#updateServerConfig()
-    let fsharp = s:getFSharpConfig()
+    let fsharp = fsharp#getServerConfig()
     let settings = {'settings': {'FSharp': fsharp}}
     call LanguageClient#Notify('workspace/didChangeConfiguration', settings)
 endfunction
@@ -231,7 +239,6 @@ endfunction
 
 function! fsharp#loadWorkspaceAuto()
     if &ft == 'fsharp'
-        call g:fsharp#updateServerConfig()
         if g:fsharp#automatic_workspace_init
             echom "[FSAC] Loading workspace..."
             let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')

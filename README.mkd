@@ -160,16 +160,15 @@ let g:fsharp#automatic_workspace_init = 1 " 0 to disable.
 
 ~~~.vim
 let g:fsharp#workspace_mode_peek_deep_level = 2
-
 ~~~
+
+#### Editor Settings
 
 ##### Enable/disable automatic calling of `:FSharpReloadWorkspace` on saving `fsproj` (default: 1)
 
 ~~~.vim
 let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 ~~~
-
-#### Editor Settings
 
 ##### Show type signature at cursor position (default: 1)
 
