@@ -119,10 +119,13 @@ endfunction
 
 " FSharpConfigDto from https://github.com/fsharp/FsAutoComplete/blob/master/src/FsAutoComplete/LspHelpers.fs
 " 
-" The following options seems not working with workspace/didChangeConfiguration
-" since the initialization has already completed?
+" * The following options seems not working with workspace/didChangeConfiguration
+"   since the initialization has already completed?
 "     'AutomaticWorkspaceInit',
 "     'WorkspaceModePeekDeepLevel',
+"
+" * Changes made to linter/unused analyzer settings seems not reflected after sending them to FSAC?
+"
 let s:config_keys_camel =
     \ [
     \     {'key': 'AutomaticWorkspaceInit', 'default': 1},
@@ -135,7 +138,7 @@ let s:config_keys_camel =
     \     {'key': 'UnionCaseStubGenerationBody'},
     \     {'key': 'RecordStubGeneration', 'default': 1},
     \     {'key': 'RecordStubGenerationBody'},
-    \     {'key': 'InterfaceStubGeneration'},
+    \     {'key': 'InterfaceStubGeneration', 'default': 1},
     \     {'key': 'InterfaceStubGenerationObjectIdentifier', 'default': 'this'},
     \     {'key': 'InterfaceStubGenerationMethodBody'},
     \     {'key': 'UnusedOpensAnalyzer', 'default': 1},
@@ -143,11 +146,11 @@ let s:config_keys_camel =
     \     {'key': 'SimplifyNameAnalyzer', 'default': 0},
     \     {'key': 'ResolveNamespaces', 'default': 1},
     \     {'key': 'EnableReferenceCodeLens', 'default': 1},
-    \     {'key': 'EnableAnalyzers', 'default': 1},
+    \     {'key': 'EnableAnalyzers', 'default': 0},
     \     {'key': 'AnalyzersPath'},
     \     {'key': 'DisableInMemoryProjectReferences', 'default': 0},
-    \     {'key': 'LineLens'},
-    \     {'key': 'UseSdkScripts', 'default': 0},
+    \     {'key': 'LineLens', 'default': {'enabled': 'replaceCodeLens', 'prefix': '//'}},
+    \     {'key': 'UseSdkScripts', 'default': 1},
     \ ]
 let s:config_keys = []
 
@@ -171,6 +174,8 @@ function! g:fsharp#getServerConfig()
     for key in s:config_keys
         if exists('g:fsharp#' . key.snake)
             let fsharp[key.camel] = g:fsharp#{key.snake}
+        elseif exists('g:fsharp#' . key.camel)
+            let fsharp[key.camel] = g:fsharp#{key.camel}
         elseif has_key(key, 'default')
             let g:fsharp#{key.snake} = key.default
             let fsharp[key.camel] = key.default
@@ -215,7 +220,7 @@ function! s:findWorkspace(dir, cont)
             call s:cont_findWorkspace(workspace.Data.Fsprojs)
         endif
     endfunction
-    call s:workspacePeek(a:dir, g:fsharp#workspace_mode_peek_deep_level, [], function("s:callback_findWorkspace"))
+    call s:workspacePeek(a:dir, g:fsharp#workspace_mode_peek_deep_level, g:fsharp#exclude_project_directories, function("s:callback_findWorkspace"))
 endfunction
 
 let s:workspace = []
@@ -239,6 +244,7 @@ endfunction
 
 function! fsharp#loadWorkspaceAuto()
     if &ft == 'fsharp'
+        call fsharp#updateServerConfig()
         if g:fsharp#automatic_workspace_init
             echom "[FSAC] Loading workspace..."
             let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')
