@@ -65,6 +65,13 @@ if !has_key(g:LanguageClient_serverCommands, 'fsharp')
     let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
 endif
 
+if !exists('g:LanguageClient_rootMarkers')
+    let g:LanguageClient_rootMarkers = {}
+endif
+if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
+    let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj']
+endif
+
 if g:fsharp#automatic_workspace_init
     augroup LanguageClient_config
         autocmd!

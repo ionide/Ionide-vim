@@ -117,6 +117,66 @@ function! s:documentationSymbol(xmlSig, assembly, cont)
     return s:call('fsharp/documentationSymbol', s:DocumentationForSymbolRequest(a:xmlSig, a:assembly), a:cont)
 endfunction
 
+" FSharpConfigDto from https://github.com/fsharp/FsAutoComplete/blob/master/src/FsAutoComplete/LspHelpers.fs
+" 
+" The following options seems not working with workspace/didChangeConfiguration
+" since the initialization has already completed?
+"     'AutomaticWorkspaceInit',
+"     'WorkspaceModePeekDeepLevel',
+let s:config_keys_camel =
+    \ [
+    \     'ExcludeProjectDirectories',
+    \     'KeywordsAutocomplete',
+    \     'ExternalAutocomplete',
+    \     'Linter',
+    \     'UnionCaseStubGeneration',
+    \     'UnionCaseStubGenerationBody',
+    \     'RecordStubGeneration',
+    \     'RecordStubGenerationBody',
+    \     'InterfaceStubGeneration',
+    \     'InterfaceStubGenerationObjectIdentifier',
+    \     'InterfaceStubGenerationMethodBody',
+    \     'UnusedOpensAnalyzer',
+    \     'UnusedDeclarationsAnalyzer',
+    \     'SimplifyNameAnalyzer',
+    \     'ResolveNamespaces',
+    \     'EnableReferenceCodeLens',
+    \     'EnableAnalyzers',
+    \     'AnalyzersPath',
+    \     'DisableInMemoryProjectReferences',
+    \     'LineLens',
+    \     'UseSdkScripts'
+    \ ]
+let s:config_keys = []
+
+function! s:buildConfigKeys()
+    if len(s:config_keys) == 0
+        for key_camel in s:config_keys_camel
+            let key = {}
+            let key.snake = substitute(key_camel, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
+            let key.camel = key_camel
+            call add(s:config_keys, key)
+        endfor
+    endif
+endfunction
+
+function! s:getFSharpConfig()
+    let fsharp = {}
+    call s:buildConfigKeys() 
+    for key in s:config_keys
+        if exists('g:fsharp#' . key.snake)
+            let fsharp[key.camel] = g:fsharp#{key.snake}
+        endif
+    endfor
+    return fsharp
+endfunction
+
+function! g:fsharp#updateServerConfig()
+    let fsharp = s:getFSharpConfig()
+    let settings = {'settings': {'FSharp': fsharp}}
+    call LanguageClient#Notify('workspace/didChangeConfiguration', settings)
+endfunction
+
 function! s:findWorkspace(dir, cont)
     let s:cont_findWorkspace = a:cont
     function! s:callback_findWorkspace(result)
@@ -171,9 +231,12 @@ endfunction
 
 function! fsharp#loadWorkspaceAuto()
     if &ft == 'fsharp'
-        echom "[FSAC] Loading workspace..."
-        let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')
-        call s:findWorkspace(bufferDirectory, function("s:load"))
+        call g:fsharp#updateServerConfig()
+        if g:fsharp#automatic_workspace_init
+            echom "[FSAC] Loading workspace..."
+            let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')
+            call s:findWorkspace(bufferDirectory, function("s:load"))
+        endif
     endif
 endfunction
 
