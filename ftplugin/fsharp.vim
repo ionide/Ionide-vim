@@ -8,6 +8,9 @@ let b:did_fsharp_ftplugin = 1
 " set some defaults
 
 " FSAC server configuration
+if !exists('g:fsharp#use_recommended_server_config')
+    let g:fsharp#use_recommended_server_config = 1
+endif
 call fsharp#getServerConfig()
 
 if !exists('g:fsharp#automatic_reload_workspace')

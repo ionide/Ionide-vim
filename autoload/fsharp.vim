@@ -176,7 +176,7 @@ function! g:fsharp#getServerConfig()
             let fsharp[key.camel] = g:fsharp#{key.snake}
         elseif exists('g:fsharp#' . key.camel)
             let fsharp[key.camel] = g:fsharp#{key.camel}
-        elseif has_key(key, 'default')
+        elseif has_key(key, 'default') && g:fsharp#use_recommended_server_config
             let g:fsharp#{key.snake} = key.default
             let fsharp[key.camel] = key.default
         endif
