@@ -186,7 +186,7 @@ let g:fsharp#workspace_mode_peek_deep_level = 2
 let g:fsharp#exclude_project_directories = ['paket-files']
 ~~~
 
-##### Enable/disable linter and unused opens/declarations analyzer (default: all disabled)
+##### Enable/disable linter and unused opens/declarations analyzer (default: all enabled)
 
 You may want to bind `LanguageClient#textDocument_codeAction()` to some shortcut key. Refer to their docs.
 
