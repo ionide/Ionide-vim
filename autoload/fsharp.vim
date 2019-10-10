@@ -154,11 +154,17 @@ let s:config_keys_camel =
     \ ]
 let s:config_keys = []
 
+function! fsharp#toSnakeCase(str)
+    let sn = substitute(a:str, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
+    if sn == a:str | return tolower(a:str) | endif
+    return sn
+endfunction
+
 function! s:buildConfigKeys()
     if len(s:config_keys) == 0
         for key_camel in s:config_keys_camel
             let key = {}
-            let key.snake = substitute(key_camel.key, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
+            let key.snake = fsharp#toSnakeCase(key_camel.key)
             let key.camel = key_camel.key
             if has_key(key_camel, 'default')
                 let key.default = key_camel.default
