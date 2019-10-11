@@ -6,12 +6,13 @@ endif
 let b:did_fsharp_ftplugin = 1
 
 " set some defaults
-if !exists('g:fsharp#automatic_workspace_init')
-    let g:fsharp#automatic_workspace_init = 1
+
+" FSAC server configuration
+if !exists('g:fsharp#use_recommended_server_config')
+    let g:fsharp#use_recommended_server_config = 1
 endif
-if !exists('g:fsharp#workspace_mode_peek_deep_level')
-    let g:fsharp#workspace_mode_peek_deep_level = 2
-endif
+call fsharp#getServerConfig()
+
 if !exists('g:fsharp#automatic_reload_workspace')
     let g:fsharp#automatic_reload_workspace = 1
 endif
@@ -65,6 +66,13 @@ if !has_key(g:LanguageClient_serverCommands, 'fsharp')
     let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
 endif
 
+if !exists('g:LanguageClient_rootMarkers')
+    let g:LanguageClient_rootMarkers = {}
+endif
+if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
+    let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj']
+endif
+
 if g:fsharp#automatic_workspace_init
     augroup LanguageClient_config
         autocmd!
@@ -80,6 +88,7 @@ augroup END
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
 com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
 com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
+com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
 
 com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
 com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()

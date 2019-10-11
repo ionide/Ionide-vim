@@ -117,6 +117,85 @@ function! s:documentationSymbol(xmlSig, assembly, cont)
     return s:call('fsharp/documentationSymbol', s:DocumentationForSymbolRequest(a:xmlSig, a:assembly), a:cont)
 endfunction
 
+" FSharpConfigDto from https://github.com/fsharp/FsAutoComplete/blob/master/src/FsAutoComplete/LspHelpers.fs
+" 
+" * The following options seems not working with workspace/didChangeConfiguration
+"   since the initialization has already completed?
+"     'AutomaticWorkspaceInit',
+"     'WorkspaceModePeekDeepLevel',
+"
+" * Changes made to linter/unused analyzer settings seems not reflected after sending them to FSAC?
+"
+let s:config_keys_camel =
+    \ [
+    \     {'key': 'AutomaticWorkspaceInit', 'default': 1},
+    \     {'key': 'WorkspaceModePeekDeepLevel', 'default': 2},
+    \     {'key': 'ExcludeProjectDirectories', 'default': []},
+    \     {'key': 'KeywordsAutocomplete', 'default': 1},
+    \     {'key': 'ExternalAutocomplete', 'default': 0},
+    \     {'key': 'Linter', 'default': 1},
+    \     {'key': 'UnionCaseStubGeneration', 'default': 1},
+    \     {'key': 'UnionCaseStubGenerationBody'},
+    \     {'key': 'RecordStubGeneration', 'default': 1},
+    \     {'key': 'RecordStubGenerationBody'},
+    \     {'key': 'InterfaceStubGeneration', 'default': 1},
+    \     {'key': 'InterfaceStubGenerationObjectIdentifier', 'default': 'this'},
+    \     {'key': 'InterfaceStubGenerationMethodBody'},
+    \     {'key': 'UnusedOpensAnalyzer', 'default': 1},
+    \     {'key': 'UnusedDeclarationsAnalyzer', 'default': 1},
+    \     {'key': 'SimplifyNameAnalyzer', 'default': 0},
+    \     {'key': 'ResolveNamespaces', 'default': 1},
+    \     {'key': 'EnableReferenceCodeLens', 'default': 1},
+    \     {'key': 'EnableAnalyzers', 'default': 0},
+    \     {'key': 'AnalyzersPath'},
+    \     {'key': 'DisableInMemoryProjectReferences', 'default': 0},
+    \     {'key': 'LineLens', 'default': {'enabled': 'replaceCodeLens', 'prefix': '//'}},
+    \     {'key': 'UseSdkScripts', 'default': 1},
+    \ ]
+let s:config_keys = []
+
+function! fsharp#toSnakeCase(str)
+    let sn = substitute(a:str, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
+    if sn == a:str | return tolower(a:str) | endif
+    return sn
+endfunction
+
+function! s:buildConfigKeys()
+    if len(s:config_keys) == 0
+        for key_camel in s:config_keys_camel
+            let key = {}
+            let key.snake = fsharp#toSnakeCase(key_camel.key)
+            let key.camel = key_camel.key
+            if has_key(key_camel, 'default')
+                let key.default = key_camel.default
+            endif
+            call add(s:config_keys, key)
+        endfor
+    endif
+endfunction
+
+function! g:fsharp#getServerConfig()
+    let fsharp = {}
+    call s:buildConfigKeys() 
+    for key in s:config_keys
+        if exists('g:fsharp#' . key.snake)
+            let fsharp[key.camel] = g:fsharp#{key.snake}
+        elseif exists('g:fsharp#' . key.camel)
+            let fsharp[key.camel] = g:fsharp#{key.camel}
+        elseif has_key(key, 'default') && g:fsharp#use_recommended_server_config
+            let g:fsharp#{key.snake} = key.default
+            let fsharp[key.camel] = key.default
+        endif
+    endfor
+    return fsharp
+endfunction
+
+function! g:fsharp#updateServerConfig()
+    let fsharp = fsharp#getServerConfig()
+    let settings = {'settings': {'FSharp': fsharp}}
+    call LanguageClient#Notify('workspace/didChangeConfiguration', settings)
+endfunction
+
 function! s:findWorkspace(dir, cont)
     let s:cont_findWorkspace = a:cont
     function! s:callback_findWorkspace(result)
@@ -147,7 +226,7 @@ function! s:findWorkspace(dir, cont)
             call s:cont_findWorkspace(workspace.Data.Fsprojs)
         endif
     endfunction
-    call s:workspacePeek(a:dir, g:fsharp#workspace_mode_peek_deep_level, [], function("s:callback_findWorkspace"))
+    call s:workspacePeek(a:dir, g:fsharp#workspace_mode_peek_deep_level, g:fsharp#exclude_project_directories, function("s:callback_findWorkspace"))
 endfunction
 
 let s:workspace = []
@@ -171,9 +250,12 @@ endfunction
 
 function! fsharp#loadWorkspaceAuto()
     if &ft == 'fsharp'
-        echom "[FSAC] Loading workspace..."
-        let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')
-        call s:findWorkspace(bufferDirectory, function("s:load"))
+        call fsharp#updateServerConfig()
+        if g:fsharp#automatic_workspace_init
+            echom "[FSAC] Loading workspace..."
+            let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')
+            call s:findWorkspace(bufferDirectory, function("s:load"))
+        endif
     endif
 endfunction
 
