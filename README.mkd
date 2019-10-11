@@ -113,7 +113,7 @@ To be added as requested for F#-specific features.
 
 #### `:FSharpUpdateServerConfig`
   - Updates FSAC configuration.
-  - See [Workspace Settings](#workspace-settings) for details.
+  - See [FsAutoComplete Settings](#fsautocomplete-settings) for details.
 
 #### `:FSharpUpdateFSAC`
   - Downloads the latest build of FsAutoComplete to be used with Ionide-vim.
@@ -154,19 +154,19 @@ for features provided via Language Server Protocol.
 
 To be added as requested for F#-specific features.
 
-#### Workspace Settings
+#### FsAutoComplete Settings
 
-See [the documentation of FSAC](https://github.com/fsharp/FsAutoComplete#settings) for details. 
-
-* You can change their values at runtime and then notify the changes to FSAC by `:FSharpUpdateServerConfig`.
-* You can/should use `snake_case` for the setting names.
+* Ionide-vim uses `snake_case` for the setting names.
+  - For FSAC settings only, `CamelCase` can also be used (as it gets serialized to a F# record).
   - If both `snake_case` and `CamelCase` are specified, the `snake_case` one will be preferred.
+* You can change the values at runtime and then notify the changes to FSAC by `:FSharpUpdateServerConfig`.
 * Some of the settings may not work in Ionide-vim as it is lacking the corresponding feature of Ionide-VSCode.
 * If not specified, the recommended default values described on the FSAC's documentation will be used.
-  - If you are using `g:LanguageClient_settingsPath`, the recommended default values will override the settings loaded from it.
+  - If you are using a JSON configuration file though `g:LanguageClient_settingsPath`, the recommended default values will override the settings loaded from it.
   - You can disable this by `let g:fsharp#use_recommended_server_config = 0`.
 
-Below is a list of frequently used settings:
+See [the documentation of FSAC](https://github.com/fsharp/FsAutoComplete#settings)
+for the complete list of available settings. Frequently used ones are:
 
 ##### Enable/disable automatic calling of `:FSharpLoadWorkspaceAuto` on opening F# files (default: enabled)
 
