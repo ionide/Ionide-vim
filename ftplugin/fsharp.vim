@@ -93,7 +93,7 @@ com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
 com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
 com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()
 com! -buffer FsiReset call fsharp#resetFsi()
-com! -buffer FsiShow call fsharp#openFsi()
+com! -buffer FsiShow call fsharp#toggleFsi()
 
 if g:fsharp#fsi_keymap == "vscode"
     if has('nvim')

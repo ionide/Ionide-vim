@@ -346,8 +346,8 @@ function! fsharp#updateFSAC(...)
     call s:download(branch)
 endfunction
 
-let s:fsi_buffer = 0
-let s:fsi_job    = 0
+let s:fsi_buffer = -1
+let s:fsi_job    = -1
 let s:fsi_width  = 0
 let s:fsi_height = 0
 
@@ -372,7 +372,7 @@ function! fsharp#openFsi(returnFocus)
             if s:fsi_width  > 0 | execute 'vertical resize' s:fsi_width | endif
             if s:fsi_height > 0 | execute 'resize' s:fsi_height | endif
             " if window is closed but FSI is still alive then reuse it
-            if s:fsi_buffer != 0 && bufexists(str2nr(s:fsi_buffer))
+            if s:fsi_buffer >= 0 && bufexists(str2nr(s:fsi_buffer))
                 exec 'b' s:fsi_buffer
                 normal G
                 if !has('nvim') && mode() == 'n' | execute "normal A" | endif
@@ -431,7 +431,7 @@ function! fsharp#toggleFsi()
 endfunction
 
 function! fsharp#quitFsi()
-    if s:fsi_buffer != 0 && bufexists(str2nr(s:fsi_buffer))
+    if s:fsi_buffer >= 0 && bufexists(str2nr(s:fsi_buffer))
         if has('nvim')
             let winid = bufwinid(s:fsi_buffer)
             if winid > 0 | execute "close " . winid | endif
@@ -439,8 +439,8 @@ function! fsharp#quitFsi()
         else
             call job_stop(s:fsi_job, "term")
         endif
-        let s:fsi_buffer = 0
-        let s:fsi_job = 0
+        let s:fsi_buffer = -1
+        let s:fsi_job = -1
     endif
 endfunction
 
