@@ -318,8 +318,7 @@ let s:script_root_dir = expand('<sfile>:p:h') . "/../"
 let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
 let g:fsharp#languageserver_command =
     \ ['dotnet', s:fsac, 
-        \ '--background-service-enabled',
-        \ '--mode', 'lsp'
+        \ '--background-service-enabled'
     \ ]
 
 function! s:download(branch)
