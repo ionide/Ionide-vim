@@ -329,7 +329,7 @@ function! s:download(branch)
         \ '"https://ci.appveyor.com/api/projects/fsautocomplete/fsautocomplete/artifacts/bin/pkgs/fsautocomplete.netcore.zip?branch=' . a:branch . '"'
         \ )
     if v:shell_error == 0
-        call system('unzip -d ' . s:script_root_dir . "/fsac " . zip)
+        call system('unzip -o -d ' . s:script_root_dir . "/fsac " . zip)
         echom "[FSAC] Updated FsAutoComplete to version " . a:branch . "" 
     else
         echom "[FSAC] Failed to update FsAutoComplete"

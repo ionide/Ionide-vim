@@ -21,7 +21,7 @@ git_url    = https://github.com/fsharp/FsAutoComplete.git
 fsautocomplete : $(ac_exe)
 $(ac_exe) : $(bin_d)
 	curl -L "$(ac_url)" -o "$(bin_d)/$(ac_archive)"
-	unzip "$(bin_d)/$(ac_archive)" -d "$(bin_d)"
+	unzip -o "$(bin_d)/$(ac_archive)" -d "$(bin_d)"
 	touch "$(ac_exe)"
 
 ~/.config/.mono/certs:
