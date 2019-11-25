@@ -223,6 +223,14 @@ let g:fsharp#fsi_command = "fsharpi"
 let g:fsharp#use_sdk_scripts = 0 " for net462 FSI
 ~~~
 
+##### Set additional runtime arguments passed to FSI (default: `[]` (empty))
+
+Sets additional arguments of the FSI instance Ionide-vim spawns and changes the behavior of FSAC accordingly when editing fsx files.
+
+~~~.vim
+let g:fsharp#fsi_extra_parameters = ['--langversion:preview']
+~~~
+
 ##### Customize how FSI window is opened (default: `botright 10new`)
 
 It must create a new empty window and then focus to it.

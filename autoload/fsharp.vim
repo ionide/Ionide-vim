@@ -131,7 +131,7 @@ let s:config_keys_camel =
     \     {'key': 'AutomaticWorkspaceInit', 'default': 1},
     \     {'key': 'WorkspaceModePeekDeepLevel', 'default': 2},
     \     {'key': 'ExcludeProjectDirectories', 'default': []},
-    \     {'key': 'KeywordsAutocomplete', 'default': 1},
+    \     {'key': 'keywordsAutocomplete', 'default': 1},
     \     {'key': 'ExternalAutocomplete', 'default': 0},
     \     {'key': 'Linter', 'default': 1},
     \     {'key': 'UnionCaseStubGeneration', 'default': 1},
@@ -151,6 +151,8 @@ let s:config_keys_camel =
     \     {'key': 'DisableInMemoryProjectReferences', 'default': 0},
     \     {'key': 'LineLens', 'default': {'enabled': 'replaceCodeLens', 'prefix': '//'}},
     \     {'key': 'UseSdkScripts', 'default': 1},
+    \     {'key': 'dotNetRoot'},
+    \     {'key': 'fsiExtraParameters', 'default': []},
     \ ]
 let s:config_keys = []
 
@@ -362,8 +364,17 @@ function! s:win_gotoid_safe(winid)
     endif
 endfunction
 
+function! s:get_fsi_command()
+    let cmd = g:fsharp#fsi_command
+    for prm in g:fsharp#fsi_extra_parameters
+        let cmd = cmd . " " . prm
+    endfor
+    return cmd
+endfunction
+
 function! fsharp#openFsi(returnFocus)
     if bufwinid(s:fsi_buffer) <= 0
+        let fsi_command = s:get_fsi_command()
         " Neovim
         if exists('*termopen') || exists('*term_start')
             let current_win = win_getid()
@@ -378,7 +389,7 @@ function! fsharp#openFsi(returnFocus)
                 if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
             " open FSI: Neovim
             elseif has('nvim')
-                let s:fsi_job = termopen(g:fsharp#fsi_command)
+                let s:fsi_job = termopen(fsi_command)
                 if s:fsi_job > 0
                     let s:fsi_buffer = bufnr("%")
                 else
@@ -393,7 +404,7 @@ function! fsharp#openFsi(returnFocus)
                 \ "curwin": 1,
                 \ "term_finish": "close"
                 \ }
-                let s:fsi_buffer = term_start(g:fsharp#fsi_command, options)
+                let s:fsi_buffer = term_start(fsi_command, options)
                 if s:fsi_buffer != 0
                     if exists('*term_setkill') | call term_setkill(s:fsi_buffer, "term") | endif
                     let s:fsi_job = term_getjob(s:fsi_buffer)
