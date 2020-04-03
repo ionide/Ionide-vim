@@ -51,8 +51,9 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 - Show symbols in file
 - Find symbol in workspace
 - Show signature in status line
-- Integration with F# Interactive **(new!)**
-- Integration with FSharpLint (additional hints and quick fixes) **(new!)**
+- Integration with F# Interactive
+- Integration with [FSharpLint](https://github.com/fsprojects/FSharpLint) (additional hints and quick fixes)
+- Integration with [Fantomas](https://github.com/fsprojects/fantomas/) (the best formatter available for F#)
 
 ## Getting Started
 
@@ -270,6 +271,12 @@ let g:fsharp#fsi_keymap = "custom"
 let g:fsharp#fsi_keymap_send   = "<C-e>"
 let g:fsharp#fsi_keymap_toggle = "<C-@>"
 ~~~
+
+#### Linter & Formatter Settings
+
+Linting (other than the basic ones described above) and formatting is powered by independent tools, [FSharpLint](https://github.com/fsprojects/FSharpLint) and [Fantomas](https://github.com/fsprojects/fantomas/) respectively.
+
+Both uses their own JSON file for configuration and Ionide-vim does not control them. See their docs about configuration: [FSharpLint](http://fsprojects.github.io/FSharpLint/#Configuration-Files) and [Fantomas](https://github.com/fsprojects/fantomas/blob/master/docs/Documentation.md#--config-path-to-file-or-folder).
 
 ### Advanced Tips
 
