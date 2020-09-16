@@ -97,7 +97,15 @@ Clone Ionide-vim to some runtimepath and run `make fsautocomplete`.
 
 #### Installing on Windows
 
-Run `install.cmd`.
+Run `install.ps1` instead of `make fsautocomplete`.
+
+For example, if you are using vim-plug, you can use the following:
+
+~~~.vim
+Plug 'ionide/Ionide-vim', {
+     \ 'do':  'powershell -ExecutionPolicy Unrestricted .\install.ps1',
+     \}
+~~~
 
 ## Usage
 
