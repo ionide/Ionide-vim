@@ -136,6 +136,7 @@ To be added as requested for F#-specific features.
 
 #### `:FSharpUpdateFSAC`
   - Downloads the latest build of FsAutoComplete to be used with Ionide-vim.
+  - This does not work on Windows yet. We will fix this but in the meantime you can use `install.ps1 update`.
 
 ### Working with F# Interactive
 
