@@ -46,7 +46,7 @@ setl comments=s0:*\ -,m0:*\ \ ,ex0:*),s1:(*,mb:*,ex:*),:\/\/\/,:\/\/
 " make ftplugin undo-able
 let b:undo_ftplugin = 'setl fo< cms< com< fdm<'
 
-com! -buffer -nargs=* FSharpUpdateFSAC call fsharp#updateFSAC(<f-args>)
+com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
 
 " check if FSAC exists
 let script_dir = expand('<sfile>:p:h')
