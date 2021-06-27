@@ -61,12 +61,9 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 
 Refer to [their INSTALL.md](https://github.com/autozimu/LanguageClient-neovim/blob/next/INSTALL.md).
 
-**Note:** There is an ongoing (but not critical) issue with the latest LC-neovim ([#22](https://github.com/ionide/Ionide-vim/issues/22)) and if you want to avoid it you should install the [tag 0.1.155](https://github.com/autozimu/LanguageClient-neovim/releases/tag/0.1.155).
-
 ```
 Plug 'autozimu/LanguageClient-neovim', {
     \ 'branch': 'next',
-    \ 'tag': '0.1.155',
     \ 'do': 'bash install.sh',
     \ }
 ```
