@@ -149,7 +149,7 @@ let s:config_keys_camel =
     \     {'key': 'EnableAnalyzers', 'default': 0},
     \     {'key': 'AnalyzersPath'},
     \     {'key': 'DisableInMemoryProjectReferences', 'default': 0},
-    \     {'key': 'LineLens', 'default': {'enabled': 'replaceCodeLens', 'prefix': '//'}},
+    \     {'key': 'LineLens', 'default': {'enabled': 'never', 'prefix': ''}},
     \     {'key': 'UseSdkScripts', 'default': 1},
     \     {'key': 'dotNetRoot'},
     \     {'key': 'fsiExtraParameters', 'default': []},
