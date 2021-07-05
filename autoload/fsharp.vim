@@ -8,6 +8,20 @@ let g:loaded_autoload_fsharp = 1
 let s:cpo_save = &cpo
 set cpo&vim
 
+
+" basic setups
+
+let s:script_root_dir = expand('<sfile>:p:h') . "/../"
+let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
+let g:fsharp#languageserver_command =
+    \ ['dotnet', s:fsac,
+        \ '--background-service-enabled'
+    \ ]
+
+if has('nvim-0.5')
+    lua ionide = require("ionide-vim")
+endif
+
 function! s:prompt(msg)
     let height = &cmdheight
     if height < 2
@@ -16,6 +30,9 @@ function! s:prompt(msg)
     echom a:msg
     let &cmdheight = height
 endfunction
+
+
+" FSAC payload interfaces
 
 function! s:PlainNotification(content)
     return { 'Content': a:content }
@@ -76,8 +93,50 @@ function! s:FsdnRequest(query)
     return { 'Query': a:query }
 endfunction
 
+" handling callback for lua
+
+let g:fsharp#callbacks = {}
+
+function! fsharp#register_callback(fn)
+    if g:fsharp#backend == 'nvim'
+        let rnd = reltimestr(reltime())
+        let g:fsharp#callbacks[rnd] = a:fn
+        return rnd
+    else
+        echoerr '[FSAC] Not supported for languageclient-neovim'
+        return -1
+    endif
+endfunction
+
+function! fsharp#resolve_callback(key, arg)
+    if g:fsharp#backend == 'nvim'
+        if has_key(g:fsharp#callbacks, a:key)
+            let Callback = g:fsharp#callbacks[a:key]
+            call Callback(a:arg)
+            call remove(g:fsharp#callbacks, a:key)
+        endif
+    else
+        echoerr '[FSAC] Not supported for languageclient-neovim'
+    endif
+endfunction
+
+" LSP functions
+
 function! s:call(method, params, cont)
-    call LanguageClient#Call(a:method, a:params, a:cont)
+    if g:fsharp#backend == 'languageclient-neovim'
+        call LanguageClient#Call(a:method, a:params, a:cont)
+    elseif g:fsharp#backend == 'nvim'
+        let key = fsharp#register_callback(a:cont)
+        call luaeval('ionide.call(_A[1], _A[2], _A[3])', [a:method, a:params, key])
+    endif
+endfunction
+
+function! s:notify(method, params)
+    if g:fsharp#backend == 'languageclient-neovim'
+        call LanguageClient#Notify(a:method, a:params)
+    elseif g:fsharp#backend == 'nvim'
+        call luaeval('ionide.notify(_A[1], _A[2])', [a:method, a:params])
+    endif
 endfunction
 
 function! s:signature(filePath, line, character, cont)
@@ -116,6 +175,9 @@ endfunction
 function! s:documentationSymbol(xmlSig, assembly, cont)
     return s:call('fsharp/documentationSymbol', s:DocumentationForSymbolRequest(a:xmlSig, a:assembly), a:cont)
 endfunction
+
+
+" FSAC configuration
 
 " FSharpConfigDto from https://github.com/fsharp/FsAutoComplete/blob/master/src/FsAutoComplete/LspHelpers.fs
 "
@@ -156,7 +218,7 @@ let s:config_keys_camel =
     \ ]
 let s:config_keys = []
 
-function! fsharp#toSnakeCase(str)
+function! s:toSnakeCase(str)
     let sn = substitute(a:str, '\(\<\u\l\+\|\l\+\)\(\u\)', '\l\1_\l\2', 'g')
     if sn == a:str | return tolower(a:str) | endif
     return sn
@@ -166,7 +228,7 @@ function! s:buildConfigKeys()
     if len(s:config_keys) == 0
         for key_camel in s:config_keys_camel
             let key = {}
-            let key.snake = fsharp#toSnakeCase(key_camel.key)
+            let key.snake = s:toSnakeCase(key_camel.key)
             let key.camel = key_camel.key
             if has_key(key_camel, 'default')
                 let key.default = key_camel.default
@@ -195,8 +257,11 @@ endfunction
 function! g:fsharp#updateServerConfig()
     let fsharp = fsharp#getServerConfig()
     let settings = {'settings': {'FSharp': fsharp}}
-    call LanguageClient#Notify('workspace/didChangeConfiguration', settings)
+    call s:notify('workspace/didChangeConfiguration', settings)
 endfunction
+
+
+" .NET/F# specific operations
 
 function! s:findWorkspace(dir, cont)
     let s:cont_findWorkspace = a:cont
@@ -302,13 +367,19 @@ function! fsharp#showF1Help()
     echo result
 endfunction
 
+function! s:hover()
+    if g:fsharp#backend == 'languageclient-neovim'
+        call LanguageClient#textDocument_hover()
+    endif
+endfunction
+
 function! fsharp#showTooltip()
     function! s:callback_showTooltip(result)
         let result = a:result
         if exists('result.result.content')
             let content = json_decode(result.result.content)
             if exists('content.Data')
-                call LanguageClient#textDocument_hover()
+                call s:hover()
             endif
         endif
     endfunction
@@ -316,12 +387,8 @@ function! fsharp#showTooltip()
     call s:signature(expand('%:p'), line('.') - 1, col('.') - 1, function("s:callback_showTooltip"))
 endfunction
 
-let s:script_root_dir = expand('<sfile>:p:h') . "/../"
-let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
-let g:fsharp#languageserver_command =
-    \ ['dotnet', s:fsac,
-        \ '--background-service-enabled'
-    \ ]
+
+" FSAC update utils
 
 function! s:update_win()
     echom "[FSAC] Downloading FSAC. This may take a while..."
@@ -353,6 +420,9 @@ function! fsharp#updateFSAC(...)
     endif
 endfunction
 
+
+" FSI integration
+
 let s:fsi_buffer = -1
 let s:fsi_job    = -1
 let s:fsi_width  = 0
@@ -381,7 +451,6 @@ endfunction
 function! fsharp#openFsi(returnFocus)
     if bufwinid(s:fsi_buffer) <= 0
         let fsi_command = s:get_fsi_command()
-        " Neovim
         if exists('*termopen') || exists('*term_start')
             let current_win = win_getid()
             execute g:fsharp#fsi_window_command
@@ -425,7 +494,7 @@ function! fsharp#openFsi(returnFocus)
             if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
             return s:fsi_buffer
         else
-            echom "[FSAC] Your Vim does not support terminal".
+            echom "[FSAC] Your (neo)vim does not support terminal".
             return 0
         endif
     endif
@@ -512,6 +581,7 @@ function! fsharp#sendAllToFsi()
     let text = s:get_complete_buffer()
     return fsharp#sendFsi(text)
 endfunction
+
 
 let &cpo = s:cpo_save
 unlet s:cpo_save

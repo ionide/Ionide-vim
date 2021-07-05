@@ -5,9 +5,12 @@ if exists('b:did_fsharp_ftplugin')
 endif
 let b:did_fsharp_ftplugin = 1
 
-" set some defaults
+if has('nvim-0.5')
+    lua ionide = require("ionide-vim")
+endif
 
 " FSAC server configuration
+
 if !exists('g:fsharp#use_recommended_server_config')
     let g:fsharp#use_recommended_server_config = 1
 endif
@@ -30,6 +33,18 @@ if !exists('g:fsharp#fsi_window_command')
 endif
 if !exists('g:fsharp#fsi_focus_on_send')
     let g:fsharp#fsi_focus_on_send = 0
+endif
+
+if !exists('g:fsharp#backend')
+    if has('nvim-0.5')
+        if exists('g:LanguageClient_loaded')
+            let g:fsharp#backend = "languageclient-neovim"
+        else
+            let g:fsharp#backend = "nvim"
+        endif
+    else
+        let g:fsharp#backend = "languageclient-neovim"
+    endif
 endif
 
 let s:cpo_save = &cpo
@@ -57,33 +72,43 @@ if empty(glob(fsac))
     finish
 endif
 
-" add LanguageClient configuration
+" backend configuration
 
-if !exists('g:LanguageClient_serverCommands')
-    let g:LanguageClient_serverCommands = {}
-endif
-if !has_key(g:LanguageClient_serverCommands, 'fsharp')
-    let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
-endif
+if g:fsharp#backend == 'languageclient-neovim'
+    if !exists('g:LanguageClient_serverCommands')
+        let g:LanguageClient_serverCommands = {}
+    endif
+    if !has_key(g:LanguageClient_serverCommands, 'fsharp')
+        let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
+    endif
 
-if !exists('g:LanguageClient_rootMarkers')
-    let g:LanguageClient_rootMarkers = {}
-endif
-if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
-    let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj']
-endif
+    if !exists('g:LanguageClient_rootMarkers')
+        let g:LanguageClient_rootMarkers = {}
+    endif
+    if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
+        let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj', '.git']
+    endif
 
-if g:fsharp#automatic_workspace_init
-    augroup LanguageClient_config
-        autocmd!
-        autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
-    augroup END
+    if g:fsharp#automatic_workspace_init
+        augroup LanguageClient_config
+            autocmd!
+            autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
+        augroup END
+    endif
+elseif g:fsharp#backend == 'nvim'
+    call luaeval('ionide.setup(_A[1], _A[2])', [g:fsharp#languageserver_command, g:fsharp#automatic_workspace_init])
+else
+    if g:fsharp#backend != 'disable'
+        echoerr "[FSAC] Invalid backend: " . g:fsharp#backend
+    endif
 endif
 
 augroup FSharpLC_fs
     autocmd!
     autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
 augroup END
+
+" F# specific bindings
 
 com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
 com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
