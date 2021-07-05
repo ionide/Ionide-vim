@@ -10,7 +10,6 @@ if has('nvim-0.5')
 endif
 
 " FSAC server configuration
-
 if !exists('g:fsharp#use_recommended_server_config')
     let g:fsharp#use_recommended_server_config = 1
 endif
@@ -61,19 +60,7 @@ setl comments=s0:*\ -,m0:*\ \ ,ex0:*),s1:(*,mb:*,ex:*),:\/\/\/,:\/\/
 " make ftplugin undo-able
 let b:undo_ftplugin = 'setl fo< cms< com< fdm<'
 
-com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
-
-" check if FSAC exists
-let script_dir = expand('<sfile>:p:h')
-let fsac = script_dir . "/../fsac/fsautocomplete.dll"
-if empty(glob(fsac))
-    echoerr "FSAC not found. :FSharpUpdateFSAC to download."
-    let &cpo = s:cpo_save
-    finish
-endif
-
 " backend configuration
-
 if g:fsharp#backend == 'languageclient-neovim'
     if !exists('g:LanguageClient_serverCommands')
         let g:LanguageClient_serverCommands = {}
@@ -88,13 +75,6 @@ if g:fsharp#backend == 'languageclient-neovim'
     if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
         let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj', '.git']
     endif
-
-    if g:fsharp#automatic_workspace_init
-        augroup LanguageClient_config
-            autocmd!
-            autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
-        augroup END
-    endif
 elseif g:fsharp#backend == 'nvim'
     call luaeval('ionide.setup(_A[1], _A[2])', [g:fsharp#languageserver_command, g:fsharp#automatic_workspace_init])
 else
@@ -103,17 +83,35 @@ else
     endif
 endif
 
-augroup FSharpLC_fs
-    autocmd!
-    autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
-augroup END
-
 " F# specific bindings
+if g:fsharp#backend == 'languageclient-neovim'
+    if g:fsharp#automatic_workspace_init
+        augroup LanguageClient_config
+            autocmd!
+            autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
+        augroup END
+    endif
+elseif g:fsharp#backend != 'disable'
+    " check if FSAC exists
+    let script_dir = expand('<sfile>:p:h')
+    let fsac = script_dir . "/../fsac/fsautocomplete.dll"
+    if empty(glob(fsac))
+        echoerr "FSAC not found. :FSharpUpdateFSAC to download."
+        let &cpo = s:cpo_save
+        finish
+    endif
 
-com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
-com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
-com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
-com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
+    augroup FSharpLC_fs
+        autocmd!
+        autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
+    augroup END
+
+    com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
+    com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
+    com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
+    com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
+    com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
+endif
 
 com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
 com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()
