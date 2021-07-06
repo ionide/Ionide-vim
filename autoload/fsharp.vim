@@ -12,14 +12,9 @@ set cpo&vim
 " basic setups
 
 let s:script_root_dir = expand('<sfile>:p:h') . "/../"
-let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
-let g:fsharp#languageserver_command =
-    \ ['dotnet', s:fsac,
-        \ '--background-service-enabled'
-    \ ]
 
 if has('nvim-0.5')
-    lua ionide = require("ionide-vim")
+    lua ionide = require("ionide")
 endif
 
 function! s:prompt(msg)
@@ -95,12 +90,12 @@ endfunction
 
 " handling callback for lua
 
-let g:fsharp#callbacks = {}
+let s:callbacks = {}
 
 function! fsharp#register_callback(fn)
     if g:fsharp#backend == 'nvim'
         let rnd = reltimestr(reltime())
-        let g:fsharp#callbacks[rnd] = a:fn
+        let s:callbacks[rnd] = a:fn
         return rnd
     else
         echoerr '[FSAC] Not supported for languageclient-neovim'
@@ -110,10 +105,10 @@ endfunction
 
 function! fsharp#resolve_callback(key, arg)
     if g:fsharp#backend == 'nvim'
-        if has_key(g:fsharp#callbacks, a:key)
-            let Callback = g:fsharp#callbacks[a:key]
+        if has_key(s:callbacks, a:key)
+            let Callback = s:callbacks[a:key]
             call Callback(a:arg)
-            call remove(g:fsharp#callbacks, a:key)
+            call remove(s:callbacks, a:key)
         endif
     else
         echoerr '[FSAC] Not supported for languageclient-neovim'

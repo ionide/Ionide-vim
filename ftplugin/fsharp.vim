@@ -6,7 +6,24 @@ endif
 let b:did_fsharp_ftplugin = 1
 
 if has('nvim-0.5')
-    lua ionide = require("ionide-vim")
+    lua ionide = require("ionide")
+endif
+
+let s:script_root_dir = expand('<sfile>:p:h') . "/../"
+if !exists('g:fsharp#languageserver_command')
+    let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
+
+    " check if FSAC exists
+    if empty(glob(s:fsac))
+        echoerr "FSAC not found. :FSharpUpdateFSAC to download."
+        let &cpo = s:cpo_save
+        finish
+    endif
+
+    let g:fsharp#languageserver_command =
+        \ ['dotnet', s:fsac,
+            \ '--background-service-enabled'
+        \ ]
 endif
 
 " FSAC server configuration
@@ -76,7 +93,15 @@ if g:fsharp#backend == 'languageclient-neovim'
         let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj', '.git']
     endif
 elseif g:fsharp#backend == 'nvim'
-    call luaeval('ionide.setup(_A[1], _A[2])', [g:fsharp#languageserver_command, g:fsharp#automatic_workspace_init])
+    if !exists('g:fsharp#lsp_auto_setup')
+        let g:fsharp#lsp_auto_setup = 1
+    endif
+    if !exists('g:fsharp#lsp_auto_start')
+        let g:fsharp#lsp_auto_start = 1
+    endif
+    if g:fsharp#lsp_auto_setup
+        lua ionide.setup{}
+    endif
 else
     if g:fsharp#backend != 'disable'
         echoerr "[FSAC] Invalid backend: " . g:fsharp#backend
@@ -91,16 +116,8 @@ if g:fsharp#backend == 'languageclient-neovim'
             autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
         augroup END
     endif
-elseif g:fsharp#backend != 'disable'
-    " check if FSAC exists
-    let script_dir = expand('<sfile>:p:h')
-    let fsac = script_dir . "/../fsac/fsautocomplete.dll"
-    if empty(glob(fsac))
-        echoerr "FSAC not found. :FSharpUpdateFSAC to download."
-        let &cpo = s:cpo_save
-        finish
-    endif
-
+endif
+if g:fsharp#backend != 'disable'
     augroup FSharpLC_fs
         autocmd!
         autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()

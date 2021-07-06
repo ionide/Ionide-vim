@@ -1,4 +1,4 @@
--- adopted from neovim/nvim-lua, see LICENSE-util.md
+-- adopted from neovim/nvim-lspconfig, see lspconfig.LICENSE.md
 
 local vim = vim
 local validate = vim.validate
