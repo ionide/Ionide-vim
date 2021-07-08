@@ -9,6 +9,7 @@ if has('nvim-0.5')
     lua ionide = require("ionide")
 endif
 
+" set some defaults
 let s:script_root_dir = expand('<sfile>:p:h') . "/../"
 if !exists('g:fsharp#languageserver_command')
     let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
@@ -25,13 +26,10 @@ if !exists('g:fsharp#languageserver_command')
             \ '--background-service-enabled'
         \ ]
 endif
-
-" FSAC server configuration
 if !exists('g:fsharp#use_recommended_server_config')
     let g:fsharp#use_recommended_server_config = 1
 endif
 call fsharp#getServerConfig()
-
 if !exists('g:fsharp#automatic_workspace_init')
     let g:fsharp#automatic_workspace_init = 1
 endif
@@ -53,7 +51,6 @@ endif
 if !exists('g:fsharp#fsi_focus_on_send')
     let g:fsharp#fsi_focus_on_send = 0
 endif
-
 if !exists('g:fsharp#backend')
     if has('nvim-0.5')
         if exists('g:LanguageClient_loaded')
@@ -111,6 +108,9 @@ elseif g:fsharp#backend == 'nvim'
     if !exists('g:fsharp#lsp_auto_start')
         let g:fsharp#lsp_auto_start = 1
     endif
+    if !exists('g:fsharp#lsp_recommended_colorscheme')
+        let g:fsharp#lsp_recommended_colorscheme = 1
+    endif
     if g:fsharp#lsp_auto_setup
         lua ionide.setup{}
     endif
@@ -120,6 +120,23 @@ else
     endif
 endif
 
+" colorscheme for nvim-lsp
+function! FSharpApplyRecommendedColorScheme()
+    highlight! LspDiagnosticsDefaultError ctermbg=Red ctermfg=White
+    highlight! LspDiagnosticsDefaultWarning ctermbg=Yellow ctermfg=Black
+    highlight! LspDiagnosticsDefaultInformation ctermbg=LightBlue ctermfg=Black
+    highlight! LspDiagnosticsDefaultHint ctermbg=Green ctermfg=White
+    highlight! default link LspCodeLens Comment
+endfunction
+
+if g:fsharp#backend == 'nvim' && g:fsharp#lsp_recommended_colorscheme
+    call FSharpApplyRecommendedColorScheme()
+    augroup FSharp_ApplyRecommendedColorScheme
+        autocmd!
+        autocmd ColorScheme * call FSharpApplyRecommendedColorScheme()
+    augroup END
+endif
+
 " F# specific bindings
 if g:fsharp#backend == 'languageclient-neovim'
     augroup LanguageClient_config
@@ -127,8 +144,14 @@ if g:fsharp#backend == 'languageclient-neovim'
         autocmd User LanguageClientStarted call fsharp#initialize_LC_neovim()
     augroup END
 endif
+if g:fsharp#backend == 'nvim'
+    augroup FSharp_AutoRefreshCodeLens
+        autocmd!
+        autocmd CursorHold,InsertLeave <buffer> lua vim.lsp.codelens.refresh()
+    augroup END
+endif
 if g:fsharp#backend != 'disable'
-    augroup FSharpLC_fs
+    augroup FSharp_OnCursorMove
         autocmd!
         autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
     augroup END
