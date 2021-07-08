@@ -19,6 +19,22 @@ if util == nil then
   util = require('ionide/util')
 end
 
+local M = {}
+
+local function create_handlers()
+  local handlers = fn['fsharp#get_handlers']()
+  local result = {}
+  for method, func_name in pairs(handlers) do
+    local handler = function(err, method_, params, client_id, bufnr, _config)
+      if params == nil or not (method == method_) then return end
+      fn[func_name](params)
+    end
+    result[method] = handler
+  end
+  M.handlers = result
+  return result
+end
+
 local function get_default_config()
   local result = {}
   local auto_init = vim.g['fsharp#automatic_workspace_init']
@@ -30,10 +46,10 @@ local function get_default_config()
   result.root_dir = util.root_pattern("*.sln", "*.fsproj", ".git")
   result.filetypes = {"fsharp"}
   result.autostart = (auto_start == 1)
+  result.handlers = create_handlers()
+
   return result
 end
-
-local M = {}
 
 M.manager = nil
 
@@ -218,7 +234,12 @@ end
 function M.call(method, params, callback_key)
   local handler = function(err, method, result, client_id, bufnr, config)
     if result ~= nil then
-      fn['fsharp#resolve_callback'](callback_key, { result = result })
+      fn['fsharp#resolve_callback'](callback_key, {
+        result = result,
+        err = err,
+        client_id = client_id,
+        bufnr = bufnr
+      })
     end
   end
   lsp.buf_request(0, method, params, handler)

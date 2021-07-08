@@ -32,6 +32,9 @@ if !exists('g:fsharp#use_recommended_server_config')
 endif
 call fsharp#getServerConfig()
 
+if !exists('g:fsharp#automatic_workspace_init')
+    let g:fsharp#automatic_workspace_init = 1
+endif
 if !exists('g:fsharp#automatic_reload_workspace')
     let g:fsharp#automatic_reload_workspace = 1
 endif
@@ -83,7 +86,16 @@ if g:fsharp#backend == 'languageclient-neovim'
         let g:LanguageClient_serverCommands = {}
     endif
     if !has_key(g:LanguageClient_serverCommands, 'fsharp')
-        let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
+        let g:LanguageClient_serverCommands.fsharp = {
+            \ 'name': 'fsautocomplete',
+            \ 'command': g:fsharp#languageserver_command,
+            \ 'initializationOptions': {},
+            \}
+        if g:fsharp#automatic_workspace_init
+            let g:LanguageClient_serverCommands.fsharp.initializationOptions = {
+                \ 'AutomaticWorkspaceInit': v:true,
+                \}
+        endif
     endif
 
     if !exists('g:LanguageClient_rootMarkers')
@@ -110,12 +122,10 @@ endif
 
 " F# specific bindings
 if g:fsharp#backend == 'languageclient-neovim'
-    if g:fsharp#automatic_workspace_init
-        augroup LanguageClient_config
-            autocmd!
-            autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
-        augroup END
-    endif
+    augroup LanguageClient_config
+        autocmd!
+        autocmd User LanguageClientStarted call fsharp#initialize_LC_neovim()
+    augroup END
 endif
 if g:fsharp#backend != 'disable'
     augroup FSharpLC_fs
@@ -124,9 +134,9 @@ if g:fsharp#backend != 'disable'
     augroup END
 
     com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
-    com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
     com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
-    com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
+    com! -buffer FSharpShowLoadedProjects call fsharp#showLoadedProjects()
+    com! -buffer -nargs=* -complete=file FSharpLoadProject call fsharp#loadProject(<f-args>)
     com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
 endif
 

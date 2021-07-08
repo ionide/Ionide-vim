@@ -88,32 +88,6 @@ function! s:FsdnRequest(query)
     return { 'Query': a:query }
 endfunction
 
-" handling callback for lua
-
-let s:callbacks = {}
-
-function! fsharp#register_callback(fn)
-    if g:fsharp#backend == 'nvim'
-        let rnd = reltimestr(reltime())
-        let s:callbacks[rnd] = a:fn
-        return rnd
-    else
-        echoerr '[FSAC] Not supported for languageclient-neovim'
-        return -1
-    endif
-endfunction
-
-function! fsharp#resolve_callback(key, arg)
-    if g:fsharp#backend == 'nvim'
-        if has_key(s:callbacks, a:key)
-            let Callback = s:callbacks[a:key]
-            call Callback(a:arg)
-            call remove(s:callbacks, a:key)
-        endif
-    else
-        echoerr '[FSAC] Not supported for languageclient-neovim'
-    endif
-endfunction
 
 " LSP functions
 
@@ -249,10 +223,57 @@ function! g:fsharp#getServerConfig()
     return fsharp
 endfunction
 
-function! g:fsharp#updateServerConfig()
+function! fsharp#updateServerConfig()
     let fsharp = fsharp#getServerConfig()
     let settings = {'settings': {'FSharp': fsharp}}
     call s:notify('workspace/didChangeConfiguration', settings)
+endfunction
+
+
+" handlers for notifications
+
+let s:handlers = {
+    \ 'fsharp/notifyWorkspace': 'fsharp#handle_notifyWorkspace',
+    \ }
+
+
+" LC-neovim specific functions
+
+function! fsharp#initialize_LC_neovim()
+    if g:fsharp#backend != 'languageclient-neovim'
+        return
+    endif
+    call LanguageClient_registerHandlers(s:handlers)
+endfunction
+
+
+" nvim-lsp specific functions
+
+" handlers are picked up by ionide.setup()
+function! fsharp#get_handlers()
+    return s:handlers
+endfunction
+
+let s:callbacks = {}
+
+function! fsharp#register_callback(fn)
+    if g:fsharp#backend != 'nvim'
+        return -1
+    endif
+    let rnd = reltimestr(reltime())
+    let s:callbacks[rnd] = a:fn
+    return rnd
+endfunction
+
+function! fsharp#resolve_callback(key, arg)
+    if g:fsharp#backend != 'nvim'
+        return
+    endif
+    if has_key(s:callbacks, a:key)
+        let Callback = s:callbacks[a:key]
+        call Callback(a:arg)
+        call remove(s:callbacks, a:key)
+    endif
 endfunction
 
 
@@ -293,13 +314,19 @@ endfunction
 
 let s:workspace = []
 
+function! fsharp#handle_notifyWorkspace(payload) abort
+    let content = json_decode(a:payload.content)
+    if content.Kind == 'projectLoading'
+        echom "[FSAC] Loading" content.Data.Project
+        let s:workspace = uniq(sort(add(s:workspace, content.Data.Project)))
+    elseif content.Kind == 'workspaceLoad' && content.Data.Status == 'finished'
+        echom printf("[FSAC] Workspace loaded (%d project(s))", len(s:workspace))
+    endif
+endfunction
+
+
 function! s:load(arg)
-    let s:loading_workspace = a:arg
-    function! s:callback_load(_)
-        echo "[FSAC] Workspace loaded: " . join(s:loading_workspace, ', ')
-        let s:workspace = s:workspace + s:loading_workspace
-    endfunction
-    call s:workspaceLoad(a:arg, function("s:callback_load"))
+    call s:workspaceLoad(a:arg, v:null)
 endfunction
 
 function! fsharp#loadProject(...)
@@ -310,23 +337,15 @@ function! fsharp#loadProject(...)
     call s:load(prjs)
 endfunction
 
-function! fsharp#loadWorkspaceAuto()
-    if &ft == 'fsharp'
-        call fsharp#updateServerConfig()
-        if g:fsharp#automatic_workspace_init
-            echom "[FSAC] Loading workspace..."
-            let bufferDirectory = fnamemodify(resolve(expand('%:p')), ':h')
-            call s:findWorkspace(bufferDirectory, function("s:load"))
-        endif
-    endif
+function! fsharp#showLoadedProjects()
+    for proj in s:workspace
+        echo "-" proj
+    endfor
 endfunction
 
 function! fsharp#reloadProjects()
     if len(s:workspace) > 0
-        function! s:callback_reloadProjects(_)
-            call s:prompt("[FSAC] Workspace reloaded.")
-        endfunction
-        call s:workspaceLoad(s:workspace, function("s:callback_reloadProjects"))
+        call s:workspaceLoad(s:workspace, v:null)
     else
         echom "[FSAC] Workspace is empty"
     endif
@@ -344,7 +363,7 @@ function! fsharp#showSignature()
         if exists('result.result.content')
             let content = json_decode(result.result.content)
             if exists('content.Data')
-                echom substitute(content.Data, '\n\+$', ' ', 'g')
+                echo substitute(content.Data, '\n\+$', ' ', 'g')
             endif
         endif
     endfunction
