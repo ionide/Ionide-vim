@@ -383,6 +383,8 @@ endfunction
 function! s:hover()
     if g:fsharp#backend == 'languageclient-neovim'
         call LanguageClient#textDocument_hover()
+    elseif g:fsharp#backend == 'nvim'
+        lua vim.lsp.buf.hover()
     endif
 endfunction
 
