@@ -41,12 +41,13 @@ local function get_default_config()
   local auto_start = vim.g['fsharp#lsp_auto_start']
 
   result.name = "ionide"
-  result.init_options = { AutomaticWorkspaceInit = (auto_init == 1) }
   result.cmd = vim.g['fsharp#languageserver_command']
   result.root_dir = util.root_pattern("*.sln", "*.fsproj", ".git")
   result.filetypes = {"fsharp"}
   result.autostart = (auto_start == 1)
   result.handlers = create_handlers()
+  result.init_options = { AutomaticWorkspaceInit = (auto_init == 1) }
+  result.on_init = function() fn['fsharp#initialize']() end
 
   return result
 end
@@ -76,11 +77,7 @@ https://github.com/ionide/Ionide-vim
 end
 
 -- partially adopted from neovim/nvim-lspconfig, see lspconfig.LICENSE.md
-function M.setup(config)
-  if lspconfig_is_present then
-    return delegate_to_lspconfig(config)
-  end
-
+local function create_manager(config)
   validate {
     cmd = { config.cmd, "t", true },
     root_dir = { config.root_dir, "f", true },
@@ -215,6 +212,13 @@ function M._setup_buffer(client_id, bufnr)
   if client.config._on_attach then
     client.config._on_attach(client, bufnr)
   end
+end
+
+function M.setup(config)
+  if lspconfig_is_present then
+    return delegate_to_lspconfig(config)
+  end
+  return create_manager(config)
 end
 
 function M.status()

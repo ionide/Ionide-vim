@@ -141,7 +141,7 @@ endif
 if g:fsharp#backend == 'languageclient-neovim'
     augroup LanguageClient_config
         autocmd!
-        autocmd User LanguageClientStarted call fsharp#initialize_LC_neovim()
+        autocmd User LanguageClientStarted call fsharp#initialize()
     augroup END
 endif
 if g:fsharp#backend == 'nvim'

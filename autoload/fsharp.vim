@@ -207,7 +207,7 @@ function! s:buildConfigKeys()
     endif
 endfunction
 
-function! g:fsharp#getServerConfig()
+function! fsharp#getServerConfig()
     let fsharp = {}
     call s:buildConfigKeys()
     for key in s:config_keys
@@ -236,14 +236,12 @@ let s:handlers = {
     \ 'fsharp/notifyWorkspace': 'fsharp#handle_notifyWorkspace',
     \ }
 
-
-" LC-neovim specific functions
-
-function! fsharp#initialize_LC_neovim()
-    if g:fsharp#backend != 'languageclient-neovim'
-        return
+function! fsharp#initialize()
+    echom '[FSAC] Initialized'
+    if g:fsharp#backend == 'languageclient-neovim'
+        call LanguageClient_registerHandlers(s:handlers)
     endif
-    call LanguageClient_registerHandlers(s:handlers)
+    call fsharp#updateServerConfig()
 endfunction
 
 
@@ -321,6 +319,7 @@ function! fsharp#handle_notifyWorkspace(payload) abort
         let s:workspace = uniq(sort(add(s:workspace, content.Data.Project)))
     elseif content.Kind == 'workspaceLoad' && content.Data.Status == 'finished'
         echom printf("[FSAC] Workspace loaded (%d project(s))", len(s:workspace))
+        call fsharp#updateServerConfig()
     endif
 endfunction
 
