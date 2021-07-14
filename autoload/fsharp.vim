@@ -236,12 +236,28 @@ let s:handlers = {
     \ 'fsharp/notifyWorkspace': 'fsharp#handle_notifyWorkspace',
     \ }
 
+function! s:registerAutocmds()
+    if g:fsharp#backend == 'nvim' && g:fsharp#lsp_codelens
+        augroup FSharp_AutoRefreshCodeLens
+            autocmd!
+            autocmd CursorHold,InsertLeave <buffer> lua vim.lsp.codelens.refresh()
+        augroup END
+    endif
+    if g:fsharp#backend != 'disable'
+        augroup FSharp_OnCursorMove
+            autocmd!
+            autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
+        augroup END
+    endif
+endfunction
+
 function! fsharp#initialize()
     echom '[FSAC] Initialized'
     if g:fsharp#backend == 'languageclient-neovim'
         call LanguageClient_registerHandlers(s:handlers)
     endif
     call fsharp#updateServerConfig()
+    call s:registerAutocmds()
 endfunction
 
 

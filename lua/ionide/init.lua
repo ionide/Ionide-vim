@@ -38,13 +38,12 @@ end
 local function get_default_config()
   local result = {}
   local auto_init = vim.g['fsharp#automatic_workspace_init']
-  local auto_start = vim.g['fsharp#lsp_auto_start']
 
   result.name = "ionide"
-  result.cmd = vim.g['fsharp#languageserver_command']
+  result.cmd = vim.g['fsharp#fsautocomplete_command']
   result.root_dir = util.root_pattern("*.sln", "*.fsproj", ".git")
   result.filetypes = {"fsharp"}
-  result.autostart = (auto_start == 1)
+  result.autostart = true
   result.handlers = create_handlers()
   result.init_options = { AutomaticWorkspaceInit = (auto_init == 1) }
   result.on_init = function() fn['fsharp#initialize']() end

@@ -11,7 +11,7 @@ endif
 
 " set some defaults
 let s:script_root_dir = expand('<sfile>:p:h') . "/../"
-if !exists('g:fsharp#languageserver_command')
+if !exists('g:fsharp#fsautocomplete_command')
     let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
 
     " check if FSAC exists
@@ -21,7 +21,7 @@ if !exists('g:fsharp#languageserver_command')
         finish
     endif
 
-    let g:fsharp#languageserver_command =
+    let g:fsharp#fsautocomplete_command =
         \ ['dotnet', s:fsac,
             \ '--background-service-enabled'
         \ ]
@@ -85,7 +85,7 @@ if g:fsharp#backend == 'languageclient-neovim'
     if !has_key(g:LanguageClient_serverCommands, 'fsharp')
         let g:LanguageClient_serverCommands.fsharp = {
             \ 'name': 'fsautocomplete',
-            \ 'command': g:fsharp#languageserver_command,
+            \ 'command': g:fsharp#fsautocomplete_command,
             \ 'initializationOptions': {},
             \}
         if g:fsharp#automatic_workspace_init
@@ -105,11 +105,11 @@ elseif g:fsharp#backend == 'nvim'
     if !exists('g:fsharp#lsp_auto_setup')
         let g:fsharp#lsp_auto_setup = 1
     endif
-    if !exists('g:fsharp#lsp_auto_start')
-        let g:fsharp#lsp_auto_start = 1
-    endif
     if !exists('g:fsharp#lsp_recommended_colorscheme')
         let g:fsharp#lsp_recommended_colorscheme = 1
+    endif
+    if !exists('g:fsharp#lsp_codelens')
+        let g:fsharp#lsp_codelens = 1
     endif
     if g:fsharp#lsp_auto_setup
         lua ionide.setup{}
@@ -144,18 +144,7 @@ if g:fsharp#backend == 'languageclient-neovim'
         autocmd User LanguageClientStarted call fsharp#initialize()
     augroup END
 endif
-if g:fsharp#backend == 'nvim'
-    augroup FSharp_AutoRefreshCodeLens
-        autocmd!
-        autocmd CursorHold,InsertLeave <buffer> lua vim.lsp.codelens.refresh()
-    augroup END
-endif
 if g:fsharp#backend != 'disable'
-    augroup FSharp_OnCursorMove
-        autocmd!
-        autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
-    augroup END
-
     com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
     com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
     com! -buffer FSharpShowLoadedProjects call fsharp#showLoadedProjects()
