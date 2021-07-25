@@ -5,14 +5,34 @@ if exists('b:did_fsharp_ftplugin')
 endif
 let b:did_fsharp_ftplugin = 1
 
-" set some defaults
+if has('nvim-0.5')
+    lua ionide = require("ionide")
+endif
 
-" FSAC server configuration
+" set some defaults
+let s:script_root_dir = expand('<sfile>:p:h') . "/../"
+if !exists('g:fsharp#fsautocomplete_command')
+    let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
+
+    " check if FSAC exists
+    if empty(glob(s:fsac))
+        echoerr "FSAC not found. :FSharpUpdateFSAC to download."
+        let &cpo = s:cpo_save
+        finish
+    endif
+
+    let g:fsharp#fsautocomplete_command =
+        \ ['dotnet', s:fsac,
+            \ '--background-service-enabled'
+        \ ]
+endif
 if !exists('g:fsharp#use_recommended_server_config')
     let g:fsharp#use_recommended_server_config = 1
 endif
 call fsharp#getServerConfig()
-
+if !exists('g:fsharp#automatic_workspace_init')
+    let g:fsharp#automatic_workspace_init = 1
+endif
 if !exists('g:fsharp#automatic_reload_workspace')
     let g:fsharp#automatic_reload_workspace = 1
 endif
@@ -31,6 +51,17 @@ endif
 if !exists('g:fsharp#fsi_focus_on_send')
     let g:fsharp#fsi_focus_on_send = 0
 endif
+if !exists('g:fsharp#backend')
+    if has('nvim-0.5')
+        if exists('g:LanguageClient_loaded')
+            let g:fsharp#backend = "languageclient-neovim"
+        else
+            let g:fsharp#backend = "nvim"
+        endif
+    else
+        let g:fsharp#backend = "languageclient-neovim"
+    endif
+endif
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -46,49 +77,80 @@ setl comments=s0:*\ -,m0:*\ \ ,ex0:*),s1:(*,mb:*,ex:*),:\/\/\/,:\/\/
 " make ftplugin undo-able
 let b:undo_ftplugin = 'setl fo< cms< com< fdm<'
 
-com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
+" backend configuration
+if g:fsharp#backend == 'languageclient-neovim'
+    if !exists('g:LanguageClient_serverCommands')
+        let g:LanguageClient_serverCommands = {}
+    endif
+    if !has_key(g:LanguageClient_serverCommands, 'fsharp')
+        let g:LanguageClient_serverCommands.fsharp = {
+            \ 'name': 'fsautocomplete',
+            \ 'command': g:fsharp#fsautocomplete_command,
+            \ 'initializationOptions': {},
+            \}
+        if g:fsharp#automatic_workspace_init
+            let g:LanguageClient_serverCommands.fsharp.initializationOptions = {
+                \ 'AutomaticWorkspaceInit': v:true,
+                \}
+        endif
+    endif
 
-" check if FSAC exists
-let script_dir = expand('<sfile>:p:h')
-let fsac = script_dir . "/../fsac/fsautocomplete.dll"
-if empty(glob(fsac))
-    echoerr "FSAC not found. :FSharpUpdateFSAC to download."
-    let &cpo = s:cpo_save
-    finish
+    if !exists('g:LanguageClient_rootMarkers')
+        let g:LanguageClient_rootMarkers = {}
+    endif
+    if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
+        let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj', '.git']
+    endif
+elseif g:fsharp#backend == 'nvim'
+    if !exists('g:fsharp#lsp_auto_setup')
+        let g:fsharp#lsp_auto_setup = 1
+    endif
+    if !exists('g:fsharp#lsp_recommended_colorscheme')
+        let g:fsharp#lsp_recommended_colorscheme = 1
+    endif
+    if !exists('g:fsharp#lsp_codelens')
+        let g:fsharp#lsp_codelens = 1
+    endif
+    if g:fsharp#lsp_auto_setup
+        lua ionide.setup{}
+    endif
+else
+    if g:fsharp#backend != 'disable'
+        echoerr "[FSAC] Invalid backend: " . g:fsharp#backend
+    endif
 endif
 
-" add LanguageClient configuration
+" colorscheme for nvim-lsp
+function! FSharpApplyRecommendedColorScheme()
+    highlight! LspDiagnosticsDefaultError ctermbg=Red ctermfg=White
+    highlight! LspDiagnosticsDefaultWarning ctermbg=Yellow ctermfg=Black
+    highlight! LspDiagnosticsDefaultInformation ctermbg=LightBlue ctermfg=Black
+    highlight! LspDiagnosticsDefaultHint ctermbg=Green ctermfg=White
+    highlight! default link LspCodeLens Comment
+endfunction
 
-if !exists('g:LanguageClient_serverCommands')
-    let g:LanguageClient_serverCommands = {}
-endif
-if !has_key(g:LanguageClient_serverCommands, 'fsharp')
-    let g:LanguageClient_serverCommands.fsharp = g:fsharp#languageserver_command
-endif
-
-if !exists('g:LanguageClient_rootMarkers')
-    let g:LanguageClient_rootMarkers = {}
-endif
-if !has_key(g:LanguageClient_rootMarkers, 'fsharp')
-    let g:LanguageClient_rootMarkers.fsharp = ['*.sln', '*.fsproj']
-endif
-
-if g:fsharp#automatic_workspace_init
-    augroup LanguageClient_config
+if g:fsharp#backend == 'nvim' && g:fsharp#lsp_recommended_colorscheme
+    call FSharpApplyRecommendedColorScheme()
+    augroup FSharp_ApplyRecommendedColorScheme
         autocmd!
-        autocmd User LanguageClientStarted call fsharp#loadWorkspaceAuto()
+        autocmd ColorScheme * call FSharpApplyRecommendedColorScheme()
     augroup END
 endif
 
-augroup FSharpLC_fs
-    autocmd!
-    autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
-augroup END
-
-com! -buffer FSharpLoadWorkspaceAuto call fsharp#loadWorkspaceAuto()
-com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
-com! -buffer -nargs=* -complete=file FSharpParseProject call fsharp#loadProject(<f-args>)
-com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
+" F# specific bindings
+if g:fsharp#backend == 'languageclient-neovim'
+    augroup LanguageClient_config
+        autocmd!
+        autocmd User LanguageClientStarted call fsharp#initialize()
+    augroup END
+endif
+if g:fsharp#backend != 'disable'
+    com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
+    com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
+    com! -buffer FSharpShowLoadedProjects call fsharp#showLoadedProjects()
+    com! -buffer -nargs=* -complete=file FSharpLoadProject call fsharp#loadProject(<f-args>)
+    com! -buffer FSharpUpdateServerConfig call fsharp#updateServerConfig()
+endif
 
 com! -buffer -nargs=1 FsiEval call fsharp#sendFsi(<f-args>)
 com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()
