@@ -356,10 +356,12 @@ function! s:registerAutocmds()
         augroup END
     endif
     if g:fsharp#backend != 'disable'
-        augroup FSharp_OnCursorMove
-            autocmd!
-            autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#OnCursorMove()
-        augroup END
+        if g:fsharp#show_signature_on_cursor_move
+            augroup FSharp_ShowSignature
+                autocmd!
+                autocmd CursorMoved *.fs,*.fsi,*.fsx  call fsharp#showSignature()
+            augroup END
+        endif
     endif
 endfunction
 
@@ -462,12 +464,6 @@ function! fsharp#showSignature()
         endif
     endfunction
     call s:signature(expand('%:p'), line('.') - 1, col('.') - 1, function("s:callback_showSignature"))
-endfunction
-
-function! fsharp#OnCursorMove()
-    if g:fsharp#show_signature_on_cursor_move
-        call fsharp#showSignature()
-    endif
 endfunction
 
 function! fsharp#showF1Help()
