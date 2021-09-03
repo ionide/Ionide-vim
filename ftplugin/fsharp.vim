@@ -63,27 +63,6 @@ com! -buffer FsiEvalBuffer call fsharp#sendAllToFsi()
 com! -buffer FsiReset call fsharp#resetFsi()
 com! -buffer FsiShow call fsharp#toggleFsi()
 
-if g:fsharp#fsi_keymap == "vscode"
-    if has('nvim')
-        let g:fsharp#fsi_keymap_send   = "<M-cr>"
-        let g:fsharp#fsi_keymap_toggle = "<M-@>"
-    else
-        let g:fsharp#fsi_keymap_send   = "<esc><cr>"
-        let g:fsharp#fsi_keymap_toggle = "<esc>@"
-    endif
-elseif g:fsharp#fsi_keymap == "vim-fsharp"
-    let g:fsharp#fsi_keymap_send   = "<leader>i"
-    let g:fsharp#fsi_keymap_toggle = "<leader>e"
-elseif g:fsharp#fsi_keymap == "custom"
-    let g:fsharp#fsi_keymap = "none"
-    if !exists('g:fsharp#fsi_keymap_send')
-        echoerr "g:fsharp#fsi_keymap_send is not set"
-    elseif !exists('g:fsharp#fsi_keymap_toggle')
-        echoerr "g:fsharp#fsi_keymap_toggle is not set"
-    else
-        let g:fsharp#fsi_keymap = "custom"
-    endif
-endif
 if g:fsharp#fsi_keymap != "none"
     execute "vnoremap <silent>" g:fsharp#fsi_keymap_send ":call fsharp#sendSelectionToFsi()<cr><esc>"
     execute "nnoremap <silent>" g:fsharp#fsi_keymap_send ":call fsharp#sendLineToFsi()<cr>"
@@ -91,11 +70,7 @@ if g:fsharp#fsi_keymap != "none"
     execute "tnoremap <silent>" g:fsharp#fsi_keymap_toggle "<C-\\><C-n>:call fsharp#toggleFsi()<cr>"
 endif
 
-" auto setup nvim-lsp
-if g:fsharp#backend == 'nvim' && g:fsharp#lsp_auto_setup
-    lua ionide.setup{}
-endif
-
 let &cpo = s:cpo_save
+unlet s:cpo_save
 
 " vim: sw=4 et sts=4
