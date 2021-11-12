@@ -64,14 +64,16 @@ end
 local function delegate_to_lspconfig(config)
   local lspconfig = require('lspconfig')
   local configs = require('lspconfig/configs')
-  configs['ionide'] = {
-    default_config = get_default_config(),
-    docs = {
-      description = [[
-https://github.com/ionide/Ionide-vim
-      ]],
-    },
-  }
+  if not (configs['ionide']) then
+    configs['ionide'] = {
+      default_config = get_default_config(),
+      docs = {
+        description = [[
+  https://github.com/ionide/Ionide-vim
+        ]],
+      },
+    }
+  end
   lspconfig.ionide.setup(config)
   autostart_if_needed(lspconfig.ionide, config)
 end
