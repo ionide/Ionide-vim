@@ -58,7 +58,7 @@ syn match fsharpRecordEncl "|}"
 " symbol names
 
 syn region fsharpValueDef transparent matchgroup=fsharpKeyword start="\<\%(let\|use\)\>!\?" end="=" contains=fsharpValueDefModifier,fsharpValueBinding,fsharpFuncBinding,fsharpGenericVarBinding,fsharpOperatorBinding,fsharpAttrib
-syn keyword fsharpValueDefModifier mutable rec inline public private internal member contained
+syn keyword fsharpValueDefModifier mutable rec inline public private internal member val contained
 
 syn region fsharpFuncBinding contained transparent matchgroup=fsharpFuncSymbol start="\w\+\%(\s\+\w\|\s*(\)\@=" matchgroup=NONE end="=\@=" contains=fsharpArgParen,fsharpArg,fsharpTypeAnnotation
 syn region fsharpValueBinding contained transparent matchgroup=fsharpSymbol start="\w\+\ze\s*[:=,]" matchgroup=NONE end="=\@=" contains=fsharpTypeAnnotation,fsharpMoreBinding
@@ -71,6 +71,7 @@ syn region fsharpMemberDef transparent matchgroup=fsharpKeyword start="\<\%(memb
 syn match  fsharpSelfBinding "\w\+\ze\s*\." contained nextgroup=fsharpSelfBindingDot skipwhite
 syn match  fsharpSelfBindingDot "\." contained nextgroup=fsharpFuncBinding,fsharpValueBinding,fsharpGenericVarBinding skipwhite
 
+" TODO: fix this
 syn region fsharpValueSig transparent matchgroup=fsharpKeyword start="\<val\>" matchgroup=NONE end="\%(\<\%(val\|type\|module\|namespace\|open\|end\|let\|member\|abstract\|override\|default\|and\)\>\)\@=" contains=fsharpValueDefModifier,@fsharpTypeExpr,fsharpAttrib
 syn region fsharpAbstractSig transparent matchgroup=fsharpKeyword start="\<abstract\>" matchgroup=NONE end="\%(\<\%(val\|type\|module\|namespace\|open\|end\|let\|member\|abstract\|override\|default\|and\)\>\)\@=" contains=fsharpValueDefModifier,@fsharpTypeExpr,fsharpAttrib
 
