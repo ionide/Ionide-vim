@@ -75,7 +75,6 @@ local function delegate_to_lspconfig(config)
     }
   end
   lspconfig.ionide.setup(config)
-  autostart_if_needed(lspconfig.ionide, config)
 end
 
 -- partially adopted from neovim/nvim-lspconfig, see lspconfig.LICENSE.md
@@ -104,6 +103,9 @@ local function create_manager(config)
     local root_dir = get_root_dir(api.nvim_buf_get_name(0), api.nvim_get_current_buf())
     if not root_dir then
       root_dir = util.path.dirname(api.nvim_buf_get_name(0))
+    end
+    if not root_dir then
+      root_dir = vim.fn.getcwd()
     end
     api.nvim_command(
       string.format(
