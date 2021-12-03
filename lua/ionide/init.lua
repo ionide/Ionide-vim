@@ -13,10 +13,10 @@ function try_require(...)
 end
 
 local lspconfig_is_present = true
-local util = try_require('lspconfig/util')
+local util = try_require('lspconfig.util')
 if util == nil then
   lspconfig_is_present = false
-  util = require('ionide/util')
+  util = require('ionide.util')
 end
 
 local M = {}
@@ -63,7 +63,7 @@ end
 
 local function delegate_to_lspconfig(config)
   local lspconfig = require('lspconfig')
-  local configs = require('lspconfig/configs')
+  local configs = require('lspconfig.configs')
   if not (configs['ionide']) then
     configs['ionide'] = {
       default_config = get_default_config(),
