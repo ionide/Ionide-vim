@@ -474,8 +474,17 @@ function! fsharp#OnCursorMove()
 endfunction
 
 function! fsharp#showF1Help()
-    let result = s:f1Help(expand('%:p'), line('.') - 1, col('.') - 1)
-    echo result
+    function! s:callback_showF1Help(result)
+        let result = a:result
+        if exists('result.result.content')
+            let content = json_decode(result.result.content)
+            if exists('content.Data')
+                let url = 'https://docs.microsoft.com/en-us/dotnet/api/' . substitute(content.Data, '#ctor', '-ctor', 'g')
+                echo url
+            endif
+        endif
+    endfunction
+    call s:f1Help(expand('%:p'), line('.') - 1, col('.') - 1, function("s:callback_showF1Help"))
 endfunction
 
 function! s:hover()
