@@ -234,11 +234,7 @@ function! fsharp#loadConfig()
     endif
 
     if !exists('g:fsharp#fsautocomplete_command')
-        let s:fsac = fnamemodify(s:script_root_dir . "fsac/fsautocomplete.dll", ":p")
-        let g:fsharp#fsautocomplete_command =
-            \ ['dotnet', s:fsac,
-                \ '--background-service-enabled'
-            \ ]
+        let g:fsharp#fsautocomplete_command = ['fsautocomplete', '--background-service-enabled']
     endif
     if !exists('g:fsharp#use_recommended_server_config')
         let g:fsharp#use_recommended_server_config = 1
@@ -508,39 +504,6 @@ function! fsharp#showTooltip()
     endfunction
     " show hover only if signature exists for the current position
     call s:signature(expand('%:p'), line('.') - 1, col('.') - 1, function("s:callback_showTooltip"))
-endfunction
-
-
-" FSAC update utils
-
-function! s:update_win()
-    echom "[FSAC] Downloading FSAC. This may take a while..."
-    let script = s:script_root_dir . "install.ps1"
-    call system('powershell -ExecutionPolicy Unrestricted ' . script . " update")
-endfunction
-
-function! s:update_unix()
-    echom "[FSAC] Downloading FSAC. This may take a while..."
-    let zip = s:script_root_dir . "fsac.zip"
-    call system(
-        \ 'curl -fLo ' . zip .  ' --create-dirs ' .
-        \ '"https://github.com/fsharp/FsAutoComplete/releases/latest/download/fsautocomplete.netcore.zip"'
-        \ )
-    if v:shell_error == 0
-        call system('unzip -o -d ' . s:script_root_dir . "/fsac " . zip)
-        call system('find ' . s:script_root_dir . '/fsac' . ' -type f -exec chmod 777 \{\} \;')
-        echom "[FSAC] Updated FsAutoComplete"
-    else
-        echom "[FSAC] Failed to update FsAutoComplete"
-    endif
-endfunction
-
-function! fsharp#updateFSAC(...)
-    if has('win32') && !has('win32unix')
-        call s:update_win()
-    else
-        call s:update_unix()
-    endif
 endfunction
 
 

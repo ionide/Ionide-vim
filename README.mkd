@@ -30,7 +30,7 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
   - Python support is not required as of now. This may or may not change in the future.
 
 * [.NET Core SDK](https://dotnet.microsoft.com/download)
-  - Required to run FsAutoComplete.
+  - Required to install and run FsAutoComplete.
   - Very useful for command-line development.
 
 * If you are using Vim or Neovim (below version 0.5):
@@ -59,6 +59,16 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 - Integration with [Fantomas](https://github.com/fsprojects/fantomas/) (the best formatter available for F#)
 
 ## Getting Started
+
+### Install FsAutoComplete
+
+Install FsAutoComplete with `dotnet tool install`.
+
+If you want to install it as a "global" tool, run `dotnet tool install -g fsautocomplete`.
+
+If you want to install it as a project-local tool, run `dotnet tool install fsautocomplete`
+at the root directory of your F# project, and configure `g:fsharp#fsautocomplete_command`
+as explained [here](#set-the-path-to-fsac).
 
 ### Install a LSP Client
 
@@ -106,39 +116,21 @@ Plug 'deoplete-plugins/deoplete-lsp'
 
 ### Install Ionide-vim
 
-#### Installing with your plugin manager
-
-##### [vim-plug](https://github.com/junegunn/vim-plug)
+#### [vim-plug](https://github.com/junegunn/vim-plug)
 
 ~~~.vim
-Plug 'ionide/Ionide-vim', {
-      \ 'do':  'make fsautocomplete',
-      \}
+Plug 'ionide/Ionide-vim'
 ~~~
 
-##### [dein.vim](https://github.com/Shougo/dein.vim)
+#### [dein.vim](https://github.com/Shougo/dein.vim)
 
 ~~~.vim
-call dein#add('ionide/Ionide-vim', {
-    \ 'build': 'make fsautocomplete',
-    \ })
-~~~
-
-#### Installing on Windows
-
-Run `install.ps1` instead of `make fsautocomplete`.
-
-For example, if you are using vim-plug, you can use the following:
-
-~~~.vim
-Plug 'ionide/Ionide-vim', {
-     \ 'do':  'powershell -ExecutionPolicy Unrestricted .\install.ps1',
-     \}
+call dein#add('ionide/Ionide-vim')
 ~~~
 
 #### Installing manually
 
-Clone Ionide-vim to some runtimepath and run `make fsautocomplete`.
+Clone Ionide-vim to some runtimepath.
 
 ## Usage
 
@@ -163,10 +155,6 @@ To be added as requested for F#-specific features.
 #### `:FSharpUpdateServerConfig`
   - Updates FSAC configuration.
   - See [FsAutoComplete Settings](#fsautocomplete-settings) for details.
-
-#### `:FSharpUpdateFSAC`
-  - Downloads the latest build of FsAutoComplete to be used with Ionide-vim.
-  - On Windows, it will run `install.ps1 update`.
 
 ### Working with F# Interactive
 
@@ -208,23 +196,28 @@ See some examples in [our wiki](https://github.com/ionide/Ionide-vim/wiki/Config
 
 #### LSP Client Settings
 
-##### Set the LSP client used by Ionide-vim (default: see below)
+##### Set the LSP client used by Ionide-vim
 
 Set `g:fsharp#backend` to
 * `nvim` if you want to use neovim's built-in LSP client.
 * `languageclient-neovim` if you want to use [autozimu/LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim).
 * `disable` if you only want the syntax highlighting and the FSI integration.
 
-Default: `nvim` if you are using Neovim 0.5+, `languageclient-neovim` otherwise.
+*Default:* `nvim` if you are using Neovim 0.5+, `languageclient-neovim` otherwise.
 
 ~~~.vim
 let g:fsharp#backend = "languageclient-neovim"
 ~~~
 
-##### Set the path to FSAC (default: bundled with Ionide-vim)
+##### Set the path to FSAC
 
-By default, Ionide-vim automatically downloads FSAC to its plugin directory.
-If you have a different one e.g. installed as a .NET global tool, you can use it in Ionide-vim by:
+*Default:* `['fsautocomplete', '--background-service-enabled']`
+
+This option overrides the path to the FSAC Ionide-vim uses.
+
+By default, Ionide-vim uses the FSAC installed globally with `dotnet tool install`.
+
+For example, if you want to use a project-local FSAC, set the following:
 
 ~~~.vim
 let g:fsharp#fsautocomplete_command =
@@ -236,7 +229,9 @@ let g:fsharp#fsautocomplete_command =
 
 Note: You have to use an array here. Setting a string value to this option will result in an error.
 
-##### Set the keybindings for LSP features (default: not set)
+##### Set the keybindings for LSP features
+
+*Default:* not set
 
 Ionide-vim does *not* provide default keybindings for various LSP features, so you will have to set them yourself.
 
@@ -247,7 +242,9 @@ Examples are available at [our wiki](https://github.com/ionide/Ionide-vim/wiki/C
 
 #### Settings specific to neovim's built-in LSP client
 
-##### Enable/disable the default colorscheme for diagnostics (default: enable)
+##### Enable/disable the default colorscheme for diagnostics
+
+*Default:* enabled
 
 Neovim's LSP client comes with no default colorscheme, so Ionide-vim sets a VSCode-like one for LSP diagnostics by default.
 You can disable this by the following:
@@ -256,7 +253,9 @@ You can disable this by the following:
 let g:fsharp#lsp_recommended_colorscheme = 0
 ~~~
 
-##### Enable/disable automatic setup (default: enabled)
+##### Enable/disable automatic setup
+
+*Default:* enabled
 
 With [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig), you would manually call the `setup` function for each LSP servers.
 Ionide-vim does this automatically by default, but you can disable it.
@@ -269,7 +268,9 @@ require'ionide'.setup{}
 EOF
 ~~~
 
-##### Enable/disable automatic refreshing CodeLens (default: enabled)
+##### Enable/disable automatic refreshing CodeLens
+
+*Default:* enabled
 
 By default, Ionide-vim sets the following so that CodeLens gets refreshed automatically.
 
@@ -302,25 +303,33 @@ Please see [their docs](https://github.com/autozimu/LanguageClient-neovim/blob/n
 See [the documentation of FSAC](https://github.com/fsharp/FsAutoComplete#settings)
 for the complete list of available settings. Frequently used ones are:
 
-##### Enable/disable automatic loading of the workspace on opening F# files (default: enabled)
+##### Enable/disable automatic loading of the workspace on opening F# files
+
+*Default:* enabled
 
 ~~~.vim
 let g:fsharp#automatic_workspace_init = 1 " 0 to disable.
 ~~~
 
-##### Set the deep level of directory hierarchy when searching for sln/fsprojs (default: `2`)
+##### Set the deep level of directory hierarchy when searching for sln/fsprojs
+
+*Default:* `2`
 
 ~~~.vim
 let g:fsharp#workspace_mode_peek_deep_level = 2
 ~~~
 
-##### Ignore specific directories when loading a workspace (default: empty)
+##### Ignore specific directories when loading a workspace
+
+*Default:* empty
 
 ~~~.vim
 let g:fsharp#exclude_project_directories = ['paket-files']
 ~~~
 
-##### Enable/disable linter and unused opens/declarations analyzer (default: all enabled)
+##### Enable/disable linter and unused opens/declarations analyzer
+
+*Default:* all enabled
 
 You may want to bind `LanguageClient#textDocument_codeAction()` to some shortcut key. Refer to their docs.
 
@@ -333,13 +342,17 @@ let g:fsharp#unused_declarations_analyzer = 1
 
 #### Editor Settings
 
-##### Enable/disable automatic calling of `:FSharpReloadWorkspace` on saving `fsproj` (default: enabled)
+##### Enable/disable automatic calling of `:FSharpReloadWorkspace` on saving `fsproj`
+
+*Default:* enabled
 
 ~~~.vim
 let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 ~~~
 
-##### Show type signature at cursor position (default: enabled)
+##### Show type signature at cursor position
+
+*Default:* enabled
 
 ~~~.vim
 let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
@@ -347,7 +360,9 @@ let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 
 #### F# Interactive Settings
 
-##### Change the F# Interactive command to be used within Ionide-vim (default: `dotnet fsi`)
+##### Change the F# Interactive command to be used within Ionide-vim
+
+*Default:* `dotnet fsi`
 
 If you want to use a .NET Framework FSI instead of .NET Core one, set `g:fsharp#use_sdk_scripts` to `0`.
 See: https://github.com/fsharp/FsAutoComplete/pull/466#issue-324869672
@@ -357,7 +372,9 @@ let g:fsharp#fsi_command = "fsharpi"
 let g:fsharp#use_sdk_scripts = 0 " for net462 FSI
 ~~~
 
-##### Set additional runtime arguments passed to FSI (default: `[]` (empty))
+##### Set additional runtime arguments passed to FSI
+
+*Default:* empty
 
 Sets additional arguments of the FSI instance Ionide-vim spawns and changes the behavior of FSAC accordingly when editing fsx files.
 
@@ -365,7 +382,9 @@ Sets additional arguments of the FSI instance Ionide-vim spawns and changes the 
 let g:fsharp#fsi_extra_parameters = ['--langversion:preview']
 ~~~
 
-##### Customize how FSI window is opened (default: `botright 10new`)
+##### Customize how FSI window is opened
+
+*Default:* `botright 10new`
 
 It must create a new empty window and then focus to it.
 
@@ -375,7 +394,9 @@ See [`:help opening-window`](http://vimdoc.sourceforge.net/htmldoc/windows.html#
 let g:fsharp#fsi_window_command = "botright vnew"
 ~~~
 
-##### Set if sending line/selection to FSI shoule make the cursor focus to FSI window (default: disabled)
+##### Set if sending line/selection to FSI shoule make the cursor focus to FSI window
+
+*Default:* disabled
 
 If you are using Vim, you might want to enable this to see the result without inputting something.
 
@@ -383,7 +404,9 @@ If you are using Vim, you might want to enable this to see the result without in
 let g:fsharp#fsi_focus_on_send = 1 " 0 to not to focus.
 ~~~
 
-##### Change the key mappings (default: `vscode`)
+##### Change the key mappings
+
+*Default:* `vscode`
 
 * `vscode`:     Default. Same as in Ionide-VSCode (`Alt-Enter` to send, `Alt-@` to toggle terminal).
   - `<M-CR>` in Neovim / `<ESC><CR>` in Vim: Sends line/selection to FSI.

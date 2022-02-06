@@ -51,7 +51,6 @@ if g:fsharp#backend == 'languageclient-neovim'
     augroup END
 endif
 if g:fsharp#backend != 'disable'
-    com! -buffer FSharpUpdateFSAC call fsharp#updateFSAC()
     com! -buffer FSharpReloadWorkspace call fsharp#reloadProjects()
     com! -buffer FSharpShowLoadedProjects call fsharp#showLoadedProjects()
     com! -buffer -nargs=* -complete=file FSharpLoadProject call fsharp#loadProject(<f-args>)
