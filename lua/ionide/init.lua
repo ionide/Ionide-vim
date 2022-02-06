@@ -42,6 +42,7 @@ local function get_default_config()
   local auto_init = vim.g['fsharp#automatic_workspace_init']
   result.name = "ionide"
   result.cmd = vim.g['fsharp#fsautocomplete_command']
+  result.cmd_env = { DOTNET_ROLL_FORWARD = "LatestMajor" }
   result.root_dir = util.root_pattern("*.sln", "*.fsproj", ".git")
   result.filetypes = {"fsharp"}
   result.autostart = true
