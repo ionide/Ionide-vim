@@ -55,33 +55,33 @@ syn match fsharpRecordEncl "}"
 syn match fsharpRecordEncl "{|"
 syn match fsharpRecordEncl "|}"
 
-" symbol names
+" value definition
+syn match fsharpKeyword "\<\%(let\|use\|member\|override\|default\|val\|abstract\)\>!\?" nextgroup=@fsharpValueDefBody skipwhite skipempty
 
-syn region fsharpValueDef transparent matchgroup=fsharpKeyword start="\<\%(let\|use\)\>!\?" end="=" contains=fsharpValueDefModifier,fsharpValueBinding,fsharpRecord,fsharpFuncBinding,fsharpGenericVarBinding,fsharpOperatorBinding,fsharpAttrib
-syn keyword fsharpValueDefModifier mutable rec inline public private internal member val contained
+syn cluster fsharpValueDefItem contains=fsharpFuncSymbol,fsharpSymbol,fsharpOperatorBinding,fsharpSelfBinding,fsharpArgParen,fsharpArgRecord
+syn cluster fsharpValueDefBody contains=@fsharpValueDefItem,fsharpValueDefModifier,fsharpValueDefAttrib
 
-syn region fsharpFuncBinding contained transparent matchgroup=fsharpFuncSymbol start="\w\+\%(\s\+\w\|\s*(\|\s\+{\)\@=" matchgroup=NONE end="=\@=" contains=fsharpArgParen,fsharpRecord,fsharpArg,fsharpTypeAnnotation
-syn region fsharpValueBinding contained transparent matchgroup=fsharpSymbol start="\w\+\ze\s*[:=,]" matchgroup=NONE end="=\@=" contains=fsharpTypeAnnotation,fsharpMoreBinding
-syn region fsharpGenericVarBinding contained transparent matchgroup=fsharpFuncSymbol start="\w\+\ze<" matchgroup=NONE end="=\@=" contains=fsharpTypeArg,fsharpArgParen,fsharpRecord,fsharpArg,fsharpTypeAnnotation
-syn region fsharpOperatorBinding contained transparent start="(.\+)" end="=\@=" contains=fsharpArgParen,fsharpRecord,fsharpArg,fsharpTypeAnnotation
+syn keyword fsharpValueDefModifier mutable rec inline public private internal member val contained nextgroup=@fsharpValueDefItem skipwhite skipempty
+syn region  fsharpValueDefAttrib matchgroup=fsharpAttribute start="\[<" end=">]" nextgroup=@fsharpValueDefItem skipwhite skipempty
 
-syn region fsharpTypeAnnotation matchgroup=NONE start=":" end="\%([=,)\]}|\n]\|with\)\@=" contains=@fsharpTypeExpr
+syn match  fsharpFuncSymbol contained "\w\+\%(\s\+\w\|\s*(\|\s\+{\|\s*<\)\@=" nextgroup=@fsharpArg skipwhite skipempty
+syn match  fsharpSymbol contained "\w\+\ze\s*[:=,]" nextgroup=fsharpTypeAnnotation,fsharpMoreBinding skipwhite skipempty
+syn match  fsharpMoreBinding "," contained nextgroup=fsharpSymbol,@fsharpArg skipwhite skipempty
+syn region fsharpOperatorBinding contained start="(" end=")" contains=fsharpOperator nextgroup=@fsharpArg skipwhite skipempty
+syn match  fsharpSelfBinding "\w\+\ze\s*\." contained nextgroup=fsharpSelfBindingDot skipwhite skipempty
+syn match  fsharpSelfBindingDot "\." contained nextgroup=fsharpFuncSymbol,fsharpSymbol skipwhite skipempty
 
-syn region fsharpMemberDef transparent matchgroup=fsharpKeyword start="\<\%(member\|override\|default\)\>" end="=" contains=fsharpValueDefModifier,fsharpFuncBinding,fsharpValueBinding,fsharpGenericVarBinding,fsharpSelfBinding,fsharpOperatorBinding,fsharpTypeAnnotation
-syn match  fsharpSelfBinding "\w\+\ze\s*\." contained nextgroup=fsharpSelfBindingDot skipwhite
-syn match  fsharpSelfBindingDot "\." contained nextgroup=fsharpFuncBinding,fsharpValueBinding,fsharpGenericVarBinding skipwhite
-syn region fsharpConstructorDef transparent matchgroup=fsharpKeyword start="\<new\>" end="=" contains=fsharpArgParen,fsharpRecord,fsharpArg
+syn region fsharpConstructorDef transparent matchgroup=fsharpKeyword start="\<new\>" end="=" contains=@fsharpArg
 
-syn keyword fsharpKeyword val abstract
+syn region fsharpFun transparent matchgroup=fsharpKeyword start="fun" matchgroup=fsharpFunArrow end="->" contains=@fsharpArg
 
-syn match  fsharpSymbol "\w\+\%(\s*[:=),]\)\@=" contained nextgroup=fsharpMoreBinding skipwhite skipempty
-syn match  fsharpMoreBinding "," contained nextgroup=fsharpSymbol,fsharpArgParen skipwhite skipempty
+" arguments
+syn cluster fsharpArg contains=fsharpArgParen,fsharpSimpleArg,fsharpArgRecord,fsharpGeneric
 
-syn match  fsharpKeyword "->"
-syn region fsharpFun transparent matchgroup=fsharpKeyword start="fun" matchgroup=fsharpFunArrow end="->" contains=fsharpArgParen,fsharpArg
-
-syn region fsharpArgParen contained transparent matchgroup=fsharpEncl start="(" end=")" contains=fsharpArg,fsharpArgParen,fsharpTypeAnnotation,fsharpAttrib
-syn match  fsharpArg "?\?\w\+\%(\s*[,:;-=)]\|\s\)\@=" contained
+syn match  fsharpSimpleArg "?\?\w\+\%(\s*[,:;-=)]\|\s\)\@=" contained nextgroup=@fsharpArg,fsharpTypeAnnotation
+syn region fsharpArgParen contained transparent matchgroup=fsharpEncl start="(" end=")" contains=fsharpSimpleArg,fsharpArgParen,fsharpTypeAnnotation,fsharpAttrib nextgroup=@fsharpArg,fsharpTypeAnnotation
+syn region fsharpArgRecord contained transparent matchgroup=fsharpEncl start="{" end="}" contains=fsharpArgRecord nextgroup=@fsharpArg,fsharpTypeAnnotation
+syn region fsharpGeneric matchgroup=fsharpTypeOp start="<" end=">" contains=@fsharpTypeExpr contained nextgroup=@fsharpArg,fsharpTypeAnnotation
 
 " type names
 syn keyword  fsharpType      bool byte char decimal double enum exn float
@@ -94,9 +94,6 @@ syn match    fsharpType      "\<\%(array\|list\|seq\|option\)\>" nextgroup=fshar
 syn match    fsharpType      "\[\]" contained nextgroup=fsharpTypeArg,fsharpType skipwhite skipempty
 
 syn keyword  fsharpTypeDefModifier public private internal nextgroup=fsharpName skipwhite skipempty contained
-
-" type definition
-syn region   fsharpTypeDef matchgroup=fsharpTypeDefKeyword start="\<type\>" matchgroup=fsharpKeyword end="=\|with" contains=fsharpTypeDefModifier,fsharpTypeName,fsharpArgParen
 
 " type expression
 syn region   fsharpTypeArg matchgroup=fsharpTypeOp start="<" end=">" contains=@fsharpTypeExpr contained
@@ -119,10 +116,14 @@ syn match    fsharpSRTPConstraint ":" contained nextgroup=fsharpSRTPCallPart ski
 syn region   fsharpEnclosedType contained matchgroup=fsharpTypeOp start="(" end=")" contains=@fsharpTypeExpr
 syn cluster  fsharpTypeExpr contains=fsharpTypeName,fsharpTypeVar,fsharpType,fsharpEnclosedType,fsharpLabelledType,fsharpTypeOp
 
+" type definition
+syn region   fsharpTypeDef matchgroup=fsharpTypeDefKeyword start="\<type\>" matchgroup=fsharpKeyword end="=\|with" contains=fsharpTypeDefModifier,fsharpTypeName,fsharpArgParen
+
 " terms involving types
 
 syn keyword  fsharpNew new nextgroup=fsharpTypeName,fsharpTypeAnnotation skipwhite skipempty
-syn region   fsharpTypeCast matchgroup=fsharpOperator start=":>\|:?>" matchgroup=NONE end="\%()\|\]\|}\|,\|\n\)\@=" contains=@fsharpTypeExpr
+syn region   fsharpTypeAnnotation matchgroup=NONE start=":" end="\%([=,)\]}|\n]\|\<with\>\|\<as\>\)\@=" contains=@fsharpTypeExpr
+syn region   fsharpTypeCast matchgroup=fsharpOperator start=":>\|:?>" matchgroup=NONE end="\%()\|\]\|}\|,\|\n\|\<as\>\)\@=" contains=@fsharpTypeExpr
 syn region   fsharpSRTPCall transparent matchgroup=fsharpEncl start="(\ze\s*\%(\^\|(\s*\^\)" end=")" contains=fsharpTypeVar,fsharpSRTPCallPart
 syn region   fsharpSRTPCallPart contained transparent matchgroup=fsharpEncl start="(" end=")" contains=fsharpTypeVar,fsharpKeyword,fsharpOperator,fsharpSRTPMember
 syn region   fsharpSRTPMember contained transparent matchgroup=fsharpKeyword start="\<member\>" end=":\@=" nextgroup=fsharpTypeAnnotation skipwhite skipempty
@@ -133,13 +134,10 @@ syn keyword  fsharpKeyword typeof typedefof nextgroup=fsharpTypeOf
 syn region   fsharpTypeOf contained transparent matchgroup=fsharpEncl start="<" end=">" contains=@fsharpTypeExpr
 syn region   fsharpGenericValue transparent matchgroup=fsharpEncl start="\<\w\+\>\zs<" end=">" contains=@fsharpTypeExpr
 
-" records
-syn region fsharpRecord contained transparent matchgroup=fsharpEncl start="{" end="}" contains=fsharpRecord
-
 " and names
 syn keyword  fsharpAndKeyword  and nextgroup=fsharpAndModifier,fsharpAndSymbol,fsharpAndTypeName skipwhite skipempty
 syn keyword  fsharpAndModifier public private internal nextgroup=fsharpAndSymbol,fsharpAndTypeName skipwhite skipempty contained
-syn match    fsharpAndSymbol   "\l\w*" contained
+syn match    fsharpAndSymbol   "\l\w*" contained nextgroup=@fsharpArg skipwhite skipempty
 syn match    fsharpAndTypeName "\u\w*" contained
 
 " qualified names
@@ -303,7 +301,7 @@ if version >= 508 || !exists("did_fs_syntax_inits")
     HiLink fsharpTypeDefKeyword    Keyword
     HiLink fsharpTypeDefModifier   Keyword
     HiLink fsharpType              Type
-    HiLink fsharpTypeOp            Type
+    HiLink fsharpTypeOp            Operator
     HiLink fsharpTypeName          Type
     HiLink fsharpTypeVar           Type
     HiLink fsharpQualifiedType     Type
@@ -350,6 +348,7 @@ if version >= 508 || !exists("did_fs_syntax_inits")
     HiLink fsharpResult            Identifier
 
     HiLink fsharpAttrib            Typedef
+    HiLink fsharpValueDefAttrib    Typedef
     HiLink fsharpXmlDoc            Typedef
 
     HiLink fsharpTodo              Todo
