@@ -181,7 +181,7 @@ local function create_manager(config)
   local manager = util.server_per_root_dir_manager(function(_root_dir) return make_config(_root_dir) end)
   function manager.try_add(bufnr)
     bufnr = bufnr or api.nvim_get_current_buf()
-    if api.nvim_buf_get_option(bufnr, "filetype") == "nofile" then
+    if api.nvim_buf_get_option(bufnr, 'buftype') == 'nofile' then
       return
     end
     local root_dir = get_root_dir(api.nvim_buf_get_name(bufnr), bufnr)
@@ -191,7 +191,8 @@ local function create_manager(config)
     end
   end
   function manager.try_add_wrapper(bufnr)
-    local buftype = api.nvim_buf_get_option(bufnr, "filetype")
+    bufnr = bufnr or api.nvim_get_current_buf()
+    local buftype = api.nvim_buf_get_option(bufnr, 'filetype')
     if buftype == 'fsharp' then
       manager.try_add(bufnr)
       return
