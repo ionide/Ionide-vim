@@ -25,8 +25,8 @@ local function create_handlers()
   local handlers = fn['fsharp#get_handlers']()
   local result = {}
   for method, func_name in pairs(handlers) do
-    local handler = function(err, method_, params, client_id, bufnr, _config)
-      if params == nil or not (method == method_) then return end
+    local handler = function(err, params, ctx, _config)
+      if params == nil or not (method == ctx.method) then return end
       fn[func_name](params)
     end
     result[method] = handler
@@ -242,13 +242,13 @@ function M.status()
 end
 
 function M.call(method, params, callback_key)
-  local handler = function(err, method, result, client_id, bufnr, config)
+  local handler = function(err, result, ctx, config)
     if result ~= nil then
       fn['fsharp#resolve_callback'](callback_key, {
         result = result,
         err = err,
-        client_id = client_id,
-        bufnr = bufnr
+        client_id = ctx.client_id,
+        bufnr = ctx.bufnr
       })
     end
   end
