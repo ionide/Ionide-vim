@@ -352,11 +352,14 @@ let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 
 ##### Show type signature at cursor position
 
-*Default:* enabled
+*Default:* disabled
 
 ~~~.vim
-let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
+let g:fsharp#show_signature_on_cursor_move = 0 " 1 to disable.
 ~~~
+
+> Note: this feature is known to be causing issues in some circumstances (#57, #58).
+> So this feature is now disabled by default.
 
 #### F# Interactive Settings
 
