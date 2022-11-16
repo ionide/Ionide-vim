@@ -33,10 +33,10 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
   - Required to install and run FsAutoComplete.
   - Very useful for command-line development.
 
-* If you are using Vim or Neovim below version 0.5:
-  * [autozimu/LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)
+* If you are using Vim or Neovim (below version 0.5):
+  * [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)
     - Required to communicate with FsAutoComplete.
-  * [junegunn/fzf](https://github.com/junegunn/fzf) (optional)
+  * [fzf](https://github.com/junegunn/fzf) (optional)
     - Optional dependency of LanguageClient-neovim.
     - Multi-entry selection UI.
 
@@ -96,23 +96,22 @@ If you are running Windows, you will have to set the value of `do` to `'powershe
 
 ### Install an autocompletion plugin
 
-We recommend using [hrsh7th/nvim-cmp](https://github.com/hrsh7th/nvim-cmp), but the setup is a bit complicated.
-See [the example](https://github.com/ionide/Ionide-vim/wiki/Configuration-Examples#with-nvim-lspconfig-and-nvim-cmp-for-neovim-05) in our wiki for how to setup nvim-cmp to be used with Ionide-vim.
-
-[Shougo/deoplete.nvim](https://github.com/Shougo/deoplete.nvim) is an easier alternative, but they say its development is complete and it won't get some features such as heredoc.
+We recommend using [Shougo/deoplete.nvim](https://github.com/Shougo/deoplete.nvim).
 
 ~~~.vim
-" if you use nvim > 0.5:
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+~~~
+
+If you are using Neovim 0.5+ and *not* using LanguageClient-neovim, you should also install [deoplete-plugins/deoplete-lsp](https://github.com/deoplete-plugins/deoplete-lsp).
+
+~~~.vim
 Plug 'deoplete-plugins/deoplete-lsp'
-
-" otherwise:
-Plug 'Shougo/deoplete.nvim'
-Plug 'roxma/nvim-yarp'
-Plug 'roxma/vim-hug-neovim-rpc'
-
-" also set this in both cases.
-let g:deoplete#enable_at_startup = 1
 ~~~
 
 ### Install Ionide-vim
@@ -137,16 +136,9 @@ Clone Ionide-vim to some runtimepath.
 
 Opening either `*.fs`, `*.fsi` or `*.fsx` files should trigger syntax highlighting and other depending runtime files as well.
 
-### LSP features (such as go-to-definition or rename)
-
-Ionide-vim only handles F# specific features of FsAutoComplete, and any other generic features such as "go to definition" and
-"rename" are provided by either Neovim or autozimu/LanguageClient-neovim.
-
-You should set your key bindings for those features on your own, so please refer to their documentation.
-[The examples in our wiki](https://github.com/ionide/Ionide-vim/wiki/Configuration-Examples#with-nvim-lspconfig-and-nvim-cmp-for-neovim-05)
-also contains an example bindings for both Neovim and LanguageClient-neovim.
-
 ### Commands
+
+Refer to [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) for features provided via Language Server Protocol.
 
 To be added as requested for F#-specific features.
 
@@ -195,6 +187,9 @@ You can customize the location of FSI, key mappings, etc. See [the documentation
 
 ### Settings
 
+Refer to [LanguageClient-neovim's recommended settings](https://github.com/autozimu/LanguageClient-neovim/wiki/Recommended-Settings#recommended-settings)
+for features provided via Language Server Protocol.
+
 To be added as requested for F#-specific features.
 
 See some examples in [our wiki](https://github.com/ionide/Ionide-vim/wiki/Configuration-Examples) if you're not sure what you would want to set.
@@ -216,7 +211,7 @@ let g:fsharp#backend = "languageclient-neovim"
 
 ##### Set the path to FSAC
 
-*Default:* `['fsautocomplete', '--background-service-enabled']`
+*Default:* `['fsautocomplete', '--adaptive-lsp-server-enabled']`
 
 This option overrides the path to the FSAC Ionide-vim uses.
 
@@ -228,7 +223,7 @@ For example, if you want to use a project-local FSAC, set the following:
 let g:fsharp#fsautocomplete_command =
     \ [ 'dotnet',
     \   'fsautocomplete',
-    \   '--background-service-enabled'
+    \   '--adaptive-lsp-server-enabled']
     \ ]
 ~~~
 
@@ -357,14 +352,11 @@ let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 
 ##### Show type signature at cursor position
 
-*Default:* disabled
+*Default:* enabled
 
 ~~~.vim
-let g:fsharp#show_signature_on_cursor_move = 0 " 1 to disable.
+let g:fsharp#show_signature_on_cursor_move = 1 " 0 to disable.
 ~~~
-
-> Note: this feature is known to be causing issues in some circumstances (#57, #58).
-> So this feature is now disabled by default.
 
 #### F# Interactive Settings
 

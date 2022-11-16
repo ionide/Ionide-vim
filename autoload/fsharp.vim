@@ -234,7 +234,7 @@ function! fsharp#loadConfig()
     endif
 
     if !exists('g:fsharp#fsautocomplete_command')
-        let g:fsharp#fsautocomplete_command = ['fsautocomplete', '--background-service-enabled']
+        let g:fsharp#fsautocomplete_command = ['fsautocomplete', '--adaptive-lsp-server-enabled']
     endif
     if !exists('g:fsharp#use_recommended_server_config')
         let g:fsharp#use_recommended_server_config = 1
@@ -247,7 +247,7 @@ function! fsharp#loadConfig()
         let g:fsharp#automatic_reload_workspace = 1
     endif
     if !exists('g:fsharp#show_signature_on_cursor_move')
-        let g:fsharp#show_signature_on_cursor_move = 0
+        let g:fsharp#show_signature_on_cursor_move = 1
     endif
     if !exists('g:fsharp#fsi_command')
         let g:fsharp#fsi_command = "dotnet fsi"
