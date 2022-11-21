@@ -234,7 +234,8 @@ function! fsharp#loadConfig()
     endif
 
     if !exists('g:fsharp#fsautocomplete_command')
-        let g:fsharp#fsautocomplete_command = ['fsautocomplete', '--adaptive-lsp-server-enabled']
+        " let g:fsharp#fsautocomplete_command = ['fsautocomplete', '--adaptive-lsp-server-enabled']
+        let g:fsharp#fsautocomplete_command = ['fsautocomplete']
     endif
     if !exists('g:fsharp#use_recommended_server_config')
         let g:fsharp#use_recommended_server_config = 1
