@@ -108,6 +108,7 @@ local function create_manager(config)
     if not root_dir then
       root_dir = vim.fn.getcwd()
     end
+    root_dir = string.gsub(root_dir, "\\", "/")
     api.nvim_command(
       string.format(
         "autocmd %s lua require'ionide'.manager.try_add_wrapper()",
