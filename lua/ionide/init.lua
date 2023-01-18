@@ -2,6 +2,8 @@ local vim = vim
 local validate = vim.validate
 local api = vim.api
 local lsp = vim.lsp
+local log = require('vim.lsp.log')
+local protocol = require('vim.lsp.protocol')
 local tbl_extend = vim.tbl_extend
 
 local function try_require(...)
@@ -39,21 +41,6 @@ M.resolve_callback = function(key, arg)
     callback(arg)
     callbacks[key] = nil
   end
-end
-
-local call = function(method, params, callback_key)
-  local handler = function(err, result, ctx, config)
-    if result ~= nil then
-      M.resolve_callback(callback_key, {
-        result = result,
-        err = err,
-        client_id = ctx.client_id,
-        bufnr = ctx.bufnr
-      })
-      print(vim.inspect(result))
-    end
-  end
-  vim.lsp.buf_request(0, method, params, handler)
 end
 
 --  function! s:PlainNotification(content)
@@ -329,7 +316,7 @@ end
 
 M.updateServerConfig = function()
   local fsharp = getServerConfig()
-  local settings = {settings = { FSharp = fsharp }}
+  local settings = { settings = { FSharp = fsharp } }
   M.notify("workspace/didChangeConfiguration", settings)
 end
 
@@ -338,6 +325,32 @@ local addThenSort = function(value, tbl)
   table.sort(tbl)
   -- print("after sorting table, it now looks like this : " .. vim.inspect(tbl))
   return tbl
+end
+
+
+--see: https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_documentHighlight
+M.handle_documentHighlight = function(err, result, ctx, _)
+  if not result then
+    -- print("no result for doc highlight ")
+    return
+  end
+  if err then
+    print("doc highlight had an error. ")
+    if err.code == protocol.ErrorCodes.InternalError then
+      print("doc highlight error code is: " .. err.code)
+      print("doc highlight error message is: " .. err.message)
+      return
+    end
+  end
+  local client_id = ctx.client_id
+  local client = vim.lsp.get_client_by_id(client_id)
+  if not client then
+    print("doc highlight cannot happen without lsp, and for some reason i can't find lsp with id of: " .. client_id)
+    return
+  end
+  local u = require("vim.lsp.util")
+  print("now calling vim.lps.util.buf_highlight_references...")
+  u.buf_highlight_references(ctx.bufnr, result, client.offset_encoding)
 end
 
 M.handle_notifyWorkspace = function(payload)
@@ -361,7 +374,8 @@ M.handle_notifyWorkspace = function(payload)
   end
 end
 
-local handlers = { ['fsharp/notifyWorkspace'] = "handle_notifyWorkspace" }
+local handlers = { ['fsharp/notifyWorkspace'] = "handle_notifyWorkspace",
+  ['textDocument/documentHighlight'] = "handle_documentHighlight" }
 
 local function getHandlers()
   return handlers
@@ -372,9 +386,29 @@ M.create_handlers = function()
   local r = {}
   for method, func_name in pairs(h) do
     local handler = function(err, params, ctx, _config)
+
+
+      -- if err then
+      --   -- LSP spec:
+      --   -- interface ResponseError:
+      --   --  code: integer;
+      --   --  message: string;
+      --   --  data?: string | number | boolean | array | object | null;
+      --   -- Per LSP, don't show ContentModified error to the user.
+      --   if err.code ~= protocol.ErrorCodes.ContentModified and func_name then
+      --
+      --     local client = vim.lsp.get_client_by_id(ctx.client_id)
+      --     local client_name = client and client.name or string.format('client_id=%d', ctx.client_id)
+      --
+      --     err_message(client_name .. ': ' .. tostring(err.code) .. ': ' .. err.message)
+      --   end
+      --   return
+      -- end
+
       if params == nil or not (method == ctx.method) then return end
       M[func_name](params)
     end
+
     r[method] = handler
   end
   M.handlers = r
@@ -452,6 +486,7 @@ end
 --     call s:signature(expand('%:p'), line('.') - 1, col('.') - 1, function("s:callback_showSignature"))
 -- endfunction
 
+
 M.showSignature = function()
   local cbShowSignature = function(result)
     if result then
@@ -469,6 +504,7 @@ M.showSignature = function()
       end
     end
   end
+
   M.signature(vim.fn.expand("%:p"), vim.cmd.line('.') - 1, vim.cmd.col('.') - 1,
     cbShowSignature)
 end
@@ -519,12 +555,12 @@ M.initialize = function()
   print 'Ionide Initialized'
 end
 
-local local_root_dir = function()
+local local_root_dir = function(n)
   local root
-  root = util.find_git_ancestor
-  root = root or util.root_pattern("*.sln")
-  root = root or util.root_pattern("*.fsproj")
-  root = root or util.root_pattern("*.fsx")
+  root = util.find_git_ancestor(n)
+  root = root or util.root_pattern("*.sln")(n)
+  root = root or util.root_pattern("*.fsproj")(n)
+  root = root or util.root_pattern("*.fsx")(n)
   return root
 end
 
@@ -540,8 +576,8 @@ local function get_default_config()
     init_options = { AutomaticWorkspaceInit = (auto_init == 1) },
     on_init = M.initialize,
     settings = M.loadConfig(),
-    -- root_dir = local_root_dir,
-    root_dir = util.root_pattern("*.sln"),
+    root_dir = local_root_dir,
+    -- root_dir = util.root_pattern("*.sln"),
   }
   return result
 end
