@@ -657,7 +657,7 @@ M.loadConfig = function()
 
   }
   for key, v in pairs(generalConfigs) do
-    local k = key:toSnakeCase()
+    local k = toSnakeCase(key)
     if not vim.g["fsharp#" .. k] then
       vim.g["fsharp#" .. k] = v
     end
