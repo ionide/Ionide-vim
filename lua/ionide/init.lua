@@ -817,7 +817,7 @@ vim.filetype.add(
 vim.api.nvim_create_autocmd("BufWritePost", {
   pattern = "*.fsproj",
   desc = "FSharp Auto refresh on project save",
-  group = vim.api.nvim_create_augroup("FSharpLCFsProj"),
+  group = vim.api.nvim_create_augroup("FSharpLCFsProj", { clear = true }),
   callback = function() M.OnFSProjSave() end
 })
 --augroup FSharpLC_fsproj
