@@ -23,7 +23,7 @@ local M = {}
 
 local callbacks = {}
 
-M.register_callback = function(fn)
+M.RegisterCallback = function(fn)
   if M.backend ~= 'nvim' then
     return -1
   end
@@ -32,7 +32,7 @@ M.register_callback = function(fn)
   return rnd
 end
 
-M.resolve_callback = function(key, arg)
+M.ResolveCallback = function(key, arg)
   if M.backend ~= 'nvim' then
     return
   end
@@ -192,10 +192,10 @@ local function buildConfigKeys(camels)
   return keys
 end
 
-M.call = function(method, params, callback_key)
+M.Call = function(method, params, callback_key)
   local handler = function(err, result, ctx, config)
     if result ~= nil then
-      M.resolve_callback(callback_key, {
+      M.ResolveCallback(callback_key, {
         result = result,
         err = err,
         client_id = ctx.client_id,
@@ -206,63 +206,63 @@ M.call = function(method, params, callback_key)
   lsp.buf_request(0, method, params, handler)
 end
 
-M.notify = function(method, params)
+M.Notify = function(method, params)
   lsp.buf_notify(0, method, params)
 end
 
 Workspace = {}
 
 
-M.signature = function(filePath, line, character, cont)
-  return M.call('fsharp/signature', M.TextDocumentPositionParams(filePath, line, character),
+M.Signature = function(filePath, line, character, cont)
+  return M.Call('fsharp/signature', M.TextDocumentPositionParams(filePath, line, character),
     cont)
 end
 
-M.signatureData = function(filePath, line, character, cont)
-  return M.call('fsharp/signatureData', M.TextDocumentPositionParams(filePath, line, character)
+M.SignatureData = function(filePath, line, character, cont)
+  return M.Call('fsharp/signatureData', M.TextDocumentPositionParams(filePath, line, character)
     , cont)
 end
 
-M.lineLens = function(projectPath, cont)
-  return M.call('fsharp/lineLens', M.ProjectParms(projectPath), cont)
+M.LineLens = function(projectPath, cont)
+  return M.Call('fsharp/lineLens', M.ProjectParms(projectPath), cont)
 end
 
-M.compilerLocation = function(cont)
-  return M.call('fsharp/compilerLocation', {}, cont)
+M.CompilerLocation = function(cont)
+  return M.Call('fsharp/compilerLocation', {}, cont)
 end
 
-M.compile = function(projectPath, cont)
-  return M.call('fsharp/compile', M.ProjectParms(projectPath), cont)
+M.Compile = function(projectPath, cont)
+  return M.Call('fsharp/compile', M.ProjectParms(projectPath), cont)
 end
 
-M.workspacePeek = function(directory, depth, excludedDirs, cont)
-  return M.call('fsharp/workspacePeek', M.WorkspacePeekRequest(directory, depth, excludedDirs),
+M.WorkspacePeek = function(directory, depth, excludedDirs, cont)
+  return M.Call('fsharp/workspacePeek', M.WorkspacePeekRequest(directory, depth, excludedDirs),
     cont)
 end
 
-M.workspaceLoad = function(files, cont)
-  return M.call('fsharp/workspaceLoad', M.WorkspaceLoadParms(files), cont)
+M.WorkspaceLoad = function(files, cont)
+  return M.Call('fsharp/workspaceLoad', M.WorkspaceLoadParms(files), cont)
 end
 
-M.project = function(projectPath, cont)
-  return M.call('fsharp/project', M.ProjectParms(projectPath), cont)
+M.Project = function(projectPath, cont)
+  return M.Call('fsharp/project', M.ProjectParms(projectPath), cont)
 end
 
-M.fsdn = function(signature, cont)
-  return M.call('fsharp/fsdn', M.FsdnRequest(signature), cont)
+M.Fsdn = function(signature, cont)
+  return M.Call('fsharp/fsdn', M.FsdnRequest(signature), cont)
 end
 
-M.f1Help = function(filePath, line, character, cont)
-  return M.call('fsharp/f1Help', M.TextDocumentPositionParams(filePath, line, character), cont)
+M.F1Help = function(filePath, line, character, cont)
+  return M.Call('fsharp/f1Help', M.TextDocumentPositionParams(filePath, line, character), cont)
 end
 
-M.documentation = function(filePath, line, character, cont)
-  return M.call('fsharp/documentation', M.TextDocumentPositionParams(filePath, line, character)
+M.Documentation = function(filePath, line, character, cont)
+  return M.Call('fsharp/documentation', M.TextDocumentPositionParams(filePath, line, character)
     , cont)
 end
 
-M.documentationSymbol = function(xmlSig, assembly, cont)
-  return M.call('fsharp/documentationSymbol', M.DocumentationForSymbolRequest(xmlSig, assembly)
+M.DocumentationSymbol = function(xmlSig, assembly, cont)
+  return M.Call('fsharp/documentationSymbol', M.DocumentationForSymbolRequest(xmlSig, assembly)
     , cont)
 end
 
@@ -323,7 +323,7 @@ local function getServerConfig()
     { key = "KeywordsAutocomplete", default = true },
     --     ExternalAutocomplete: bool option
     --false
-    { key = "ExternalAutocomplete", default = 0 },
+    { key = "ExternalAutocomplete", default = false },
     --     Linter: bool option
     --false
     { key = "Linter", default = true },
@@ -380,7 +380,7 @@ local function getServerConfig()
     --     DisableInMemoryProjectReferences: bool option
     --false
     --
-    { key = "DisableInMemoryProjectReferences", default = 0 },
+    { key = "DisableInMemoryProjectReferences", default = false },
     --     LineLens: LineLensConfig option
     --
     { key = "LineLens", default = { enabled = "always", prefix = "//" } },
@@ -458,7 +458,7 @@ local function getServerConfig()
     --     LogDurationBetweenCheckFiles = false
     --     LogCheckFileDuration = false }
     --       }
-    { key = "DebugDto",
+    { key = "Debug",
       default =
       { DontCheckRelatedFiles = false,
         CheckFileDebouncerTimeout = 250,
@@ -499,10 +499,10 @@ local function getServerConfig()
   return config
 end
 
-M.updateServerConfig = function()
+M.UpdateServerConfig = function()
   local fsharp = getServerConfig()
   local settings = { settings = { FSharp = fsharp } }
-  M.notify("workspace/didChangeConfiguration", settings)
+  M.Notify("workspace/didChangeConfiguration", settings)
 end
 
 local addThenSort = function(value, tbl)
@@ -514,7 +514,7 @@ end
 
 
 --see: https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_documentHighlight
-M.handle_documentHighlight = function(err, result, ctx, _)
+M.HandleDocumentHighlight = function(err, result, ctx, _)
   if not result then
     -- print("no result for doc highlight ")
     return
@@ -538,7 +538,7 @@ M.handle_documentHighlight = function(err, result, ctx, _)
   u.buf_highlight_references(ctx.bufnr, result, client.offset_encoding)
 end
 
-M.handle_notifyWorkspace = function(payload)
+M.HandleNotifyWorkspace = function(payload)
   local content = vim.json.decode(payload.content)
   if content then
     if content.Kind == 'projectLoading' then
@@ -551,7 +551,7 @@ M.handle_notifyWorkspace = function(payload)
       -- print("[Ionide] calling updateServerConfig ... ")
 
       -- print("[Ionide] before calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
-      M.updateServerConfig()
+      M.UpdateServerConfig()
 
       -- print("[Ionide] after calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
       print("[Ionide] Workspace loaded (" .. #Workspace .. " project(s))")
@@ -559,15 +559,16 @@ M.handle_notifyWorkspace = function(payload)
   end
 end
 
-local handlers = { ['fsharp/notifyWorkspace'] = "handle_notifyWorkspace",
-  ['textDocument/documentHighlight'] = "handle_documentHighlight" }
+local handlers = { ['fsharp/notifyWorkspace'] = "HandleNotifyWorkspace",
+  ['textDocument/documentHighlight'] = "HandleDocumentHighlight" }
 
-local function getHandlers()
+local function GetHandlers()
   return handlers
 end
 
-M.create_handlers = function()
-  local h = getHandlers()
+M.CreateHandlers = function()
+
+  local h = GetHandlers()
   local r = {}
   for method, func_name in pairs(h) do
     local handler = function(err, params, ctx, _config)
@@ -596,15 +597,15 @@ M.create_handlers = function()
 
     r[method] = handler
   end
-  M.handlers = r
+  M.Handlers = r
   return r
 end
 
 local function load(arg)
-  M.workspaceLoad(arg, nil)
+  M.WorkspaceLoad(arg, nil)
 end
 
-M.loadProject = function(...)
+M.LoadProject = function(...)
   local prjs = {}
   for _, proj in ipairs({ ... }) do
     table.insert(prjs, util.fnamemodify(proj, ':p'))
@@ -612,27 +613,27 @@ M.loadProject = function(...)
   load(prjs)
 end
 
-M.showLoadedProjects = function()
+M.ShowLoadedProjects = function()
   for _, proj in ipairs(Workspace) do
     print("- " .. proj)
   end
 end
 
-M.reloadProjects = function()
+M.ReloadProjects = function()
   if #Workspace > 0 then
-    M.workspaceLoad(Workspace, nil)
+    M.WorkspaceLoad(Workspace, nil)
   else
     print("[Ionide] Workspace is empty")
   end
 end
 
 M.OnFSProjSave = function()
-  if vim.bo.ft == "fsharp_project" and M.automatic_reload_workspace and M.automatic_reload_workspace == true then
+  if vim.bo.ft == "fsharp_project" and M.AutomaticReloadWorkspace and M.AutomaticReloadWorkspace == true then
     M.reloadProjects()
   end
 end
 
-M.loadConfig = function()
+M.LoadConfig = function()
 
   local generalConfigs = {
 
@@ -680,7 +681,7 @@ end
 -- endfunction
 
 
-M.showSignature = function()
+M.ShowSignature = function()
   local cbShowSignature = function(result)
     if result then
       if result.result then
@@ -698,7 +699,7 @@ M.showSignature = function()
     end
   end
 
-  M.signature(vim.fn.expand("%:p"), vim.cmd.line('.') - 1, vim.cmd.col('.') - 1,
+  M.Signature(vim.fn.expand("%:p"), vim.cmd.line('.') - 1, vim.cmd.col('.') - 1,
     cbShowSignature)
 end
 
@@ -709,15 +710,15 @@ end
 -- endfunction
 --
 M.OnCursorMove = function()
-  if M.show_signature_on_cursor_move then
+  if M.ShowSignatureOnCursorMove then
     M.showSignature()
   end
 end
 
 
-M.registerAutocmds = function()
+M.RegisterAutocmds = function()
   --     if g:fsharp#backend == 'nvim' && g:fsharp#lsp_codelens
-  if M.backend == 'nvim' and (M.lsp_codelens == true or M.lsp_codelens == 1) then
+  if M.backend == 'nvim' and (M.LspCodelens == true or M.LspCodelens == 1) then
     -- print("fsharp.backend is nvim and lsp_codelens is true.. ")
     local autocmd = vim.api.nvim_create_autocmd
     local grp = vim.api.nvim_create_augroup
@@ -739,12 +740,12 @@ M.registerAutocmds = function()
   end
 end
 
-M.initialize = function()
+M.Initialize = function()
   print 'Ionide Initializing'
   print 'Ionide calling updateServerConfig...'
-  M.updateServerConfig()
+  M.UpdateServerConfig()
   print 'Ionide calling registerAutocmds...'
-  M.registerAutocmds()
+  M.RegisterAutocmds()
   print 'Ionide Initialized'
 end
 
@@ -765,8 +766,8 @@ local function get_default_config()
     cmd_env = { DOTNET_ROLL_FORWARD = "LatestMajor" },
     filetypes = { "fsharp" },
     autostart = true,
-    handlers = M.create_handlers(),
-    init_options = { AutomaticWorkspaceInit = (M.automatic_workspace_init == 1) },
+    handlers = M.CreateHandlers(),
+    init_options = { AutomaticWorkspaceInit = M.AutomaticWorkspaceInit },
     on_init = M.initialize,
     settings = { FSharp = config },
     root_dir = local_root_dir,
@@ -807,13 +808,18 @@ vim.filetype.add(
     extension = {
       fsproj = function(path, bufnr)
         return 'fsharp_project', function(bufnr)
-          vim.bo[bufnr].syntax.set = 'xml'
+          vim.cmd("set syntax= xml")
         end
       end,
     },
   })
 
-
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "*.fsproj",
+  desc = "FSharp Auto refresh on project save",
+  group = vim.api.nvim_create_augroup("FSharpLCFsProj"),
+  callback = function() M.OnFSProjSave() end
+})
 --augroup FSharpLC_fsproj
 -- autocmd! BufWritePost *.fsproj call fsharp#OnFSProjSave()
 --augroup END
@@ -928,6 +934,8 @@ local function create_manager(config)
         if vim.tbl_isempty(settings) then
           settings = { [vim.type_idx] = vim.types.dictionary }
         end
+        local settingsInspected = vim.inspect(settings)
+        vim.notify("Settings being sent to LSP server are: " .. settingsInspected)
         return client.notify("workspace/didChangeConfiguration", {
           settings = settings,
         })
@@ -1021,7 +1029,7 @@ function M.status()
   end
 end
 
-M.get_visual_selection = function()
+M.GetVisualSelection = function()
   local line_start, column_start = unpack(vim.fn.getpos("'<"))
   local line_end, column_end = unpack(vim.fn.getpos("'>"))
   local lines = vim.fn.getline(line_start, line_end)
@@ -1033,26 +1041,26 @@ M.get_visual_selection = function()
   return lines
 end
 
-local get_complete_buffer = function()
+M.GetCompleteBuffer = function()
   return vim.fn.join(vim.fn.getline(1, tonumber(vim.fn.expand('$'))), "\n")
 end
 
-function M.sendSelectionToFsi()
-  local lines = M.get_visual_selection()
+function M.SendSelectionToFsi()
+  local lines = M.GetVisualSelection()
   vim.fn.exec('normal' .. vim.fn.len(lines) .. 'j')
   local text = vim.fn.join(lines, "\n")
-  return M.sendFsi(text)
+  return M.SendFsi(text)
 end
 
-function M.sendLineToFsi()
+function M.SendLineToFsi()
   local text = vim.api.nvim_get_current_line()
   vim.fn.exec 'normal j'
-  return M.sendFsi(text)
+  return M.SendFsi(text)
 end
 
-function M.sendAllToFsi()
-  local text = get_complete_buffer()
-  return M.sendFsi(text)
+function M.SendAllToFsi()
+  local text = M.GetCompleteBuffer()
+  return M.SendFsi(text)
 end
 
 return M
