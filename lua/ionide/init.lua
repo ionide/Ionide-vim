@@ -759,7 +759,7 @@ local local_root_dir = function(n)
 end
 
 local function get_default_config()
-  local config = M.loadConfig()
+  local config = M.LoadConfig()
   local result = {
     name = "ionide",
     cmd = { 'fsautocomplete', '--adaptive-lsp-server-enabled', '-v' },
