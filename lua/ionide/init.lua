@@ -165,9 +165,8 @@ M.WorkspaceLoadParms = function(files)
 end
 
 local function toSnakeCase(str)
-  local sn = str:gsub("(%u%l+|%l+)(%u)", "%l%1_%l%2")
-  if sn == str then return str:lower() end
-  return sn
+  local snake = str:gsub("%u", function(ch) return "_" .. ch:lower() end)
+  return snake:gsub("^_", "")
 end
 
 local function buildConfigKeys(camels)
@@ -215,102 +214,288 @@ Workspace = {}
 
 
 M.signature = function(filePath, line, character, cont)
-  return call('fsharp/signature', M.TextDocumentPositionParams(filePath, line, character),
+  return M.call('fsharp/signature', M.TextDocumentPositionParams(filePath, line, character),
     cont)
 end
 
 M.signatureData = function(filePath, line, character, cont)
-  return call('fsharp/signatureData', M.TextDocumentPositionParams(filePath, line, character)
+  return M.call('fsharp/signatureData', M.TextDocumentPositionParams(filePath, line, character)
     , cont)
 end
 
 M.lineLens = function(projectPath, cont)
-  return call('fsharp/lineLens', M.ProjectParms(projectPath), cont)
+  return M.call('fsharp/lineLens', M.ProjectParms(projectPath), cont)
 end
 
 M.compilerLocation = function(cont)
-  return call('fsharp/compilerLocation', {}, cont)
+  return M.call('fsharp/compilerLocation', {}, cont)
 end
 
 M.compile = function(projectPath, cont)
-  return call('fsharp/compile', M.ProjectParms(projectPath), cont)
+  return M.call('fsharp/compile', M.ProjectParms(projectPath), cont)
 end
 
 M.workspacePeek = function(directory, depth, excludedDirs, cont)
-  return call('fsharp/workspacePeek', M.WorkspacePeekRequest(directory, depth, excludedDirs),
+  return M.call('fsharp/workspacePeek', M.WorkspacePeekRequest(directory, depth, excludedDirs),
     cont)
 end
 
 M.workspaceLoad = function(files, cont)
-  return call('fsharp/workspaceLoad', M.WorkspaceLoadParms(files), cont)
+  return M.call('fsharp/workspaceLoad', M.WorkspaceLoadParms(files), cont)
 end
 
 M.project = function(projectPath, cont)
-  return call('fsharp/project', M.ProjectParms(projectPath), cont)
+  return M.call('fsharp/project', M.ProjectParms(projectPath), cont)
 end
 
 M.fsdn = function(signature, cont)
-  return call('fsharp/fsdn', M.FsdnRequest(signature), cont)
+  return M.call('fsharp/fsdn', M.FsdnRequest(signature), cont)
 end
 
 M.f1Help = function(filePath, line, character, cont)
-  return call('fsharp/f1Help', M.TextDocumentPositionParams(filePath, line, character), cont)
+  return M.call('fsharp/f1Help', M.TextDocumentPositionParams(filePath, line, character), cont)
 end
 
 M.documentation = function(filePath, line, character, cont)
-  return call('fsharp/documentation', M.TextDocumentPositionParams(filePath, line, character)
+  return M.call('fsharp/documentation', M.TextDocumentPositionParams(filePath, line, character)
     , cont)
 end
 
 M.documentationSymbol = function(xmlSig, assembly, cont)
-  return call('fsharp/documentationSymbol', M.DocumentationForSymbolRequest(xmlSig, assembly)
+  return M.call('fsharp/documentationSymbol', M.DocumentationForSymbolRequest(xmlSig, assembly)
     , cont)
 end
 
+-- from https://github.com/fsharp/FsAutoComplete/blob/main/src/FsAutoComplete/LspHelpers.fs
+-- FSharpConfigDto =
+--   { AutomaticWorkspaceInit: bool option
+--     WorkspaceModePeekDeepLevel: int option
+--     ExcludeProjectDirectories: string[] option
+--     KeywordsAutocomplete: bool option
+--     ExternalAutocomplete: bool option
+--     Linter: bool option
+--     LinterConfig: string option
+--     IndentationSize: int option
+--     UnionCaseStubGeneration: bool option
+--     UnionCaseStubGenerationBody: string option
+--     RecordStubGeneration: bool option
+--     RecordStubGenerationBody: string option
+--     InterfaceStubGeneration: bool option
+--     InterfaceStubGenerationObjectIdentifier: string option
+--     InterfaceStubGenerationMethodBody: string option
+--     UnusedOpensAnalyzer: bool option
+--     UnusedDeclarationsAnalyzer: bool option
+--     SimplifyNameAnalyzer: bool option
+--     ResolveNamespaces: bool option
+--     EnableReferenceCodeLens: bool option
+--     EnableAnalyzers: bool option
+--     AnalyzersPath: string[] option
+--     DisableInMemoryProjectReferences: bool option
+--     LineLens: LineLensConfig option
+--     UseSdkScripts: bool option
+--     DotNetRoot: string option
+--     FSIExtraParameters: string[] option
+--     FSICompilerToolLocations: string[] option
+--     TooltipMode: string option
+--     GenerateBinlog: bool option
+--     AbstractClassStubGeneration: bool option
+--     AbstractClassStubGenerationObjectIdentifier: string option
+--     AbstractClassStubGenerationMethodBody: string option
+--     CodeLenses: CodeLensConfigDto option
+--     InlayHints: InlayHintDto option
+--     Debug: DebugDto option }
+--
+-- type FSharpConfigRequest = { FSharp: FSharpConfigDto }
 local function getServerConfig()
   local config = {}
   local camels = {
-    { key = "AutomaticWorkspaceInit", default = 1 },
+    --   { AutomaticWorkspaceInit: bool option
+    --AutomaticWorkspaceInit = false
+    { key = "AutomaticWorkspaceInit", default = true },
+    --     WorkspaceModePeekDeepLevel: int option
+    --WorkspaceModePeekDeepLevel = 2
     { key = "WorkspaceModePeekDeepLevel", default = 4 },
+    --     ExcludeProjectDirectories: string[] option
+    -- = [||]
     { key = "ExcludeProjectDirectories", default = {} },
-    { key = "keywordsAutocomplete", default = 1 },
+    --     KeywordsAutocomplete: bool option
+    -- false
+    { key = "KeywordsAutocomplete", default = true },
+    --     ExternalAutocomplete: bool option
+    --false
     { key = "ExternalAutocomplete", default = 0 },
-    { key = "Linter", default = 1 },
-    { key = "UnionCaseStubGeneration", default = 1 },
-    { key = "UnionCaseStubGenerationBody" },
-    { key = "RecordStubGeneration", default = 1 },
-    { key = "RecordStubGenerationBody" },
-    { key = "InterfaceStubGeneration", default = 1 },
+    --     Linter: bool option
+    --false
+    { key = "Linter", default = true },
+    --     IndentationSize: int option
+    --4
+    { key = "IndentationSize", default = 2 },
+    --     UnionCaseStubGeneration: bool option
+    --false
+    { key = "UnionCaseStubGeneration", default = true },
+    --     UnionCaseStubGenerationBody: string option
+    --    """failwith "Not Implemented" """
+    { key = "UnionCaseStubGenerationBody", default = "failwith \"Not Implemented\"" },
+    --     RecordStubGeneration: bool option
+    --false
+    { key = "RecordStubGeneration", default = true },
+    --     RecordStubGenerationBody: string option
+    -- "failwith \"Not Implemented\""
+    { key = "RecordStubGenerationBody", default = "failwith \"Not Implemented\"" },
+    --     InterfaceStubGeneration: bool option
+    --false
+    { key = "InterfaceStubGeneration", default = true },
+    --     InterfaceStubGenerationObjectIdentifier: string option
+    -- "this"
     { key = "InterfaceStubGenerationObjectIdentifier", default = "this" },
-    { key = "InterfaceStubGenerationMethodBody" },
-    { key = "UnusedOpensAnalyzer", default = 1 },
-    { key = "UnusedDeclarationsAnalyzer", default = 1 },
-    { key = "SimplifyNameAnalyzer", default = 1 },
-    { key = "ResolveNamespaces", default = 1 },
-    { key = "EnableReferenceCodeLens", default = 1 },
-    { key = "EnableAnalyzers", default = 1 },
+    --     InterfaceStubGenerationMethodBody: string option
+    -- "failwith \"Not Implemented\""
+    { key = "InterfaceStubGenerationMethodBody", default = "failwith \"Not Implemented\"" },
+    --     UnusedOpensAnalyzer: bool option
+    --false
+    { key = "UnusedOpensAnalyzer", default = true },
+    --     UnusedDeclarationsAnalyzer: bool option
+    --false
+    --
+    { key = "UnusedDeclarationsAnalyzer", default = true },
+    --     SimplifyNameAnalyzer: bool option
+    --false
+    --
+    { key = "SimplifyNameAnalyzer", default = true },
+    --     ResolveNamespaces: bool option
+    --false
+    --
+    { key = "ResolveNamespaces", default = true },
+    --     EnableReferenceCodeLens: bool option
+    --false
+    --
+    { key = "EnableReferenceCodeLens", default = true },
+    --     EnableAnalyzers: bool option
+    --false
+    --
+    { key = "EnableAnalyzers", default = true },
+    --     AnalyzersPath: string[] option
+    --
     { key = "AnalyzersPath" },
+    --     DisableInMemoryProjectReferences: bool option
+    --false
+    --
     { key = "DisableInMemoryProjectReferences", default = 0 },
+    --     LineLens: LineLensConfig option
+    --
     { key = "LineLens", default = { enabled = "always", prefix = "//" } },
-    { key = "UseSdkScripts", default = 1 },
-    { key = "dotNetRoot" },
-    { key = "fsiExtraParameters", default = {} },
+    --     UseSdkScripts: bool option
+    --false
+    --
+    { key = "UseSdkScripts", default = true },
+    --     DotNetRoot: string option  Environment.dotnetSDKRoot.Value.FullName
+    --
+    { key = "DotNetRoot", default = "" },
+    --     FSIExtraParameters: string[] option
+    --     j
+    { key = "FSIExtraParameters", default = {} },
+    --     FSICompilerToolLocations: string[] option
+    --
+    { key = "FSICompilerToolLocations", default = {} },
+    --     TooltipMode: string option
+    --TooltipMode = "full"
+    { key = "TooltipMode", default = "full" },
+    --     GenerateBinlog: bool option
+    -- GenerateBinlog = false
+    { key = "GenerateBinlog", default = false },
+    --     AbstractClassStubGeneration: bool option
+    -- AbstractClassStubGeneration = true
+    { key = "AbstractClassStubGeneration", default = true },
+    --     AbstractClassStubGenerationObjectIdentifier: string option
+    -- AbstractClassStubGenerationObjectIdentifier = "this"
+    { key = "AbstractClassStubGenerationObjectIdentifier", default = "this" },
+    --     AbstractClassStubGenerationMethodBody: string option, default = "failwith \"Not Implemented\""
+    -- AbstractClassStubGenerationMethodBody = "failwith \"Not Implemented\""
+    --
+    { key = "AbstractClassStubGenerationMethodBody", default = "failwith \"Not Implemented\"" },
+    --     CodeLenses: CodeLensConfigDto option
+    --  type CodeLensConfigDto =
+    -- { Signature: {| Enabled: bool option |} option
+    --   References: {| Enabled: bool option |} option }
+    { key = "CodeLenses",
+      default = {
+        Signature = {
+          Enabled = true
+        },
+        References = {
+          Enabled = true
+        },
+      },
+    },
+    --     InlayHints: InlayHintDto option
+    --type InlayHintsConfig =
+    -- { typeAnnotations: bool
+    -- parameterNames: bool
+    -- disableLongTooltip: bool }
+    -- static member Default =
+    --   { typeAnnotations = true
+    --     parameterNames = true
+    --     disableLongTooltip = true }
+
+    { key = "InlayHints",
+      default = {
+        typeAnnotations = true,
+        parameterNames = true,
+        disableLongTooltip = true,
+      },
+    },
+
+    --     Debug: DebugDto option }
+    --   type DebugConfig =
+    -- { DontCheckRelatedFiles: bool
+    --   CheckFileDebouncerTimeout: int
+    --   LogDurationBetweenCheckFiles: bool
+    --   LogCheckFileDuration: bool }
+    --
+    -- static member Default =
+    --   { DontCheckRelatedFiles = false
+    --     CheckFileDebouncerTimeout = 250
+    --     LogDurationBetweenCheckFiles = false
+    --     LogCheckFileDuration = false }
+    --       }
+    { key = "DebugDto",
+      default =
+      { DontCheckRelatedFiles = false,
+        CheckFileDebouncerTimeout = 250,
+        LogDurationBetweenCheckFiles = false,
+        LogCheckFileDuration = false,
+      },
+    },
+
   }
+
   local keys = buildConfigKeys(camels)
   for _, key in ipairs(keys) do
-    if not vim.g[key.snake] then
-      vim.g[key.snake] = key.default or ""
+
+    -- if not M[key.snake] then
+    -- M[key.snake] = key.default
+    -- end
+
+    if not M[key.camel] then
+      M[key.camel] = key.default
+    end
+    -- if not vim.g[key.snake] then
+    --   vim.g[key.snake] = key.default or ""
+    -- end
+    if not config[key.camel] then
+      config[key.camel] = key.default or ""
     end
     if vim.g[key.snake] then
-      config[key.camel] = M[key.snake]
+      config[key.camel] = vim.g[key.snake]
     elseif vim.g[key.camel] then
-      config[key.camel] = M[key.camel]
+      config[key.camel] = vim.g[key.snake]
     elseif key.default and M.use_recommended_server_config then
-      vim.g[key.snake] = key.default
-      config[key.camel] = key.default
+      vim.g[key.camel] = key.default or ""
+      vim.g[key.snake] = key.default or ""
+      config[key.camel] = key.default or ""
     end
   end
-
+  -- vim.notify("ionide config is " .. vim.inspect(config))
   return config
 end
 
@@ -442,34 +627,42 @@ M.reloadProjects = function()
 end
 
 M.OnFSProjSave = function()
-  if vim.bo.ft == "fsharp_project" and M.automatic_reload_workspace and M.automatic_reload_workspace == 1 then
+  if vim.bo.ft == "fsharp_project" and M.automatic_reload_workspace and M.automatic_reload_workspace == true then
     M.reloadProjects()
   end
 end
 
 M.loadConfig = function()
 
-  M.fsautocomplete_command = { "fsautocomplete", "--adaptive-lsp-server-enabled", "-v" }
-  M.use_recommended_server_config = 1
-  -- getServerConfig()
-  M.automatic_workspace_init = 1
-  M.automatic_reload_workspace = 1
-  M.show_signature_on_cursor_move = 1
-  M.fsi_command = "dotnet fsi"
-  M.fsi_keymap = "vscode"
-  M.fsi_window_command = "botright 10new"
-  M.fsi_focus_on_send = 0
-  M.backend = "nvim"
-  M.lsp_auto_setup = 0
-  M.lsp_recommended_colorscheme = 1
-  M.lsp_codelens = 1
-  M.fsi_vscode_keymaps = 1
-  M.statusline = "Ionide"
-  M.autocmd_events = { "BufEnter", "BufWritePost", "CursorHold", "CursorHoldI", "InsertEnter",
-    "InsertLeave" }
-  M.fsi_keymap_send = "<M-cr>"
-  M.fsi_keymap_toggle = "<M-@>"
+  local generalConfigs = {
 
+    FsAutocompleteCommand = { "fsautocomplete", "--adaptive-lsp-server-enabled", "-v" },
+    UseRecommendedServerConfig = true,
+    AutomaticWorkspaceInit = true,
+    AutomaticReloadWorkspace = true,
+    ShowSignatureOnCursorMove = true,
+    FsiCommand = "dotnet fsi",
+    FsiKeymap = "vscode",
+    FsiWindowCommand = "botright 10new",
+    FsiFocusOnSend = false,
+    Backend = "nvim",
+    LspAutoSetup = false,
+    LspRecommendedColorscheme = true,
+    LspCodelens = true,
+    FsiVscodeKeymaps = true,
+    Statusline = "Ionide",
+    AutocmdEvents = { "BufEnter", "BufWritePost", "CursorHold", "CursorHoldI", "InsertEnter", "InsertLeave" },
+    FsiKeymapSend = "<M-cr>",
+    FsiKeymapToggle = "<M-@>",
+
+  }
+  for key, v in pairs(generalConfigs) do
+    local k = key:toSnakeCase()
+    if not vim.g["fsharp#" .. k] then
+      vim.g["fsharp#" .. k] = v
+    end
+    if not M[k] then M[k] = vim.g["fsharp#" .. k] end
+  end
   return getServerConfig()
 end
 
@@ -565,7 +758,7 @@ local local_root_dir = function(n)
 end
 
 local function get_default_config()
-  local auto_init = M.automatic_workspace_init
+  local config = M.loadConfig()
   local result = {
     name = "ionide",
     cmd = { 'fsautocomplete', '--adaptive-lsp-server-enabled', '-v' },
@@ -573,12 +766,13 @@ local function get_default_config()
     filetypes = { "fsharp" },
     autostart = true,
     handlers = M.create_handlers(),
-    init_options = { AutomaticWorkspaceInit = (auto_init == 1) },
+    init_options = { AutomaticWorkspaceInit = (M.automatic_workspace_init == 1) },
     on_init = M.initialize,
-    settings = M.loadConfig(),
+    settings = { FSharp = config },
     root_dir = local_root_dir,
     -- root_dir = util.root_pattern("*.sln"),
   }
+  vim.notify("ionide defalut settings are : " .. vim.inspect(result))
   return result
 end
 
