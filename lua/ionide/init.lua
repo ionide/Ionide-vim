@@ -24,7 +24,7 @@ local M = {}
 local callbacks = {}
 
 M.RegisterCallback = function(fn)
-  if M.backend ~= 'nvim' then
+  if M.Backend ~= 'nvim' then
     return -1
   end
   local rnd = os.time()
@@ -33,7 +33,7 @@ M.RegisterCallback = function(fn)
 end
 
 M.ResolveCallback = function(key, arg)
-  if M.backend ~= 'nvim' then
+  if M.Backend ~= 'nvim' then
     return
   end
   if callbacks[key] then
@@ -718,7 +718,7 @@ end
 
 M.RegisterAutocmds = function()
   --     if g:fsharp#backend == 'nvim' && g:fsharp#lsp_codelens
-  if M.backend == 'nvim' and (M.LspCodelens == true or M.LspCodelens == 1) then
+  if M.Backend == 'nvim' and (M.LspCodelens == true or M.LspCodelens == 1) then
     -- print("fsharp.backend is nvim and lsp_codelens is true.. ")
     local autocmd = vim.api.nvim_create_autocmd
     local grp = vim.api.nvim_create_augroup
