@@ -483,16 +483,16 @@ local function getServerConfig()
     --   vim.g[key.snake] = key.default or ""
     -- end
     if not config[key.camel] then
-      config[key.camel] = key.default or ""
+      config[key.camel] = key.default
     end
     if vim.g[key.snake] then
       config[key.camel] = vim.g[key.snake]
     elseif vim.g[key.camel] then
       config[key.camel] = vim.g[key.snake]
-    elseif key.default and M.use_recommended_server_config then
-      vim.g[key.camel] = key.default or ""
-      vim.g[key.snake] = key.default or ""
-      config[key.camel] = key.default or ""
+    elseif key.default and M.UseRecommendedServerConfig then
+      vim.g[key.camel] = key.default
+      vim.g[key.snake] = key.default
+      config[key.camel] = key.default
     end
   end
   -- vim.notify("ionide config is " .. vim.inspect(config))
@@ -500,7 +500,9 @@ local function getServerConfig()
 end
 
 M.UpdateServerConfig = function()
+
   local fsharp = getServerConfig()
+  vim.notify("ionide config is " .. vim.inspect(fsharp))
   local settings = { settings = { FSharp = fsharp } }
   M.Notify("workspace/didChangeConfiguration", settings)
 end
@@ -548,7 +550,7 @@ M.HandleNotifyWorkspace = function(payload)
 
       -- print("after attempting to reassign table value it looks like this : " .. vim.inspect(Workspace))
     elseif content.Kind == 'workspaceLoad' and content.Data.Status == 'finished' then
-      -- print("[Ionide] calling updateServerConfig ... ")
+      print("[Ionide] calling updateServerConfig ... ")
 
       -- print("[Ionide] before calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
       M.UpdateServerConfig()
@@ -637,7 +639,7 @@ M.LoadConfig = function()
 
   local generalConfigs = {
 
-    FsAutocompleteCommand = { "fsautocomplete", "--adaptive-lsp-server-enabled", "-v" },
+    FsautocompleteCommand = { "fsautocomplete", "--adaptive-lsp-server-enabled", "-v" },
     UseRecommendedServerConfig = true,
     AutomaticWorkspaceInit = true,
     AutomaticReloadWorkspace = true,
@@ -773,7 +775,7 @@ local function get_default_config()
     root_dir = local_root_dir,
     -- root_dir = util.root_pattern("*.sln"),
   }
-  vim.notify("ionide defalut settings are : " .. vim.inspect(result))
+  vim.notify("ionide default settings are : " .. vim.inspect(result))
   return result
 end
 
@@ -942,6 +944,8 @@ local function create_manager(config)
       end
 
       if not vim.tbl_isempty(new_config.settings) then
+        local settingsInspected = vim.inspect(new_config.settings)
+        vim.notify("Settings being sent to LSP server are: " .. settingsInspected)
         client.workspace_did_change_configuration(new_config.settings)
       end
     end)
@@ -987,7 +991,7 @@ local function create_manager(config)
   end
 
   M.manager = manager
-  M.make_config = make_config
+  M.MakeConfig = make_config
   if reload and not (config.autostart == false) then
     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
       manager.try_add_wrapper(bufnr)
