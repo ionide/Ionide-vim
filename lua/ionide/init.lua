@@ -892,10 +892,11 @@ vim.filetype.add(
         return 'fsharp_project', function(bufnr)
           vim.bo[bufnr].syn = "xml"
           vim.bo[bufnr].ro = false
+          vim.b[bufnr].readonly = false
           vim.bo[bufnr].commentstring = "<!--%s-->"
           vim.bo[bufnr].comments = "<!--,e:-->"
           vim.opt_local.foldlevelstart = 99
-          -- vim.w.fdm = 'syntax'
+          vim.w.fdm = 'syntax'
         end
       end,
     },
@@ -958,12 +959,12 @@ vim.api.nvim_create_autocmd("BufWritePost", {
   callback = function() M.OnFSProjSave() end
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = "*.fsproj",
-  desc = "FSharp Auto refresh on project save",
-  group = vim.api.nvim_create_augroup("FSharpLCFsProj", { clear = true }),
-  callback = function() M.OnFSProjSave() end
-})
+-- vim.api.nvim_create_autocmd("BufWritePost", {
+--   pattern = "*.fsproj",
+--   desc = "FSharp Auto refresh on project save",
+--   group = vim.api.nvim_create_augroup("FSharpLCFsProj", { clear = true }),
+--   callback = function() M.OnFSProjSave() end
+-- })
 
 --augroup FSharpLC_fsproj
 -- autocmd! BufWritePost *.fsproj call fsharp#OnFSProjSave()
