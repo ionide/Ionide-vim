@@ -1,6 +1,7 @@
 local vim = vim
 local validate = vim.validate
 local api = vim.api
+local uc = vim.api.nvim_create_user_command
 local lsp = vim.lsp
 local log = require('vim.lsp.log')
 local protocol = require('vim.lsp.protocol')
@@ -22,13 +23,16 @@ end
 local M = {}
 
 local callbacks = {}
+M.CallBackResults = {}
 
 M.RegisterCallback = function(fn)
   if M.Backend ~= 'nvim' then
     return -1
   end
   local rnd = os.time()
+
   callbacks[rnd] = fn
+  M.CallBackResults[rnd] = fn
   return rnd
 end
 
@@ -193,8 +197,16 @@ local function buildConfigKeys(camels)
 end
 
 M.Call = function(method, params, callback_key)
+  -- local register = M.RegisterCallback(callback_key)
   local handler = function(err, result, ctx, config)
+    vim.notify("result is: " .. vim.inspect({
+      result = vim.inspect(result or "NO result"),
+      err = vim.inspect(err or "NO err"),
+      client_id = vim.inspect(ctx.client_id or "NO ctx clientid  "),
+      bufnr = vim.inspect(ctx.bufnr or "NO ctx clientid  ")
+    }))
     if result ~= nil then
+      -- vim.notify("result is: " .. vim.inspect(result))
       M.ResolveCallback(callback_key, {
         result = result,
         err = err,
@@ -203,7 +215,17 @@ M.Call = function(method, params, callback_key)
       })
     end
   end
-  lsp.buf_request(0, method, params, handler)
+  -- if method == "fsharp/compilerLocation" then
+  vim.notify("requesting method called '" ..
+    method .. "' with " .. vim.inspect(params or "NO PARAMS Given") .. "with callback key of: " .. callback_key)
+  -- end
+  local request = lsp.buf_request(0, method, params, handler)
+  if request then
+    -- vim.notify("request gave : " .. vim.inspect(request))
+    if callbacks[request] then
+      -- vim.notify("request was found in callbacks: " .. vim.inspect(callbacks[request]))
+    end
+  end
 end
 
 M.Notify = function(method, params)
@@ -230,6 +252,19 @@ end
 M.CompilerLocation = function(cont)
   return M.Call('fsharp/compilerLocation', {}, cont)
 end
+
+uc('IonideCompilerLocation',
+  function()
+    -- local cb = M.RegisterCallback(M.CompilerLocation)
+    -- local rcb = M.ResolveCallback(cb,{})
+    -- vim.notify(vim.inspect(rcb()))
+    local key = os.time()
+    vim.notify("Calling for CompilerLocations with timekey of " .. vim.inspect(key))
+    return M.Call('fsharp/compilerLocation', M.PlainNotification({}), key)
+    -- M.CompilerLocation(key)
+    -- vim.notify(vim.inspect(M.Call('fsharp/compilerLocation', {}, os.time())))
+  end
+  , { nargs = 0, desc = "Get compiler location data from FSAC" })
 
 M.Compile = function(projectPath, cont)
   return M.Call('fsharp/compile', M.ProjectParms(projectPath), cont)
@@ -378,7 +413,7 @@ local function getServerConfig()
     --
     { key = "AnalyzersPath" },
     --     DisableInMemoryProjectReferences: bool option
-    --false
+    --false|
     --
     { key = "DisableInMemoryProjectReferences", default = false },
     --     LineLens: LineLensConfig option
@@ -390,7 +425,43 @@ local function getServerConfig()
     { key = "UseSdkScripts", default = true },
     --     DotNetRoot: string option  Environment.dotnetSDKRoot.Value.FullName
     --
-    { key = "DotNetRoot", default = "" },
+    { key = "DotNetRoot", default =
+
+    (function()
+      local function find_executable(name)
+        local path = os.getenv("PATH") or ""
+        for dir in string.gmatch(path, "[^:]+") do
+          local executable = dir .. "/" .. name .. ".exe"
+          if os.execute("test -x " .. executable) == 1 then
+            return dir .. "/"
+          end
+        end
+        return nil
+      end
+
+      local dnr = os.getenv("DOTNET_ROOT")
+      if dnr and not dnr == "" then
+        return dnr
+      else
+        if vim.fn.has("win32") then
+          local canExecute = vim.fn.executable("dotnet") == 1
+          if not canExecute then
+            local vs1 = vim.fs.find({ "fscAnyCpu.exe" },
+              { path = "C:/Program Files/Microsoft Visual Studio", type = "file" })
+            local vs2 = vim.fs.find({ "fscAnyCpu.exe" },
+              { path = "C:/Program Files (x86)/Microsoft Visual Studio", type = "file" })
+            return vs1 or vs2 or ""
+          else
+            local dn = vim.fs.find({ "dotnet.exe" }, { path = "C:/Program Files/dotnet/", type = "file" })
+            return dn or find_executable("dotnet") or ""
+          end
+        else
+          return ""
+        end
+        return ""
+      end
+    end)()
+    },
     --     FSIExtraParameters: string[] option
     --     j
     { key = "FSIExtraParameters", default = {} },
@@ -502,67 +573,75 @@ end
 M.UpdateServerConfig = function()
 
   local fsharp = getServerConfig()
-  vim.notify("ionide config is " .. vim.inspect(fsharp))
+  -- vim.notify("ionide config is " .. vim.inspect(fsharp))
   local settings = { settings = { FSharp = fsharp } }
   M.Notify("workspace/didChangeConfiguration", settings)
 end
 
 local addThenSort = function(value, tbl)
-  table.insert(tbl, value)
-  table.sort(tbl)
+  if not vim.tbl_contains(tbl, value) then
+    table.insert(tbl, value)
+    table.sort(tbl)
+  end
   -- print("after sorting table, it now looks like this : " .. vim.inspect(tbl))
   return tbl
 end
 
 
 --see: https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_documentHighlight
-M.HandleDocumentHighlight = function(err, result, ctx, _)
-  if not result then
-    -- print("no result for doc highlight ")
-    return
-  end
-  if err then
-    print("doc highlight had an error. ")
-    if err.code == protocol.ErrorCodes.InternalError then
-      print("doc highlight error code is: " .. err.code)
-      print("doc highlight error message is: " .. err.message)
-      return
-    end
-  end
-  local client_id = ctx.client_id
-  local client = vim.lsp.get_client_by_id(client_id)
-  if not client then
-    print("doc highlight cannot happen without lsp, and for some reason i can't find lsp with id of: " .. client_id)
-    return
-  end
+M.HandleDocumentHighlight = function(range, kind)
   local u = require("vim.lsp.util")
-  print("now calling vim.lps.util.buf_highlight_references...")
-  u.buf_highlight_references(ctx.bufnr, result, client.offset_encoding)
+
+  u.buf_highlight_references(0, range or {}, "utf-16")
 end
 
 M.HandleNotifyWorkspace = function(payload)
+  -- vim.notify("handling notifyWorkspace")
   local content = vim.json.decode(payload.content)
   if content then
     if content.Kind == 'projectLoading' then
-      print("[Ionide] Loading " .. content.Data.Project)
+      vim.notify("[Ionide] Loading " .. content.Data.Project)
       -- print("[Ionide] now calling AddOrUpdateThenSort on table  " .. vim.inspect(Workspace))
       Workspace = addThenSort(content.Data.Project, Workspace)
-
       -- print("after attempting to reassign table value it looks like this : " .. vim.inspect(Workspace))
     elseif content.Kind == 'workspaceLoad' and content.Data.Status == 'finished' then
-      print("[Ionide] calling updateServerConfig ... ")
-
+      -- print("[Ionide] calling updateServerConfig ... ")
       -- print("[Ionide] before calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
       M.UpdateServerConfig()
-
       -- print("[Ionide] after calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
-      print("[Ionide] Workspace loaded (" .. #Workspace .. " project(s))")
+      vim.notify("[Ionide] Workspace loaded (" .. #Workspace .. " project(s))")
     end
   end
 end
 
-local handlers = { ['fsharp/notifyWorkspace'] = "HandleNotifyWorkspace",
-  ['textDocument/documentHighlight'] = "HandleDocumentHighlight" }
+M.HandleCompilerLocation = function(result)
+  -- vim.notify("handling compilerLocation response\n" .. "result is: \n" .. vim.inspect(result or "Nothing came back from the server.."))
+  vim.notify("handling compilerLocation response\n" ..
+    "result is: \n" .. vim.inspect(vim.json.decode(result.content) or "Nothing came back from the server.."))
+  -- local content = vim.json.decode(payload.content)
+  -- if content then
+
+  -- vim.notify(vim.inspect(content))
+  -- if content.Kind == 'projectLoading' then
+  --   print("[Ionide] Loading " .. content.Data.Project)
+  --   -- print("[Ionide] now calling AddOrUpdateThenSort on table  " .. vim.inspect(Workspace))
+  --   Workspace = addThenSort(content.Data.Project, Workspace)
+  --   -- print("after attempting to reassign table value it looks like this : " .. vim.inspect(Workspace))
+  -- elseif content.Kind == 'workspaceLoad' and content.Data.Status == 'finished' then
+  --   print("[Ionide] calling updateServerConfig ... ")
+  --   -- print("[Ionide] before calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
+  --   M.UpdateServerConfig()
+  --   -- print("[Ionide] after calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
+  --   print("[Ionide] Workspace loaded (" .. #Workspace .. " project(s))")
+  -- end
+  -- end
+end
+
+local handlers = {
+  ['fsharp/notifyWorkspace'] = "HandleNotifyWorkspace",
+  ['textDocument/documentHighlight'] = "HandleDocumentHighlight",
+  ['fsharp/compilerLocation'] = "HandleCompilerLocation"
+}
 
 local function GetHandlers()
   return handlers
@@ -593,7 +672,7 @@ M.CreateHandlers = function()
       --   return
       -- end
 
-      if params == nil or not (method == ctx.method) then return end
+      -- if params == nil or not (method == ctx.method) then return end
       M[func_name](params)
     end
 
@@ -631,7 +710,8 @@ end
 
 M.OnFSProjSave = function()
   if vim.bo.ft == "fsharp_project" and M.AutomaticReloadWorkspace and M.AutomaticReloadWorkspace == true then
-    M.reloadProjects()
+    vim.notify("fsharp project saved, reloading...")
+    M.ReloadProjects()
   end
 end
 
@@ -713,7 +793,7 @@ end
 --
 M.OnCursorMove = function()
   if M.ShowSignatureOnCursorMove then
-    M.showSignature()
+    M.ShowSignature()
   end
 end
 
@@ -770,19 +850,19 @@ local function get_default_config()
     autostart = true,
     handlers = M.CreateHandlers(),
     init_options = { AutomaticWorkspaceInit = M.AutomaticWorkspaceInit },
-    on_init = M.initialize,
+    on_init = M.Initialize,
     settings = { FSharp = config },
     root_dir = local_root_dir,
     -- root_dir = util.root_pattern("*.sln"),
   }
-  vim.notify("ionide default settings are : " .. vim.inspect(result))
+  -- vim.notify("ionide default settings are : " .. vim.inspect(result))
   return result
 end
 
-M.manager = nil
+M.Manager = nil
 
 local function autostart_if_needed(m, config)
-  local auto_setup = (M.lsp_auto_setup == 1)
+  local auto_setup = (M.LspAutoSetup == 1)
   if auto_setup and not (config.autostart == false) then
     m.autostart()
   end
@@ -810,7 +890,62 @@ vim.filetype.add(
     extension = {
       fsproj = function(path, bufnr)
         return 'fsharp_project', function(bufnr)
-          vim.cmd("set syntax= xml")
+          vim.bo[bufnr].syn = "xml"
+          vim.bo[bufnr].ro = false
+          vim.bo[bufnr].commentstring = "<!--%s-->"
+          vim.bo[bufnr].comments = "<!--,e:-->"
+          vim.opt_local.foldlevelstart = 99
+          -- vim.w.fdm = 'syntax'
+        end
+      end,
+    },
+  })
+
+vim.filetype.add(
+  {
+    extension = {
+      fsproj = function(path, bufnr)
+        return 'fsharp', function(bufnr)
+
+          if not vim.g.filetype_fs then
+            vim.g['filetype_fs'] = 'fsharp'
+          end
+          if not vim.g.filetype_fs == 'fsharp' then
+            vim.g['filetype_fs'] = 'fsharp'
+          end
+          -- if vim.b.did_fsharp_ftplugin and vim.b.did_fsharp_ftplugin == 1 then
+          -- return
+          -- end
+
+          -- vim.b.did_fsharp_ftplugin = 1
+
+          -- local cpo_save = vim.o.cpo
+          -- vim.o.cpo = ''
+          --
+          -- enable syntax based folding
+          vim.w.fdm = 'syntax'
+
+          -- comment settings
+          vim.bo[bufnr].formatoptions = 'croql'
+          vim.bo[bufnr].commentstring = '(*%s*)'
+          vim.bo[bufnr].comments = [[s0:*\ -,m0:*\ \ ,ex0:*),s1:(*,mb:*,ex:*),:\/\/\/,:\/\/]]
+
+          -- make ftplugin undo-able
+          -- vim.bo[bufnr].undo_ftplugin = 'setl fo< cms< com< fdm<'
+
+          -- local function prompt(msg)
+          --   local height = vim.o.cmdheight
+          --   if height < 2 then
+          --     vim.o.cmdheight = 2
+          --   end
+          --   print(msg)
+          --   vim.o.cmdheight = height
+          -- end
+
+          -- vim.o.cpo = cpo_save
+
+
+
         end
       end,
     },
@@ -822,46 +957,20 @@ vim.api.nvim_create_autocmd("BufWritePost", {
   group = vim.api.nvim_create_augroup("FSharpLCFsProj", { clear = true }),
   callback = function() M.OnFSProjSave() end
 })
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = "*.fsproj",
+  desc = "FSharp Auto refresh on project save",
+  group = vim.api.nvim_create_augroup("FSharpLCFsProj", { clear = true }),
+  callback = function() M.OnFSProjSave() end
+})
+
 --augroup FSharpLC_fsproj
 -- autocmd! BufWritePost *.fsproj call fsharp#OnFSProjSave()
 --augroup END
+---- end ftplugin section ----
 
-if not vim.g.filetype_fs then
-  vim.g['filetype_fs'] = 'fsharp'
-end
-if not vim.g.filetype_fs == 'fsharp' then
-  vim.g['filetype_fs'] = 'fsharp'
-end
-if vim.b.did_fsharp_ftplugin and vim.b.did_fsharp_ftplugin == 1 then
-  return
-end
 
-vim.b.did_fsharp_ftplugin = 1
-
-local cpo_save = vim.o.cpo
-vim.o.cpo = ''
-
--- enable syntax based folding
-vim.b.fdm = 'syntax'
-
--- comment settings
-vim.b.formatoptions = 'croql'
-vim.b.commentstring = '(*%s*)'
-vim.b.comments = [[s0:*\ -,m0:*\ \ ,ex0:*),s1:(*,mb:*,ex:*),:\/\/\/,:\/\/]]
-
--- make ftplugin undo-able
-vim.b.undo_ftplugin = 'setl fo< cms< com< fdm<'
-
-local function prompt(msg)
-  local height = vim.o.cmdheight
-  if height < 2 then
-    vim.o.cmdheight = 2
-  end
-  print(msg)
-  vim.o.cmdheight = height
-end
-
-vim.o.cpo = cpo_save
 
 local function create_manager(config)
   validate {
@@ -884,7 +993,7 @@ local function create_manager(config)
 
   local get_root_dir = config.root_dir
 
-  function M.autostart()
+  function M.Autostart()
     local root_dir = get_root_dir(api.nvim_buf_get_name(0), api.nvim_get_current_buf())
     if not root_dir then
       root_dir = util.path.dirname(api.nvim_buf_get_name(0))
@@ -902,18 +1011,18 @@ local function create_manager(config)
     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
       local buf_dir = api.nvim_buf_get_name(bufnr)
       if buf_dir:sub(1, root_dir:len()) == root_dir then
-        M.manager.try_add_wrapper(bufnr)
+        M.Manager.try_add_wrapper(bufnr)
       end
     end
   end
 
   local reload = false
-  if M.manager then
-    for _, client in ipairs(M.manager.clients()) do
+  if M.Manager then
+    for _, client in ipairs(M.Manager.clients()) do
       client.stop(true)
     end
     reload = true
-    M.manager = nil
+    M.Manager = nil
   end
 
   local make_config = function(_root_dir)
@@ -990,7 +1099,7 @@ local function create_manager(config)
     end
   end
 
-  M.manager = manager
+  M.Manager = manager
   M.MakeConfig = make_config
   if reload and not (config.autostart == false) then
     for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
@@ -1022,8 +1131,8 @@ end
 function M.status()
   if lspconfig_is_present then
     print("* LSP server: handled by nvim-lspconfig")
-  elseif M.manager ~= nil then
-    if next(M.manager.clients()) == nil then
+  elseif M.Manager ~= nil then
+    if next(M.Manager.clients()) == nil then
       print("* LSP server: not started")
     else
       print("* LSP server: started")
@@ -1068,3 +1177,4 @@ function M.SendAllToFsi()
 end
 
 return M
+
