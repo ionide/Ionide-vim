@@ -904,7 +904,7 @@ vim.filetype.add(
 vim.filetype.add(
   {
     extension = {
-      fsproj = function(path, bufnr)
+      fs = function(path, bufnr)
         return 'fsharp', function(bufnr)
 
           if not vim.g.filetype_fs then
@@ -1177,4 +1177,3 @@ function M.SendAllToFsi()
 end
 
 return M
-
