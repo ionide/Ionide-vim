@@ -232,7 +232,7 @@ M.Notify = function(method, params)
   lsp.buf_notify(0, method, params)
 end
 
-Workspace = {}
+workspace_folders = {}
 
 
 M.Signature = function(filePath, line, character, cont)
@@ -602,19 +602,19 @@ M.HandleNotifyWorkspace = function(payload)
     if content.Kind == 'projectLoading' then
       vim.notify("[Ionide] Loading " .. content.Data.Project)
       -- print("[Ionide] now calling AddOrUpdateThenSort on table  " .. vim.inspect(Workspace))
-      Workspace = addThenSort(content.Data.Project, Workspace)
+      M.workspace_folders = addThenSort(content.Data.Project, M.workspace_folders)
       -- print("after attempting to reassign table value it looks like this : " .. vim.inspect(Workspace))
     elseif content.Kind == 'workspaceLoad' and content.Data.Status == 'finished' then
       -- print("[Ionide] calling updateServerConfig ... ")
       -- print("[Ionide] before calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
       M.UpdateServerConfig()
       -- print("[Ionide] after calling updateServerconfig, workspace looks like:   " .. vim.inspect(Workspace))
-      vim.notify("[Ionide] Workspace loaded (" .. #Workspace .. " project(s))")
+      vim.notify("[Ionide] Workspace loaded (" .. #M.workspace_folders .. " project(s))")
     end
   end
 end
 
-M.HandleCompilerLocation = function(result)
+function M.HandleCompilerLocationn(result)
   -- vim.notify("handling compilerLocation response\n" .. "result is: \n" .. vim.inspect(result or "Nothing came back from the server.."))
   vim.notify("handling compilerLocation response\n" ..
     "result is: \n" .. vim.inspect(vim.json.decode(result.content) or "Nothing came back from the server.."))
@@ -695,14 +695,14 @@ M.LoadProject = function(...)
 end
 
 M.ShowLoadedProjects = function()
-  for _, proj in ipairs(Workspace) do
+  for _, proj in ipairs(workspace_folders) do
     print("- " .. proj)
   end
 end
 
 M.ReloadProjects = function()
-  if #Workspace > 0 then
-    M.WorkspaceLoad(Workspace, nil)
+  if #workspace_folders > 0 then
+    M.WorkspaceLoad(workspace_folders, nil)
   else
     print("[Ionide] Workspace is empty")
   end
@@ -876,7 +876,7 @@ local function delegate_to_lspconfig(config)
       default_config = get_default_config(),
       docs = {
         description = [[
-            https://github.com/ionide/Ionide-vim
+            https://github.com/willehrendreich/Ionide-vim
                   ]],
       },
     }
@@ -1143,6 +1143,208 @@ function M.status()
   end
 end
 
+-- " " FSI integration
+--"
+--" let s:fsi_buffer = -1
+--" let s:fsi_job    = -1
+--" let s:fsi_width  = 0
+--" let s:fsi_height = 0
+local fsiBuffer = -1
+local fsiJob = -1
+local fsiWidth = 0
+local fsiHeight = 0
+--"
+--" function! s:win_gotoid_safe(winid)
+--"     function! s:vimReturnFocus(window)
+--"         call win_gotoid(a:window)
+--"         redraw!
+--"     endfunction
+--"     if has('nvim')
+--"         call win_gotoid(a:winid)
+--"     else
+--"         call timer_start(1, { -> s:vimReturnFocus(a:winid) })
+--"     endif
+--" endfunction
+local function vimReturnFocus(window)
+  vim.fn.win_gotoid(window)
+  vim.cmd.redraw("!")
+end
+
+local function winGoToIdSafe(id)
+
+  if vim.cmd.has('nvim') then
+    vim.fn.win_gotoid(id)
+  else
+    vim.fn.timer_start(1, function() vimReturnFocus(id) end, {})
+  end
+end
+
+--"
+--" function! s:get_fsi_command()
+--"     let cmd = g:fsharp#fsi_command
+--"     for prm in g:fsharp#fsi_extra_parameters
+--"         let cmd = cmd . " " . prm
+--"     endfor
+--"     return cmd
+--" endfunction
+
+local function getFsiCommand()
+  local cmd = M.FsiCommand or "dotnet fsi"
+  local ep = M.FSIExtraParameters or {}
+  for _, x in pairs(ep) do
+    cmd = cmd .. ' ' .. x
+  end
+  return cmd
+
+end
+
+--" function! fsharp#openFsi(returnFocus)
+function M.OpenFsi(returnFocus)
+  local isNeovim = vim.fn.has('nvim')
+
+  --"     if bufwinid(s:fsi_buffer) <= 0
+  if vim.fn.bufwinid(fsiBuffer) <= 0 then
+
+    --"         let fsi_command = s:get_fsi_command()
+    local cmd = getFsiCommand()
+    --"         if exists('*termopen') || exists('*term_start')
+    if vim.fn.exists('*termopen') == true or vim.fn.exists('*term_start') then
+      --"             let current_win = win_getid()
+      local currentWin = vim.fn.win_getid()
+      --"             execute g:fsharp#fsi_window_command
+      vim.fn.execute(M.FsiWindowCommand or 'botright 10new')
+      --"             if s:fsi_width  > 0 | execute 'vertical resize' s:fsi_width | endif
+      if fsiWidth > 0 then vim.fn.execute('vertical resize ' .. fsiWidth) end
+      --"             if s:fsi_height > 0 | execute 'resize' s:fsi_height | endif
+
+      if fsiHeight > 0 then vim.fn.execute('resize ' .. fsiHeight) end
+      --"             " if window is closed but FSI is still alive then reuse it
+      --"             if s:fsi_buffer >= 0 && bufexists(str2nr(s:fsi_buffer))
+      if fsiBuffer >= 0 and vim.fn.bufexists(fsiBuffer) then
+        --"                 exec 'b' s:fsi_buffer
+        vim.fn.cmd('b' .. tostring(fsiBuffer))
+        --"                 normal G
+
+        vim.cmd("normal G")
+        --"                 if !has('nvim') && mode() == 'n' | execute "normal A" | endif
+
+        if not isNeovim and vim.api.nvim_get_mode()[1] == 'n' then
+          vim.cmd("normal A")
+        end
+        --"                 if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
+        if returnFocus then winGoToIdSafe(currentWin) end
+        --"             " open FSI: Neovim
+        --"             elseif has('nvim')
+      elseif isNeovim then
+        --"                 let s:fsi_job = termopen(fsi_command)
+        fsiJob = vim.fn.termopen(M.FsiCommand) or 0
+        --"                 if s:fsi_job > 0
+        if fsiJob > 0 then
+          --"                     let s:fsi_buffer = bufnr("%")
+          fsiBuffer = vim.fn.bufnr(tonumber(vim.fn.expand("%")))
+          --"                 else
+        else
+          --"                     close
+          vim.cmd.close()
+          --"                     echom "[FSAC] Failed to open FSI."
+          vim.notify("Ionide failed to open FSI")
+          --"                     return -1
+          return -1
+          --"                 endif
+        end
+        --"             " open FSI: Vim
+        --"             else
+      else
+        --"                 let options = {
+        local options = {
+          term_name = "F# Interactive",
+          curwin = 1,
+          term_finish = "close"
+        }
+        --"                 \ "term_name": "F# Interactive",
+
+        --"                 \ "curwin": 1,
+
+        --"                 \ "term_finish": "close"
+
+        --"                 \ }
+
+        --"                 let s:fsi_buffer = term_start(fsi_command, options)
+        fsiBuffer = vim.fn("term_start(" .. M.FsiCommand .. ", " .. vim.inspect(options) .. ")")
+        --"                 if s:fsi_buffer != 0
+        if fsiBuffer ~= 0 then
+          --"                     if exists('*term_setkill') | call term_setkill(s:fsi_buffer, "term") | endif
+          if vim.fn.exists('*term_setkill') == true then vim.fn("term_setkill(" .. fsiBuffer .. [["term"]]) end
+          --"                     let s:fsi_job = term_getjob(s:fsi_buffer)
+          fsiJob = vim.cmd.term_getjob(fsiBuffer)
+          --"                 else
+        else
+          --"                     close
+
+          vim.cmd.close()
+          --"                     echom "[FSAC] Failed to open FSI."
+
+          vim.notify("Ionide failed to open FSI")
+          --"                     return -1
+          return -1
+          --"                 endif
+
+        end
+        --"             endif
+
+      end
+      --"             setlocal bufhidden=hide
+
+      vim.opt_local.bufhidden = "hide"
+      --"             normal G
+
+      vim.cmd("normal G")
+      --"             if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
+      if returnFocus then winGoToIdSafe(currentWin) end
+      --"             return s:fsi_buffer
+      return fsiBuffer
+      --"         else
+    else
+      --"             echom "[FSAC] Your (neo)vim does not support terminal".
+      vim.notify("Ionide - Your neovim doesn't support terminal.")
+      --"             return 0
+      return 0
+      --"         endif
+    end
+    --"     endif
+  end
+  return fsiBuffer
+  --" endfunction
+end
+
+--"
+--" function! fsharp#toggleFsi()
+--"     let fsiWindowId = bufwinid(s:fsi_buffer)
+--"     if fsiWindowId > 0
+--"         let current_win = win_getid()
+--"         call win_gotoid(fsiWindowId)
+--"         let s:fsi_width = winwidth('%')
+--"         let s:fsi_height = winheight('%')
+--"         close
+--"         call win_gotoid(current_win)
+--"     else
+--"         call fsharp#openFsi(0)
+--"     endif
+--" endfunction
+function M.ToggleFsi()
+  local w = vim.fn.bufwinid(fsiBuffer)
+  if w > 0 then
+    local curWin = vim.fn.win_getid()
+    M.winGoToId(w)
+    fsiWidth = vim.fn.winwidth(tonumber(vim.fn.expand('%')) or 0)
+    fsiHeight = vim.fn.winheight(tonumber(vim.fn.expand('%')) or 0)
+    vim.cmd.close()
+    vim.fn.win_gotoid(curWin)
+  else
+    M.OpenFsi()
+  end
+end
+
 M.GetVisualSelection = function()
   local line_start, column_start = unpack(vim.fn.getpos("'<"))
   local line_end, column_end = unpack(vim.fn.getpos("'>"))
@@ -1154,8 +1356,71 @@ M.GetVisualSelection = function()
   lines[1] = string.sub(lines[1], column_start)
   return lines
 end
+--"
+--" function! fsharp#quitFsi()
+--"     if s:fsi_buffer >= 0 && bufexists(str2nr(s:fsi_buffer))
+--"         if has('nvim')
+--"             let winid = bufwinid(s:fsi_buffer)
+--"             if winid > 0 | execute "close " . winid | endif
+--"             call jobstop(s:fsi_job)
+--"         else
+--"             call job_stop(s:fsi_job, "term")
+--"         endif
+--"         let s:fsi_buffer = -1
+--"         let s:fsi_job = -1
+--"     endif
+--" endfunction
+function M.QuitFsi()
+  if vim.api.nvim_buf_is_valid(fsiBuffer) then
+    local is_neovim = vim.api.nvim_eval("has('nvim')")
+    if is_neovim then
+      local winid = vim.api.nvim_call_function("bufwinid", { fsiBuffer })
+      if winid > 0 then
+        vim.api.nvim_win_close(winid, true)
+      end
+    end
+    vim.api.nvim_call_function("jobstop", { fsiJob })
+    fsiBuffer = -1
+    fsiJob = -1
+  end
+end
 
-M.GetCompleteBuffer = function()
+--" function! fsharp#resetFsi()
+--"     call fsharp#quitFsi()
+--"     return fsharp#openFsi(1)
+--" endfunction
+--"
+function M.ResetFsi()
+  M.QuitFsi()
+  M.OpenFsi(true)
+end
+
+--" function! fsharp#sendFsi(text)
+--"     if fsharp#openFsi(!g:fsharp#fsi_focus_on_send) > 0
+--"         " Neovim
+--"         if has('nvim')
+--"             call chansend(s:fsi_job, a:text . "\n" . ";;". "\n")
+--"         " Vim 8
+--"         else
+--"             call term_sendkeys(s:fsi_buffer, a:text . "\<cr>" . ";;" . "\<cr>")
+--"             call term_wait(s:fsi_buffer)
+--"         endif
+--"     endif
+--" endfunction
+-- "
+
+function M.SendFsi(text)
+  if M.OpenFsi(M.FsiFocusOnSend or true) > 0 then
+    if vim.fn.has('nvim') then
+      vim.fn.chansend(fsiJob, text .. "\n" .. ";;" .. "\n")
+    else
+      vim.api.nvim_call_function("term_sendkeys", { fsiBuffer, text .. "\\<cr>" .. ";;" .. "\\<cr>" })
+      vim.api.nvim_call_function("term_wait", { fsiBuffer })
+    end
+  end
+end
+
+function M.GetCompleteBuffer()
   return vim.fn.join(vim.fn.getline(1, tonumber(vim.fn.expand('$'))), "\n")
 end
 
