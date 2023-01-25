@@ -1143,6 +1143,52 @@ function M.status()
   end
 end
 
+--     " FSI keymaps
+--     if g:fsharp#fsi_keymap == "vscode"
+--         if has('nvim')
+--             let g:fsharp#fsi_keymap_send   = "<M-cr>"
+--             let g:fsharp#fsi_keymap_toggle = "<M-@>"
+--         else
+--             let g:fsharp#fsi_keymap_send   = "<esc><cr>"
+--             let g:fsharp#fsi_keymap_toggle = "<esc>@"
+--         endif
+--     elseif g:fsharp#fsi_keymap == "vim-fsharp"
+--         let g:fsharp#fsi_keymap_send   = "<leader>i"
+--         let g:fsharp#fsi_keymap_toggle = "<leader>e"
+--     elseif g:fsharp#fsi_keymap == "custom"
+--         let g:fsharp#fsi_keymap = "none"
+--         if !exists('g:fsharp#fsi_keymap_send')
+--             echoerr "g:fsharp#fsi_keymap_send is not set"
+--         elseif !exists('g:fsharp#fsi_keymap_toggle')
+--             echoerr "g:fsharp#fsi_keymap_toggle is not set"
+--         else
+--             let g:fsharp#fsi_keymap = "custom"
+--         endif
+--     endif
+--
+
+if vim.fn.has('nvim') then
+  if M.FsiKeymap == "vscode" then
+    M.FsiKeymapSend = "<M-cr>"
+    M.FsiKeymapToggle = "<M-@>"
+  elseif M.FsiKeymap == "vim-fsharp" then
+    M.FsiKeymapSend   = "<leader>i"
+    M.FsiKeymapToggle = "<leader>e"
+  elseif M.FsiKeymap == "custom" then
+    M.FsiKeymap = "none"
+    if not M.FsiKeymapSend then
+      vim.cmd.echoerr("FsiKeymapSend not set. good luck with that I dont have a nice way to change it yet. sorry. ")
+    elseif not M.FsiKeymapToggle then
+      vim.cmd.echoerr("FsiKeymapToggle not set. good luck with that I dont have a nice way to change it yet. sorry. ")
+    else
+      M.FsiKeymap = "custom"
+    end
+  end
+else
+  vim.notify("I'm sorry I don't support this, try ionide/ionide-vim instead")
+end
+
+
 -- " " FSI integration
 --"
 --" let s:fsi_buffer = -1
@@ -1237,7 +1283,7 @@ function M.OpenFsi(returnFocus)
         --"             elseif has('nvim')
       elseif isNeovim then
         --"                 let s:fsi_job = termopen(fsi_command)
-        fsiJob = vim.fn.termopen(M.FsiCommand) or 0
+        fsiJob = vim.fn.termopen(cmd) or 0
         --"                 if s:fsi_job > 0
         if fsiJob > 0 then
           --"                     let s:fsi_buffer = bufnr("%")
@@ -1441,5 +1487,19 @@ function M.SendAllToFsi()
   local text = M.GetCompleteBuffer()
   return M.SendFsi(text)
 end
+
+-- if g:fsharp#fsi_keymap != "none"
+--     execute "vnoremap <silent>" g:fsharp#fsi_keymap_send ":call fsharp#sendSelectionToFsi()<cr><esc>"
+--     execute "nnoremap <silent>" g:fsharp#fsi_keymap_send ":call fsharp#sendLineToFsi()<cr>"
+--     execute "nnoremap <silent>" g:fsharp#fsi_keymap_toggle ":call fsharp#toggleFsi()<cr>"
+--     execute "tnoremap <silent>" g:fsharp#fsi_keymap_toggle "<C-\\><C-n>:call fsharp#toggleFsi()<cr>"
+-- endif
+if not M.FsiKeymap == "none" then
+  vim.keymap.set({ "v" }, M.FsiKeymapSend, M.SendSelectionToFsi, { silent = true })
+  vim.keymap.set({ "n" }, M.FsiKeymapSend, M.SendLineToFsi, { silent = true })
+  vim.keymap.set({ "n" }, M.FsiKeymapToggle, M.ToggleFsi, { silent = true })
+  vim.keymap.set({ "t" }, M.FsiKeymapToggle, M.ToggleFsi, { silent = true })
+end
+
 
 return M
