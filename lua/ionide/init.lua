@@ -25,6 +25,7 @@ local M = {}
 local callbacks = {}
 M.CallBackResults = {}
 
+M.workspace_folders = {}
 M.RegisterCallback = function(fn)
   if M.Backend ~= 'nvim' then
     return -1
