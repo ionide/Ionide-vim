@@ -827,6 +827,8 @@ M.Initialize = function()
   print 'Ionide Initializing'
   print 'Ionide calling updateServerConfig...'
   M.UpdateServerConfig()
+  print 'Ionide calling SetKeymaps...'
+  M.SetKeymaps()
   print 'Ionide calling registerAutocmds...'
   M.RegisterAutocmds()
   print 'Ionide Initialized'
@@ -1495,12 +1497,14 @@ end
 --     execute "nnoremap <silent>" g:fsharp#fsi_keymap_toggle ":call fsharp#toggleFsi()<cr>"
 --     execute "tnoremap <silent>" g:fsharp#fsi_keymap_toggle "<C-\\><C-n>:call fsharp#toggleFsi()<cr>"
 -- endif
-if not M.FsiKeymap == "none" then
-  vim.keymap.set({ "v" }, M.FsiKeymapSend, M.SendSelectionToFsi, { silent = true })
-  vim.keymap.set({ "n" }, M.FsiKeymapSend, M.SendLineToFsi, { silent = true })
-  vim.keymap.set({ "n" }, M.FsiKeymapToggle, M.ToggleFsi, { silent = true })
-  vim.keymap.set({ "t" }, M.FsiKeymapToggle, M.ToggleFsi, { silent = true })
-end
+function M.SetKeymaps()
+  if not M.FsiKeymap == "none" then
+    vim.keymap.set({ "v" }, M.FsiKeymapSend, M.SendSelectionToFsi, { silent = true })
+    vim.keymap.set({ "n" }, M.FsiKeymapSend, M.SendLineToFsi, { silent = true })
+    vim.keymap.set({ "n" }, M.FsiKeymapToggle, M.ToggleFsi, { silent = true })
+    vim.keymap.set({ "t" }, M.FsiKeymapToggle, M.ToggleFsi, { silent = true })
+  end
 
+end
 
 return M
