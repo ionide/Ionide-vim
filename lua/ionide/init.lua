@@ -53,7 +53,17 @@ local function get_default_config()
   return result
 end
 
-M.manager = nil
+-- https://github.com/ionide/Ionide-vim/issues/69
+local function inject_codelens_refresh(config)
+  local new_config = tbl_extend("keep", config, {})
+  new_config.on_attach = function(client, bufnr)
+    if config.on_attach then
+      config.on_attach(client, bufnr)
+    end
+    vim.lsp.codelens.refresh()
+  end
+  return new_config
+end
 
 local function autostart_if_needed(m, config)
   local auto_setup = (vim.g['fsharp#lsp_auto_setup'] == 1)
@@ -77,6 +87,8 @@ local function delegate_to_lspconfig(config)
   end
   lspconfig.ionide.setup(config)
 end
+
+M.manager = nil
 
 -- partially adopted from neovim/nvim-lspconfig, see lspconfig.LICENSE.md
 local function create_manager(config)
@@ -222,10 +234,11 @@ function M._setup_buffer(client_id, bufnr)
 end
 
 function M.setup(config)
+  local new_config = inject_codelens_refresh(config)
   if lspconfig_is_present then
-    return delegate_to_lspconfig(config)
+    return delegate_to_lspconfig(new_config)
   end
-  return create_manager(config)
+  return create_manager(new_config)
 end
 
 function M.status()

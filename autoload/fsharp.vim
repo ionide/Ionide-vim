@@ -580,7 +580,7 @@ function! fsharp#openFsi(returnFocus)
             if a:returnFocus | call s:win_gotoid_safe(current_win) | endif
             return s:fsi_buffer
         else
-            echom "[FSAC] Your (neo)vim does not support terminal".
+            echom "[FSAC] Your (neo)vim does not support terminal."
             return 0
         endif
     endif
