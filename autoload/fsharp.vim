@@ -407,6 +407,10 @@ endfunction
 
 let s:workspace = []
 
+function! fsharp#getLoadedProjects()
+    return copy(s:workspace)
+endfunction
+
 function! fsharp#handle_notifyWorkspace(payload) abort
     let content = json_decode(a:payload.content)
     if content.Kind == 'projectLoading'
