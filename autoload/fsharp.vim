@@ -163,7 +163,10 @@ let s:config_keys_camel =
     \     {'key': 'ExcludeProjectDirectories', 'default': []},
     \     {'key': 'keywordsAutocomplete', 'default': 1},
     \     {'key': 'ExternalAutocomplete', 'default': 0},
+    \     {'key': 'FullNameExternalAutocomplete', 'default': 0},
     \     {'key': 'Linter', 'default': 1},
+    \     {'key': 'LinterConfig'},
+    \     {'key': 'IndentationSize', 'default': 4},
     \     {'key': 'UnionCaseStubGeneration', 'default': 1},
     \     {'key': 'UnionCaseStubGenerationBody'},
     \     {'key': 'RecordStubGeneration', 'default': 1},
@@ -171,18 +174,37 @@ let s:config_keys_camel =
     \     {'key': 'InterfaceStubGeneration', 'default': 1},
     \     {'key': 'InterfaceStubGenerationObjectIdentifier', 'default': 'this'},
     \     {'key': 'InterfaceStubGenerationMethodBody'},
+    \     {'key': 'AddPrivateAccessModifier', 'default': 0},
     \     {'key': 'UnusedOpensAnalyzer', 'default': 1},
+    \     {'key': 'UnusedOpensAnalyzerExclusions', 'default': []},
     \     {'key': 'UnusedDeclarationsAnalyzer', 'default': 1},
+    \     {'key': 'UnusedDeclarationsAnalyzerExclusions', 'default': []},
     \     {'key': 'SimplifyNameAnalyzer', 'default': 0},
+    \     {'key': 'SimplifyNameAnalyzerExclusions', 'default': []},
+    \     {'key': 'UnnecessaryParenthesesAnalyzer', 'default': 0},
     \     {'key': 'ResolveNamespaces', 'default': 1},
     \     {'key': 'EnableReferenceCodeLens', 'default': 1},
     \     {'key': 'EnableAnalyzers', 'default': 0},
     \     {'key': 'AnalyzersPath'},
+    \     {'key': 'ExcludeAnalyzers'},
+    \     {'key': 'IncludeAnalyzers'},
     \     {'key': 'DisableInMemoryProjectReferences', 'default': 0},
     \     {'key': 'LineLens', 'default': {'enabled': 'never', 'prefix': ''}},
     \     {'key': 'UseSdkScripts', 'default': 1},
     \     {'key': 'dotNetRoot'},
     \     {'key': 'fsiExtraParameters', 'default': []},
+    \     {'key': 'fsiCompilerToolLocations', 'default': []},
+    \     {'key': 'TooltipMode', 'default': 'full'},
+    \     {'key': 'GenerateBinlog', 'default': 0},
+    \     {'key': 'AbstractClassStubGeneration', 'default': 1},
+    \     {'key': 'AbstractClassStubGenerationObjectIdentifier', 'default': 'this'},
+    \     {'key': 'AbstractClassStubGenerationMethodBody', 'default': 'failwith "Not Implemented"'},
+    "\    {'key': 'CodeLenses', TODO},
+    "\    {'key': 'PipelineHints', TODO}
+    "\    {'key': 'InlayHints', TODO}
+    "\    {'key': 'Fsac', TODO}
+    "\    {'key': 'Notifications', TODO}
+    "\    {'key': 'Debug', TODO}
     \ ]
 let s:config_keys = []
 
