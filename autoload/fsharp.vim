@@ -556,9 +556,12 @@ endfunction
 
 function! s:get_fsi_command()
     let cmd = g:fsharp#fsi_command
-    for prm in g:fsharp#fsi_extra_parameters
-        let cmd = cmd . " " . prm
-    endfor
+    if exists("g:fsharp#fsi_extra_parameters")
+        echom "[Ionide-vim]: `g:fsharp#fsi_extra_parameters` is being deprecated. Migrate to `g:fsharp#fsi_extra_interactive_parameters` and `g:fsharp_extra_shared_parameters`."
+        for prm in g:fsharp#fsi_extra_parameters
+            let cmd = cmd . " " . prm
+        endfor
+    endif
     for prm in g:fsharp#fsi_extra_interactive_parameters
         let cmd = cmd . " " . prm
     endfor
