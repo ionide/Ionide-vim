@@ -192,7 +192,7 @@ let s:config_keys_camel =
     \     {'key': 'LineLens', 'default': {'enabled': 'never', 'prefix': ''}},
     \     {'key': 'UseSdkScripts', 'default': 1},
     \     {'key': 'dotNetRoot'},
-    \     {'key': 'fsiExtraParameters', 'default': []},
+    \     {'key': 'fsiExtraParameters'},
     \     {'key': 'fsiExtraInteractiveParameters', 'default': ['--readline-']},
     \     {'key': 'fsiExtraSharedParameters', 'default': []},
     \     {'key': 'fsiCompilerToolLocations', 'default': []},
