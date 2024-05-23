@@ -193,6 +193,8 @@ let s:config_keys_camel =
     \     {'key': 'UseSdkScripts', 'default': 1},
     \     {'key': 'dotNetRoot'},
     \     {'key': 'fsiExtraParameters', 'default': []},
+    \     {'key': 'fsiExtraInteractiveParameters', 'default': ['--readline-']},
+    \     {'key': 'fsiExtraSharedParameters', 'default': []},
     \     {'key': 'fsiCompilerToolLocations', 'default': []},
     \     {'key': 'TooltipMode', 'default': 'full'},
     \     {'key': 'GenerateBinlog', 'default': 0},
@@ -555,6 +557,12 @@ endfunction
 function! s:get_fsi_command()
     let cmd = g:fsharp#fsi_command
     for prm in g:fsharp#fsi_extra_parameters
+        let cmd = cmd . " " . prm
+    endfor
+    for prm in g:fsharp#fsi_extra_interactive_parameters
+        let cmd = cmd . " " . prm
+    endfor
+    for prm in g:fsharp#fsi_extra_shared_parameters
         let cmd = cmd . " " . prm
     endfor
     return cmd
