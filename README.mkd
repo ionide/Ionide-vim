@@ -382,13 +382,30 @@ let g:fsharp#use_sdk_scripts = 0 " for net462 FSI
 
 ##### Set additional runtime arguments passed to FSI
 
-*Default:* empty
+*Default:* `--readline-`
 
 Sets additional arguments of the FSI instance Ionide-vim spawns and changes the behavior of FSAC accordingly when editing fsx files.
+FSAC passes parameters on to the compiler for static analysis of script files.
+Not all parameters are shared between the compiler and interpreter, so FSAC splits these into 
+1. `FSIExtraInteractiveParameters`: specifically for use with the interpreter process 
+2. `FSIExtraSharedParameters`: those parameters which should be passed both to the interactive interpreter *and* the compiler
+
+Ionide-vim will pass all options from both of these parameters to the interpreter launched by `fsharp#fsi_command`
 
 ~~~.vim
-let g:fsharp#fsi_extra_parameters = ['--langversion:preview']
+let g:fsharp#fsi_extra_interactive_parameters = ['--readline-']
+let g:fsharp#fsi_extra_shared_parameters = ['--langversion:preview']
 ~~~
+
+There is a legacy option that is still supported by Ionide-vim and FSAC, `FSIExtraParameters`, that will be deprecated upstream in the future.
+This is a single option that combines the functionality of both mentioned above.
+Using interactive-only parameters in this option yields compiler errors.
+[See more discussion in the issue for FSAC](https://github.com/Ionide/fsautocomplete/issues/1210).
+
+It is recommended to migrate configuration to the new parameters.
+If you are currently using `FSIExtraParameters`, simply copying the options to `FSIExtraSharedParameters` will preserve all current behavior.
+
+Unti
 
 ##### Customize how FSI window is opened
 

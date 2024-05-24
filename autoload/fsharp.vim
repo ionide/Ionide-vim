@@ -192,7 +192,9 @@ let s:config_keys_camel =
     \     {'key': 'LineLens', 'default': {'enabled': 'never', 'prefix': ''}},
     \     {'key': 'UseSdkScripts', 'default': 1},
     \     {'key': 'dotNetRoot'},
-    \     {'key': 'fsiExtraParameters', 'default': []},
+    \     {'key': 'fsiExtraParameters'},
+    \     {'key': 'fsiExtraInteractiveParameters', 'default': ['--readline-']},
+    \     {'key': 'fsiExtraSharedParameters', 'default': []},
     \     {'key': 'fsiCompilerToolLocations', 'default': []},
     \     {'key': 'TooltipMode', 'default': 'full'},
     \     {'key': 'GenerateBinlog', 'default': 0},
@@ -554,7 +556,16 @@ endfunction
 
 function! s:get_fsi_command()
     let cmd = g:fsharp#fsi_command
-    for prm in g:fsharp#fsi_extra_parameters
+    if exists("g:fsharp#fsi_extra_parameters")
+        echom "[Ionide-vim]: `g:fsharp#fsi_extra_parameters` is being deprecated. Migrate to `g:fsharp#fsi_extra_interactive_parameters` and `g:fsharp_extra_shared_parameters`."
+        for prm in g:fsharp#fsi_extra_parameters
+            let cmd = cmd . " " . prm
+        endfor
+    endif
+    for prm in g:fsharp#fsi_extra_interactive_parameters
+        let cmd = cmd . " " . prm
+    endfor
+    for prm in g:fsharp#fsi_extra_shared_parameters
         let cmd = cmd . " " . prm
     endfor
     return cmd
