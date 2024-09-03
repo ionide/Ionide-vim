@@ -407,7 +407,7 @@ endfunction
 let s:callbacks = {}
 
 function! fsharp#register_callback(fn)
-    if g:fsharp#backend != 'nvim'
+    if g:fsharp#backend != 'nvim' || type(a:fn) != v:t_func
         return -1
     endif
     let rnd = reltimestr(reltime())
