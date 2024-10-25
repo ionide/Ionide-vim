@@ -41,17 +41,10 @@ Ionide uses FSAutoComplete (FSAC) as its LSP server.  See |fsac-settings| on
 configuring FSAutoComplete.
 
 ------------------------------------------------------------------------------
-2.1. FSAUTOCOMPLETE COMMANDS                                    *fsac-commands*
+2.1. SET UP LSP                                                   *fsac-set-up*
 
-*:FSharpShowLoadedProjects* - Shows the currently loaded projects.
-*:FSharpParseProject*       - Loads specified projects (`sln` or `fsproj`).
-*:FSharpReloadWorkspace*    - Reloads currently loaded projects.
-*:FSharpUpdateServerConfig* - Updates FSAutoComplete (FSAC) configuration.
+Install FSAutoComplete globally with: `dotnet tool install -g fsautocomplete`
 
-------------------------------------------------------------------------------
-2.2. FSAUTOCOMPLETE SETTINGS                                    *fsac-settings*
-
-TODO: explain FSAC settings.
 
                                                            *'g:fsharp#backend'*
 Set the LSP client used.  Available values:
@@ -75,7 +68,7 @@ Use project local FSAC:
         \ [ 'dotnet', 'fsautocomplete', '--background-service-enabled' ]
 <
 ------------------------------------------------------------------------------
-2.3. NEOVIM LSP CLIENT SETTINGS               *fsharp-nvim-lsp-client-settings*
+2.2. NEOVIM LSP CLIENT SETTINGS               *fsharp-nvim-lsp-client-settings*
 
 A bunch of configuration options for Ionide when using the Neovim LSP client.
 Note: These do nothing when |'g:fsharp#backend'| is `'languageclient-neovim'`.
@@ -97,6 +90,40 @@ If you would rather control it manually set this option to `0`.
 By default Ionide-vim will automatically refresh Neovim's LSP client CodeLens
 on |CursorHold| and |InsertLeave|.  To disable this set this option to `0`.
 
+------------------------------------------------------------------------------
+2.3. FSAUTOCOMPLETE COMMANDS                                    *fsac-commands*
+
+  * *:FSharpShowLoadedProjects* - Shows the currently loaded projects.
+  * *:FSharpParseProject*       - Loads specified projects (`sln` or `fsproj`).
+  * *:FSharpReloadWorkspace*    - Reloads currently loaded projects.
+  * *:FSharpUpdateServerConfig* - Updates FSAutoComplete (FSAC) configuration.
+
+------------------------------------------------------------------------------
+2.4. FSAUTOCOMPLETE SETTINGS                                    *fsac-settings*
+
+The FSAutoComplete (FSAC) LSP server is configured through Vim variables.
+After setting the variables use |:FSharpUpdateServerConfig| to apply the
+config changes.
+
+The Vim variables to configure FSAC all begin with `g:fsharp#` and followed by
+snake_case versions of the FSAC setting name you wish to set.  Not all FSAC
+settings will do anything as Ionide-vim may be missing some features.
+
+If an FSAC setting is not specified, the "recommended default" in the FSAC
+documentation will be used.  Turn off all recomended defaults by setting
+*'g:fsharp#use_recommended_server_config'* to `0`.
+
+List of all FSAC settings: https://github.com/ionide/FsAutoComplete#settings
+
+Some frequently used FSAC settings are:
+  * *'g:fsharp#automatic_workspace_init'*      - Default: `1` (enabled)
+  * *'g:fsharp#automatic_reload_workspace'*    - Default: `1` (enabled)
+  * *'g:fsharp#exclude_project_directories'*   - Default: `[]`
+  * *'g:fsharp#linter'*                        - Default: `1` (enabled)
+  * *'g:fsharp#show_signature_on_cursor_move'* - Default: `0` (disabled)
+  * |'g:fsharp#fsi_extra_shared_parameters'|
+  * |'g:fsharp#fsi_extra_interactive_parameters'|
+
 ==============================================================================
 3. F# INTERACTIVE                                     *fsharp-interactive*  *FSI*
 
@@ -106,10 +133,10 @@ the builtin |:terminal| feature introduced in Vim 8 and Neovim.
 ------------------------------------------------------------------------------
 3.1. FSI COMMANDS                                                *fsi-commands*
 
-*:FsiShow*       - Opens FSI in a split window.
-*:FsiEval*       - Evaluates given expression in the FSI.
-*:FsiEvalBuffer* - Evaluates the current buffer in the FSI.
-*:FsiReset*      - Resets the current FSI session.
+  * *:FsiShow*       - Opens FSI in a split window.
+  * *:FsiEval*       - Evaluates given expression in the FSI.
+  * *:FsiEvalBuffer* - Evaluates the current buffer in the FSI.
+  * *:FsiReset*      - Resets the current FSI session.
 
 ------------------------------------------------------------------------------
 3.2. FSI MAPPINGS                                                *fsi-mappings*
