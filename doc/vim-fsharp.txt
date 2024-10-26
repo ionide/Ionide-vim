@@ -1,206 +1,228 @@
-*vim-fsharp.txt* F# support for Vim
-*FSharp* *F#* *fsharp* *vim-fsharp*
-===============================================================================
-#                                                                             #
-#               ███████╗███████╗██╗  ██╗ █████╗ ██████╗ ██████╗               #
-#               ██╔════╝██╔════╝██║  ██║██╔══██╗██╔══██╗██╔══██╗              #
-#               █████╗  ███████╗███████║███████║██████╔╝██████╔╝              #
-#               ██╔══╝  ╚════██║██╔══██║██╔══██║██╔══██╗██╔═══╝               #
-#               ██║     ███████║██║  ██║██║  ██║██║  ██║██║                   #
-#               ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝                   #
-#                                                                             #
-===============================================================================
-CONTENTS                                                      *fsharp-contents*
+*vim-fsharp.txt*         Ionide-Vim: F# support for Vim          *F#* *ionide-vim*
 
-    1. Dependencies.................................|fsharp-dependencies|
-    2. Usage........................................|fsharp-usage|
-    3. Options......................................|fsharp-options|
-    4. Commands.....................................|fsharp-commands|
-    5. Mappings.....................................|fsharp-mappings|
-    6. Credits......................................|fsharp-credits|
 
-===============================================================================
-DEPENDENCIES                                              *fsharp-dependencies*
+                ███████╗███████╗██╗  ██╗ █████╗ ██████╗ ██████╗
+                ██╔════╝██╔════╝██║  ██║██╔══██╗██╔══██╗██╔══██╗
+                █████╗  ███████╗███████║███████║██████╔╝██████╔╝
+                ██╔══╝  ╚════██║██╔══██║██╔══██║██╔══██╗██╔═══╝
+                ██║     ███████║██║  ██║██║  ██║██║  ██║██║
+                ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
 
-Required:~
-    - Vim 7.3 or higher with Python 2 or 3 support
-    - Mono OR .NET Framework
-    - F#
 
-Optional:~
-    - Syntastic plugin (for syntax and type checking)
-    NOTE: Must be enabled (see |'g:syntastic_fsharp_checkers'|)
+    1. Usage ......................................... |fsharp-usage|
+    2. FSAutoComplete LSP ............................ |fsharp-projects|
+    3. F# Interactive ................................ |fsharp-interactive|
+    4. Linting ....................................... |fsharp-linting|
+    5. Formatting .................................... |fsharp-formatting|
+    6. Credits ....................................... |fsharp-credits|
 
-===============================================================================
-USAGE                                                            *fsharp-usage*
+==============================================================================
+1. USAGE                                                         *fsharp-usage*
 
-Syntax highlighting and linting will trigger upon opening a `*.fs`, `*.fsi`,
-or `*.fsx` file. Using omni completion will begin the fsautocomplete process.
+Syntax highlighting, linting and the LSP will trigger upon opening a `*.fs`,
+`*.fsi`, or `*.fsx` file.
 
-Suggestion: Install a completer such as NeoComplete or SuperTab
+Dependencies ~
 
-===============================================================================
-OPTIONS                                                        *fsharp-options*
+  * Neovim or Vim 8+
 
-                                                *'g:syntastic_fsharp_checkers'*
-Use this option to enable syntastic integration >
-    let g:syntastic_fsharp_checkers=['syntax']
-<
-                                        *'g:fsharp_only_check_errors_on_write'*
-Use this option to disable "on the fly" syntax checking >
-    let g:fsharp_only_check_errors_on_write = 1
-<
-                                                      *'g:fsharpbinding_debug'*
-Use this option to enable debug-mode and inspect fsautocomplete behavior: >
-    let g:fsharpbinding_debug = 1
-<
-This will create two log files `log.txt` and `log2.txt` in your temporary folder
-(i.e. `/tmp/`)
+    Note: If using Neovim < 0.5 or Vim, you will need to install:
+          https://github.com/autozimu/LanguageClient-neovim
 
-                                                       *'g:fsharp_xbuild_path'*
-Use this option set the msbuild/xbuild path >
-    let g:fsharp_xbuild_path = "/path/to/xbuild/or/msbuild"
-<
+  * .NET SDK
+    https://dotnet.microsoft.com/download
 
-                                                       *'g:fsharp_test_runner'*
-Use this option to point to a suitable test runner (such as nunit-console.exe) >
-    let g:fsharp_test_runner = "/path/to/test/runner"
-<
+  * FsAutoComplete (`dotnet tool install -g fsautocomplete`)
 
-                                               *'g:fsharp_completion_helptext'*
-Use this option to disable helptext during auto completion. Turn off if
-completion is too slow >
-    let g:fsharp_completion_helptext = 0
-<
+==============================================================================
+2. FSAUTOCOMPLETE LSP                                   *fsharp-projects*  *FSAC*
 
-                                                          *'g:fsharp_map_keys'*
-Use this option to disable default bindings >
-    let g:fsharp_map_keys = 0
-<
+Ionide uses FSAutoComplete (FSAC) as its LSP server.  See |fsac-settings| on
+configuring FSAutoComplete.
 
-                                                        *'g:fsharp_map_prefix'*
-Use this option to override the default prefix of `<leader>` >
-    let g:fsharp_map_prefix = 'cp'
-<
-Set to `cp` in this example
+------------------------------------------------------------------------------
+2.1. SET UP LSP                                                   *fsac-set-up*
 
-                                                   *'g:fsharp_map_fsisendline'*
-Use this option to override the default mapping to send the current line to
-fsharp interactive >
-    let g:fsharp_map_fsisendline = 'p'
-<
-Set to `p` in this example
+Install FSAutoComplete globally with: `dotnet tool install -g fsautocomplete`
 
-                                                    *'g:fsharp_map_fsisendsel'*
-Use this option to override the default mapping to send the current selection
-to fsharp interactive >
-    let g:fsharp_map_fsisendsel = 'p'
-<
-Set to `p` in this example
 
-                                                      *'g:fsharp_map_gotodecl'*
-Use this option to override the default mapping to go to declaration in the
-current window >
-    let g:fsharp_map_gotodecl = 'g'
-<
-Set to `g` in this example
+                                                           *'g:fsharp#backend'*
+Set the LSP client used.  Available values:
+  * `'nvim'`                  - Default on Neovim v0.5+.
+  * `'languageclient-neovim'` - Default if Vim or Neovim < v0.5.
+  * `'disable'`               - Turn off LSP integration.
 
-                                                *'g:fsharp_map_gobackfromdecl'*
-Use this option to override the default mapping to go back to where go to
-declaration was triggered >
-    let g:fsharp_map_gobackfromdecl = 'b'
-<
-Set to `b` in this example
+The `'languageclient-neovim'` option sets the LSP client to be
+https://github.com/autozimu/LanguageClient-neovim which needs installing
+separately.
 
-                                                      *'g:fsharp_map_fsiinput'*
-Override the default mapping to evaluate an fsharp expression in the fsi >
-    let g:fsharp_map_fsiinput = 'i'
-<
 
-===============================================================================
-COMMANDS                                                      *fsharp-commands*
+                                            *'g:fsharp#fsautocomplete_command'*
+Set the path to FSAutoComplete (FSAC).
 
-General commands:~
-                                                                        *:make*
-:make
-    Calls xbuild on the fsproj for the current file (if any).
+Default: `['fsautocomplete', '--background-service-enabled']`
 
-                                                          *:FSharpParseProject*
-:FSharpParseProject
-    Reparses all the project files and dependencies (this is done automatically
-    when opening a .fs or .fsi file).
-
-                                                          *:FSharpBuildProject*
-:FSharpBuildProject
-    Calls xbuild on the fsproj for the current file (if any). Can also take a
-    path to the proj file to build.
-
-                                                            *:FSharpRunProject*
-:FSharpRunProject
-    Runs the project for the current file (if any).
-
-                                                              *:FSharpRunTests*
-:FSharpRunTests
-    If `g:fsharp_test_runner` is set it will build the current project and run
-    any tests. (Currently only tested with nunit-console.exe)
-
-                                                        *:FSharpToggleHelptext*
-:FSharpToggleHelptext
-    toggles g:fsharp_completion_helptext. (See below for details)
-
-FSharp interaction commands:~
-
-                                                                     `:FsiEval`
-:FsiEval
-    Evaluates an fsharp expression in the fsi
-
-                                                               `:FsiEvalBuffer`
-:FsiEvalBuffer
-    Evaluates the entire buffer in the fsi
-
-                                                                    `:FsiReset`
-:FsiReset
-    Resets the current fsharp interactive
-
-                                                                     `:FsiRead`
-:FsiRead
-    Outputs any lines written by the fsi but not yet output as vim messages
-
-                                                                    `:FsiClear`
-:FsiClear
-    Deletes all text from the fsi output buffer but doesn't reset the fsi
-    session.
-
-                                                                     `:FsiShow`
-:FsiShow
-    Opens the _fsi-out_ buffer in a split window
-
-===============================================================================
-MAPPINGS                                                      *fsharp-mappings*
-
-General:~
-
-    <leader>t
-        Echoes the type of the expression currently pointed to by the cursor
-    <leader>d
-        Go to declaration in current window
-    <leader>s
-        Takes you back from where go to declaration was triggered. Experimental
-
-FSharp Interactive:~
-    <A-CR>      OR
-    <leader>i
-        Send either the current selection or the current line to the fsharp
-        interactive and echoes the output the first line of the output. All
-        output will be written to the fsi-out buffer.
-
-===============================================================================
-CREDITS                                                        *fsharp-credits*
-
-Syntax and indent files by kongo2002 <github.com/kongo2002>:
- http://github.com/kongo2002/fsharp-vim
-
-Adapted from Tim Robinson <github.com/timrobinson>:
- http://github.com/timrobinson/fsharp-vim
+Use project local FSAC:
 >
-===============================================================================
+    let g:fsharp#fsautocomplete_command =
+        \ [ 'dotnet', 'fsautocomplete', '--background-service-enabled' ]
+<
+------------------------------------------------------------------------------
+2.2. NEOVIM LSP CLIENT SETTINGS               *fsharp-nvim-lsp-client-settings*
+
+A bunch of configuration options for Ionide when using the Neovim LSP client.
+Note: These do nothing when |'g:fsharp#backend'| is `'languageclient-neovim'`.
+
+                                       *'g:fsharp#lsp_recommended_colorscheme'*
+
+Neovim's LSP client comes with no default colorscheme, so Ionide-vim sets
+a VSCode-like one for LSP diagnostics by default. You can disable this by the
+setting the option to `0`.
+
+                                                    *'g:fsharp#lsp_auto_setup'*
+
+Ionide-vim automatically sets up the server config for the Neovim LSP client.
+If you would rather control it manually set this option to `0`.
+
+
+                                                      *'g:fsharp#lsp_codelens'*
+
+By default Ionide-vim will automatically refresh Neovim's LSP client CodeLens
+on |CursorHold| and |InsertLeave|.  To disable this set this option to `0`.
+
+------------------------------------------------------------------------------
+2.3. FSAUTOCOMPLETE COMMANDS                                    *fsac-commands*
+
+  * *:FSharpShowLoadedProjects* - Shows the currently loaded projects.
+  * *:FSharpParseProject*       - Loads specified projects (`sln` or `fsproj`).
+  * *:FSharpReloadWorkspace*    - Reloads currently loaded projects.
+  * *:FSharpUpdateServerConfig* - Updates FSAutoComplete (FSAC) configuration.
+
+------------------------------------------------------------------------------
+2.4. FSAUTOCOMPLETE SETTINGS                                    *fsac-settings*
+
+The FSAutoComplete (FSAC) LSP server is configured through Vim variables.
+After setting the variables use |:FSharpUpdateServerConfig| to apply the
+config changes.
+
+The Vim variables to configure FSAC all begin with `g:fsharp#` and followed by
+snake_case versions of the FSAC setting name you wish to set.  Not all FSAC
+settings will do anything as Ionide-vim may be missing some features.
+
+If an FSAC setting is not specified, the "recommended default" in the FSAC
+documentation will be used.  Turn off all recomended defaults by setting
+*'g:fsharp#use_recommended_server_config'* to `0`.
+
+List of all FSAC settings: https://github.com/ionide/FsAutoComplete#settings
+
+Some frequently used FSAC settings are:
+  * *'g:fsharp#automatic_workspace_init'*      - Default: `1` (enabled)
+  * *'g:fsharp#automatic_reload_workspace'*    - Default: `1` (enabled)
+  * *'g:fsharp#exclude_project_directories'*   - Default: `[]`
+  * *'g:fsharp#linter'*                        - Default: `1` (enabled)
+  * *'g:fsharp#show_signature_on_cursor_move'* - Default: `0` (disabled)
+  * |'g:fsharp#fsi_extra_shared_parameters'|
+  * |'g:fsharp#fsi_extra_interactive_parameters'|
+
+==============================================================================
+3. F# INTERACTIVE                                     *fsharp-interactive*  *FSI*
+
+Ionide-vim can integrate with F# Interactive (FSI).  FSI is displayed using
+the builtin |:terminal| feature introduced in Vim 8 and Neovim.
+
+------------------------------------------------------------------------------
+3.1. FSI COMMANDS                                                *fsi-commands*
+
+  * *:FsiShow*       - Opens FSI in a split window.
+  * *:FsiEval*       - Evaluates given expression in the FSI.
+  * *:FsiEvalBuffer* - Evaluates the current buffer in the FSI.
+  * *:FsiReset*      - Resets the current FSI session.
+
+------------------------------------------------------------------------------
+3.2. FSI MAPPINGS                                                *fsi-mappings*
+
+<M-CR> (Alt + Enter)
+  * Normal mode: sends the current line to FSI.
+  * Visual mode: sends the selection to FSI.
+  * Opens the FSI window but the cursor does not focus it.
+  * When |'g:fsharp#fsi_keymap'| is set to `'vim-fsharp'` the mapping for this
+    becomes <leader>i
+  * When |'g:fsharp#fsi_keymap'| is set to `'custom'` the mapping for this can
+    be configured with *'g:fsharp#fsi_keymap_send'*
+
+<M-@> (Alt + @)
+  * Toggles the FSI window.
+  * When opened, the cursor focuses to the FSI window (unlike <M-CR>).
+  * When |'g:fsharp#fsi_keymap'| is set to `'vim-fsharp'` the mapping for this
+    becomes <leader>e
+  * When |'g:fsharp#fsi_keymap'| is set to `'custom'` the mapping for this can
+    be configured with *'g:fsharp#fsi_keymap_toggle'*
+
+------------------------------------------------------------------------------
+3.3. FSI SETTINGS                                                *fsi-settings*
+
+                                                       *'g:fsharp#fsi_command'*
+Set the command to launch FSI.  Default: `'dotnet fsi'`
+
+                                  *'g:fsharp#fsi_extra_interactive_parameters'*
+                                  *'g:fsharp#fsi_extra_shared_parameters'*
+
+Sets additional arguments of the FSI instance Ionide-vim spawns and changes
+the behavior of FSAC accordingly when editing F# files. FSAC passes parameters
+on to the compiler for static analysis of script files. Not all parameters are
+shared between the compiler and interpreter, so FSAC splits these into
+
+  * `FSIExtraInteractiveParameters`: specifically for the interpreter process.
+  * `FSIExtraSharedParameters`: for both to the interpreter and compiler.
+
+Ionide-vim will pass all options from both of these parameters to the
+interpreter launched by |'g:fsharp#fsi_command'|.
+
+Default: `let g:fsharp#fsi_extra_interactive_parameters = ['--readline-']`
+
+
+                                                *'g:fsharp#fsi_window_command'*
+
+Change how the FSI window opens.  Default: `'botright 10new'`.
+
+
+                                                 *'g:fsharp#fsi_focus_on_send'*
+
+Control if sending line/selection to FSI should move the cursor focus to FSI.
+Set this to `1` to turn this on.
+
+
+                                                        *'g:fsharp#fsi_keymap'*
+
+Change the default FSI mappings.  Available values are:
+  * `'vscode'`     - Default.  Matches Ionide-VSCode.
+  * `'vim-fsharp'` - Use original vim-fsharp mappings.
+  * `'custom'`     - Set the bindings yourself.
+
+See |fsi-mappings| for more information on these values.
+
+==============================================================================
+4. LINTING                                                     *fsharp-linting*
+
+Advanced linting is controlled by https://github.com/fsprojects/FSharpLint and
+can be configured independent of Ionide by using its configuration mechanism.
+
+==============================================================================
+5. FORMATTING                                               *fsharp-formatting*
+
+Advanced formatting is controlled by https://github.com/fsprojects/fantomas
+and can be configured independent of Ionide by using its configuration
+mechanism.
+
+==============================================================================
+6. CREDITS                                                     *fsharp-credits*
+
+Source code: https://github.com/ionide/Ionide-vim
+
+Syntax and indent files by kongo2002: http://github.com/kongo2002/fsharp-vim
+
+Adapted from Tim Robinson: http://github.com/timrobinson/fsharp-vim
+
+==============================================================================
+
+vim:tw=78:et:sw=4:sts=4:ts=8:ft=help:norl:

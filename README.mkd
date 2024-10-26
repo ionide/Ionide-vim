@@ -26,8 +26,7 @@ Feel free to [request features and/or file bug reports](https://github.com/ionid
 
 ## Requirements
 
-* Neovim or Vim 8.0+
-  - Python support is not required as of now. This may or may not change in the future.
+* Neovim or Vim 8+
 
 * [.NET Core SDK](https://dotnet.microsoft.com/download)
   - Required to install and run FsAutoComplete.
@@ -360,7 +359,7 @@ let g:fsharp#automatic_reload_workspace = 1 " 0 to disable.
 *Default:* disabled
 
 ~~~.vim
-let g:fsharp#show_signature_on_cursor_move = 0 " 1 to disable.
+let g:fsharp#show_signature_on_cursor_move = 0 " 1 to enable.
 ~~~
 
 > Note: this feature is known to be causing issues in some circumstances (#57, #58).
@@ -386,8 +385,8 @@ let g:fsharp#use_sdk_scripts = 0 " for net462 FSI
 
 Sets additional arguments of the FSI instance Ionide-vim spawns and changes the behavior of FSAC accordingly when editing fsx files.
 FSAC passes parameters on to the compiler for static analysis of script files.
-Not all parameters are shared between the compiler and interpreter, so FSAC splits these into 
-1. `FSIExtraInteractiveParameters`: specifically for use with the interpreter process 
+Not all parameters are shared between the compiler and interpreter, so FSAC splits these into
+1. `FSIExtraInteractiveParameters`: specifically for use with the interpreter process
 2. `FSIExtraSharedParameters`: those parameters which should be passed both to the interactive interpreter *and* the compiler
 
 Ionide-vim will pass all options from both of these parameters to the interpreter launched by `fsharp#fsi_command`
