@@ -25,6 +25,14 @@ function! s:prompt(msg)
     let &cmdheight = height
 endfunction
 
+function! s:get_newline()
+    if has('win32') || &fileformat == 'dos'
+        return "\r\n"
+    else
+        return "\n"
+    endif
+endfunction
+let s:newline = s:get_newline()
 
 " FSAC payload interfaces
 
@@ -661,7 +669,7 @@ function! fsharp#sendFsi(text)
     if fsharp#openFsi(!g:fsharp#fsi_focus_on_send) > 0
         " Neovim
         if has('nvim')
-            call chansend(s:fsi_job, a:text . "\n" . ";;". "\n")
+            call chansend(s:fsi_job, a:text . s:newline . ";;". s:newline)
         " Vim 8
         else
             call term_sendkeys(s:fsi_buffer, a:text . "\<cr>" . ";;" . "\<cr>")
@@ -684,13 +692,13 @@ function! s:get_visual_selection()
 endfunction
 
 function! s:get_complete_buffer()
-    return join(getline(1, '$'), "\n")
+    return join(getline(1, '$'), s:newline)
 endfunction
 
 function! fsharp#sendSelectionToFsi() range
     let lines = s:get_visual_selection()
     exec 'normal' len(lines) . 'j'
-    let text = join(lines, "\n")
+    let text = join(lines, s:newline)
     return fsharp#sendFsi(text)
 endfunction
 
