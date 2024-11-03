@@ -26,10 +26,8 @@ function! s:prompt(msg)
 endfunction
 
 function! s:get_newline()
-    if &fileformat == 'dos'
+    if has('win32') || &fileformat == 'dos'
         return "\r\n"
-    elseif &fileformat == 'mac'
-        return "\r"
     else
         return "\n"
     endif
