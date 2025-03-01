@@ -190,6 +190,7 @@ let s:config_keys_camel =
     \     {'key': 'SimplifyNameAnalyzer', 'default': 0},
     \     {'key': 'SimplifyNameAnalyzerExclusions', 'default': []},
     \     {'key': 'UnnecessaryParenthesesAnalyzer', 'default': 0},
+    \     {'key': 'UnnecessaryParenthesesAnalyzerExclusions', 'default': []},
     \     {'key': 'ResolveNamespaces', 'default': 1},
     \     {'key': 'EnableReferenceCodeLens', 'default': 1},
     \     {'key': 'EnableAnalyzers', 'default': 0},
