@@ -136,8 +136,12 @@ M.path = (function()
     end
   end
 
+  local flatten = function(t)
+    return vim.fn.has "nvim-0.11" == 1 and vim.iter(t):flatten():totable() or vim.tbl_flatten(t)
+  end
+    
   local function path_join(...)
-    local result = table.concat(vim.tbl_flatten { ... }, path_sep):gsub(path_sep .. "+", path_sep)
+    local result = table.concat(flatten { ... }, path_sep):gsub(path_sep .. "+", path_sep)
     return result
   end
 
