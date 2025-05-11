@@ -667,16 +667,24 @@ function! fsharp#resetFsi()
 endfunction
 
 function! fsharp#sendFsi(text)
-    if fsharp#openFsi(!g:fsharp#fsi_focus_on_send) > 0
-        " Neovim
-        if has('nvim')
-            call chansend(s:fsi_job, a:text . s:newline . ";;". s:newline)
-        " Vim 8
-        else
-            call term_sendkeys(s:fsi_buffer, a:text . "\<cr>" . ";;" . "\<cr>")
-            call term_wait(s:fsi_buffer)
-        endif
-    endif
+     if fsharp#openFsi(!g:fsharp#fsi_focus_on_send) > 0
+         " Neovim
+         let l:current_dir = expand('%:p:h')
+         " Ensure directory exists before trying to cd into it
+         if !empty(l:current_dir) && isdirectory(l:current_dir)
+             let l:cd_command = printf('#cd @"%s"', l:current_dir)
+             let l:full_text = l:cd_command . s:newline . a:text
+         else
+             let l:full_text = a:text " Don't send #cd if directory is invalid/empty
+         endif
+         if has('nvim')
+             call chansend(s:fsi_job, l:full_text . s:newline . ";;". s:newline)
+         " Vim 8
+         else
+             call term_sendkeys(s:fsi_buffer, l:full_text . "\<cr>" . ";;" . "\<cr>")
+             call term_wait(s:fsi_buffer)
+         endif
+     endif
 endfunction
 
 " https://stackoverflow.com/a/6271254
