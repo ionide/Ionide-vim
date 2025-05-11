@@ -9,6 +9,18 @@ local fn = vim.fn
 
 local M = {}
 
+local flatten = (function()
+  if vim.fn.has "nvim-0.11" == 1 then
+    return function(t)
+      return vim.iter(t):flatten():totable()
+    end
+  else
+    return function(t)
+      return vim.tbl_flatten(t)
+    end
+  end
+end)()
+
 M.default_config = {
   log_level = lsp.protocol.MessageType.Warning,
   message_level = lsp.protocol.MessageType.Warning,
@@ -136,10 +148,6 @@ M.path = (function()
     end
   end
 
-  local flatten = function(t)
-    return vim.fn.has "nvim-0.11" == 1 and vim.iter(t):flatten():totable() or vim.tbl_flatten(t)
-  end
-    
   local function path_join(...)
     local result = table.concat(flatten { ... }, path_sep):gsub(path_sep .. "+", path_sep)
     return result
@@ -277,7 +285,7 @@ function M.search_ancestors(startpath, func)
 end
 
 function M.root_pattern(...)
-  local patterns = vim.tbl_flatten { ... }
+  local patterns = flatten { ... }
   local function matcher(path)
     for _, pattern in ipairs(patterns) do
       for _, p in ipairs(vim.fn.glob(M.path.join(path, pattern), true, true)) do
