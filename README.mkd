@@ -128,6 +128,35 @@ Plug 'ionide/Ionide-vim'
 call dein#add('ionide/Ionide-vim')
 ~~~
 
+#### [lazy.nvim](https://github.com/folke/lazy.nvim)
+
+~~~.lua
+-- Some configuration must be set before Ionide starts
+-- vim.g['fsharp#fsautocomplete_command'] = {
+--   'dotnet',
+--   'fsautocomplete',
+--   '--background-service-enabled'
+-- }
+
+return {
+  -- F# support
+  'ionide/Ionide-vim',
+  ft = { 'fsharp', 'fsharp_project' },
+  config = function()
+    -- if you need extra configuration/events, example with 'Show tooltips on CursorHold'
+    -- vim.api.nvim_create_autocmd({ 'CursorHold' }, {
+    --   pattern = { '*.fs', '*.fsi', '*.fsx' },
+    --   callback = function()
+    --     vim.fn['fsharp#showTooltip']()
+    --   end,
+    -- })
+
+    -- Show fsi in horizontal split
+    -- vim.g["fsharp#fsi_window_command"] = "vnew"
+  end
+}
+~~~
+
 #### Installing manually
 
 Clone Ionide-vim to some runtimepath.
