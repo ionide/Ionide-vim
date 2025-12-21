@@ -687,6 +687,28 @@ function! fsharp#sendFsi(text)
      endif
 endfunction
 
+function! s:trim_common_leading_spaces(lines)
+    let min_indent = 1000
+    for line in a:lines
+        if empty(line) | continue | endif
+        let indent = match(line, '\S')
+        if indent == -1 | continue | endif
+        if min_indent == 1000 || indent < min_indent
+            let min_indent = indent
+        endif
+    endfor
+
+    if min_indent > 0
+        let trimmed_lines = []
+        for line in a:lines
+            call add(trimmed_lines, strpart(line, min_indent))
+        endfor
+        return trimmed_lines
+    else
+        return a:lines
+    endif
+endfunction
+
 " https://stackoverflow.com/a/6271254
 function! s:get_visual_selection()
     let [line_start, column_start] = getpos("'<")[1:2]
@@ -707,12 +729,15 @@ endfunction
 function! fsharp#sendSelectionToFsi() range
     let lines = s:get_visual_selection()
     exec 'normal' len(lines) . 'j'
-    let text = join(lines, s:newline)
+    let trimmed_lines = s:trim_common_leading_spaces(lines)
+    let text = join(trimmed_lines, s:newline)
     return fsharp#sendFsi(text)
 endfunction
 
 function! fsharp#sendLineToFsi()
-    let text = getline('.')
+    let lines = [getline('.')]
+    let trimmed_lines = s:trim_common_leading_spaces(lines)
+    let text = trimmed_lines[0]
     exec 'normal j'
     return fsharp#sendFsi(text)
 endfunction
