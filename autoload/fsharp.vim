@@ -294,6 +294,10 @@ function! fsharp#loadConfig()
     if !exists('g:fsharp#fsi_focus_on_send')
         let g:fsharp#fsi_focus_on_send = 0
     endif
+    if !exists('g:fsharp#fsi_trim_indentation')
+        let g:fsharp#fsi_trim_indentation = 1
+    endif
+
     if !exists('g:fsharp#backend')
         if has('nvim-0.5')
             if exists('g:LanguageClient_loaded')
@@ -729,14 +733,22 @@ endfunction
 function! fsharp#sendSelectionToFsi() range
     let lines = s:get_visual_selection()
     exec 'normal' len(lines) . 'j'
-    let trimmed_lines = s:trim_common_leading_spaces(lines)
+    if g:fsharp#fsi_trim_indentation == 1
+        let trimmed_lines = s:trim_common_leading_spaces(lines)
+    else
+        let trimmed_lines = lines
+    endif
     let text = join(trimmed_lines, s:newline)
     return fsharp#sendFsi(text)
 endfunction
 
 function! fsharp#sendLineToFsi()
     let lines = [getline('.')]
-    let trimmed_lines = s:trim_common_leading_spaces(lines)
+    if g:fsharp#fsi_trim_indentation == 1
+        let trimmed_lines = s:trim_common_leading_spaces(lines)
+    else
+        let trimmed_lines = lines
+    endif
     let text = trimmed_lines[0]
     exec 'normal j'
     return fsharp#sendFsi(text)
