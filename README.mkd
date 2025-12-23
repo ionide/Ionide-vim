@@ -457,6 +457,14 @@ If you are using Vim, you might want to enable this to see the result without in
 let g:fsharp#fsi_focus_on_send = 1 " 0 to not to focus.
 ~~~
 
+##### Set if common leading spaces are trimmed from line/selection before sending to FSI
+
+*Default:* enabled
+
+~~~.vim
+let g:fsharp#fsi_trim_indentation = 1 " 0 to disable.
+~~~
+
 ##### Change the key mappings
 
 *Default:* `vscode`
