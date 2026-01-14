@@ -60,12 +60,12 @@ separately.
                                             *'g:fsharp#fsautocomplete_command'*
 Set the path to FSAutoComplete (FSAC).
 
-Default: `['fsautocomplete', '--background-service-enabled']`
+Default: `['fsautocomplete']`
 
 Use project local FSAC:
 >
     let g:fsharp#fsautocomplete_command =
-        \ [ 'dotnet', 'fsautocomplete', '--background-service-enabled' ]
+        \ [ 'dotnet', 'fsautocomplete' ]
 <
 ------------------------------------------------------------------------------
 2.2. NEOVIM LSP CLIENT SETTINGS               *fsharp-nvim-lsp-client-settings*

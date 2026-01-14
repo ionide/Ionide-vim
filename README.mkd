@@ -134,8 +134,7 @@ call dein#add('ionide/Ionide-vim')
 -- Some configuration must be set before Ionide starts
 -- vim.g['fsharp#fsautocomplete_command'] = {
 --   'dotnet',
---   'fsautocomplete',
---   '--background-service-enabled'
+--   'fsautocomplete'
 -- }
 
 return {
@@ -244,7 +243,7 @@ let g:fsharp#backend = "languageclient-neovim"
 
 ##### Set the path to FSAC
 
-*Default:* `['fsautocomplete', '--background-service-enabled']`
+*Default:* `['fsautocomplete']`
 
 This option overrides the path to the FSAC Ionide-vim uses.
 
@@ -255,8 +254,7 @@ For example, if you want to use a project-local FSAC, set the following:
 ~~~.vim
 let g:fsharp#fsautocomplete_command =
     \ [ 'dotnet',
-    \   'fsautocomplete',
-    \   '--background-service-enabled'
+    \   'fsautocomplete'
     \ ]
 ~~~
 
